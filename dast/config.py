@@ -81,7 +81,11 @@ class EndpointsConfig(BaseModel):
     """Endpoint mappings."""
 
     base: str = ""
-    custom: Dict[str, str] = Field(default_factory=dict)
+    custom: Optional[Dict[str, str]] = None
+
+    def get_custom(self) -> Dict[str, str]:
+        """Get custom endpoints dict, defaulting to empty dict."""
+        return self.custom or {}
 
 
 class TargetConfig(BaseModel):
@@ -91,7 +95,15 @@ class TargetConfig(BaseModel):
     base_url: str
     authentication: AuthConfig = Field(default_factory=AuthConfig)
     endpoints: EndpointsConfig = Field(default_factory=EndpointsConfig)
-    variables: Dict[str, Any] = Field(default_factory=dict)
+    variables: Optional[Dict[str, Any]] = None
+
+    def get_variables(self) -> Dict[str, Any]:
+        """Get variables dict, defaulting to empty dict."""
+        return self.variables or {}
+
+    def get_endpoints(self) -> Dict[str, str]:
+        """Get endpoints dict, defaulting to empty dict."""
+        return self.endpoints.get_custom()
 
     # Scanner settings
     timeout: float = 30.0
@@ -166,12 +178,20 @@ class TemplateInfo(BaseModel):
 
 
 class Template(BaseModel):
-    """Vulnerability scan template."""
+    """Vulnerability scan template.
+
+    Supports two modes:
+    1. Generic mode: Uses 'generic' field with payloads for cross-app testing
+    2. Direct mode: Uses 'requests' field for specific test cases
+    """
 
     id: str
     info: TemplateInfo
     variables: Dict[str, Any] = Field(default_factory=dict)
     requests: List[RequestConfig] = Field(default_factory=list)
+
+    # Generic template fields
+    generic: Optional["GenericTemplate"] = None
 
     @classmethod
     def from_yaml(cls, path: Union[str, Path]) -> "Template":
@@ -184,6 +204,46 @@ class Template(BaseModel):
         if not data:
             raise ValueError(f"Empty template: {path}")
         return cls(**data)
+
+
+class GenericTemplate(BaseModel):
+    """Generic template configuration for cross-application vulnerability testing.
+
+    Allows defining payload variations that work across different applications.
+    The endpoint and parameters are resolved from the target config.
+    """
+
+    # Endpoint variable name (resolved from target config's endpoints.custom)
+    endpoint: str
+
+    # HTTP method
+    method: str = "GET"
+
+    # Parameter name to inject payloads into
+    parameter: Optional[str] = None
+
+    # Request body template for POST requests (supports {{payload}} placeholder)
+    body_template: Optional[str] = None
+
+    # Content type for POST requests
+    content_type: str = "application/x-www-form-urlencoded"
+
+    # List of payload variations to test
+    payloads: List[Union[str, "PayloadConfig"]] = Field(default_factory=list)
+
+    # Headers (beyond auth headers)
+    headers: Dict[str, str] = Field(default_factory=dict)
+
+    # Matchers to validate responses
+    matchers: List[MatcherConfig] = Field(default_factory=list)
+
+
+class PayloadConfig(BaseModel):
+    """A single payload configuration."""
+
+    name: str
+    value: str
+    description: Optional[str] = None
 
 
 # ==== Scan Results ====

@@ -1,0 +1,28 @@
+id: generic-options-method
+info:
+  name: HTTP Options Method Enabled
+  severity: low
+  description: Tests OPTIONS method for information disclosure
+  tags:
+    - information-disclosure
+    - http-methods
+    - generic
+
+requests:
+  - name: Test OPTIONS method
+    method: OPTIONS
+    path: /
+    headers: {}
+    matchers:
+      - type: status
+        values: [200, 204]
+      - type: word
+        words: ["allow", "GET", "POST", "PUT", "DELETE"]
+        condition: or
+        part: header
+        case_sensitive: false
+    on_match:
+      vulnerability: HTTP_METHODS_DISCLOSURE
+      message: OPTIONS method reveals allowed HTTP methods
+      remediation: Disable unnecessary HTTP methods; avoid revealing methods in OPTIONS response
+      evidence_strength: heuristic

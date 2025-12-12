@@ -36,6 +36,8 @@ class ContainerManager:
 
     # Default images
     JUICE_SHOP_IMAGE = "bkimminich/juice-shop:latest"
+    BWAPP_IMAGE = "raesene/bwapp:latest"
+    DVWA_IMAGE = "vulnerables/web-dvwa:latest"
     DEFAULT_PORT = 3000
 
     def __init__(

