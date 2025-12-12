@@ -1,0 +1,38 @@
+name: OWASP Juice Shop
+base_url: http://localhost:3000
+
+authentication:
+  type: form
+  login:
+    url: /rest/user/login
+    method: POST
+    payload:
+      email: "jim@juice-sh.op"
+      password: "ncc-1701"
+    headers:
+      Content-Type: application/json
+    extract:
+      - name: token
+        selector: "$.authentication.token"
+        location: body
+    apply:
+      headers:
+        Authorization: "Bearer {{token}}"
+
+variables:
+  basket_id: "1"
+  USER_EMAIL: "jim@juice-sh.op"
+  USER_PASSWORD: "ncc-1701"
+  ATTACKER_EMAIL: "test@juice-sh.op"
+  ATTACKER_PASSWORD: "test123"
+  VICTIM_EMAIL: "jim@juice-sh.op"
+  VICTIM_PASSWORD: "ncc-1701"
+
+endpoints:
+  base: /api
+  custom:
+    basket: /api/Basket
+    basket_items: /api/BasketItems
+
+timeout: 30.0
+parallel: 5

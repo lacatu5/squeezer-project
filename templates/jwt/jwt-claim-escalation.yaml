@@ -1,0 +1,37 @@
+id: jwt-claim-escalation
+info:
+  name: JWT Claim Manipulation / Privilege Escalation
+  severity: critical
+  description: Tests for JWT claim manipulation vulnerability
+  tags:
+    - jwt
+    - privilege-escalation
+
+variables:
+  email: "{{USER_EMAIL}}"
+  password: "{{USER_PASSWORD}}"
+
+requests:
+  - name: Authenticate to get JWT
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{email}}", "password": "{{password}}"}'
+    extractors:
+      - type: json
+        name: original_token
+        selector: "$.authentication.token"
+
+  - name: Test admin endpoint with original token
+    method: GET
+    path: /rest/admin/application-configuration
+    headers:
+      Authorization: "Bearer {{original_token}}"
+    matchers:
+      - type: status
+        values: [200]
+    on_match:
+      vulnerability: JWT_CLAIM_ESCALATION
+      message: Admin endpoint accessible - test claim manipulation manually
+      remediation: Validate all claims against server-side session data

