@@ -4,7 +4,7 @@ import json
 import re
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 from httpx import Response
 
@@ -510,20 +510,50 @@ class DiffMatcher(Matcher):
 
 
 class TimeMatcher(Matcher):
-    """Match time-based conditions.
+    """Match time-based conditions with baseline comparison support.
 
     Useful for timing attack detection and response time analysis.
+    For accurate time-based detection, use multiple samples and statistical analysis.
+
+    Attributes:
+        threshold_ms: Absolute time threshold in milliseconds
+        baseline_ms: Baseline response time for comparison (if set)
+        diff_threshold_ms: Minimum difference from baseline to trigger match
     """
 
-    def __init__(self, config: MatcherConfig):
+    def __init__(self, config: MatcherConfig, baseline_response: Optional[Response] = None):
         super().__init__(config)
         self.threshold_ms = getattr(config, 'threshold_ms', 1000)
         self.threshold_sec = getattr(config, 'threshold_sec', None)
+        self.diff_threshold_ms = getattr(config, 'diff_threshold_ms', None)
+
+        # Extract baseline from response if provided
+        self.baseline_ms = None
+        if baseline_response:
+            self.baseline_ms = baseline_response.elapsed.total_seconds() * 1000
 
     def matches(self, response: Response) -> MatchResult:
         # Get elapsed time in milliseconds
         elapsed_ms = response.elapsed.total_seconds() * 1000
 
+        # Use baseline comparison if available (more accurate for network jitter)
+        if self.baseline_ms is not None and self.diff_threshold_ms is not None:
+            time_diff = elapsed_ms - self.baseline_ms
+            matched = time_diff > self.diff_threshold_ms
+
+            return self._apply_negative(MatchResult(
+                matched=matched,
+                evidence={
+                    "elapsed_ms": elapsed_ms,
+                    "baseline_ms": self.baseline_ms,
+                    "diff_ms": time_diff,
+                    "threshold_ms": self.diff_threshold_ms,
+                },
+                message=f"Response time {elapsed_ms:.0f}ms (baseline: {self.baseline_ms:.0f}ms, diff: {time_diff:.0f}ms)",
+                evidence_strength=EvidenceStrength.INFERENCE if matched else EvidenceStrength.HEURISTIC,
+            ))
+
+        # Fall back to absolute threshold
         threshold = self.threshold_sec * 1000 if self.threshold_sec else self.threshold_ms
 
         if self.condition == "gt":
@@ -545,6 +575,7 @@ class TimeMatcher(Matcher):
                 "threshold_ms": threshold,
             },
             message=f"Response time {elapsed_ms:.0f}ms vs threshold {threshold}ms",
+            evidence_strength=EvidenceStrength.INFERENCE if matched else EvidenceStrength.HEURISTIC,
         ))
 
 
@@ -565,7 +596,7 @@ def create_matcher(config: MatcherConfig, **kwargs) -> Matcher:
     elif matcher_type == "diff":
         return DiffMatcher(config, base_response=kwargs.get("base_response"))
     elif matcher_type == "time":
-        return TimeMatcher(config)
+        return TimeMatcher(config, baseline_response=kwargs.get("base_response"))
     else:
         raise ValueError(f"Unknown matcher type: {matcher_type}")
 

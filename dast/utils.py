@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import time
 from typing import Any, Callable, Optional
 from urllib.parse import urlparse
 
@@ -27,8 +28,7 @@ def setup_logging(verbose: bool = False) -> None:
     # Suppress noisy httpx logging
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    global logger
-    logger = logging.getLogger("dast")
+    # Configure module-level logger
     logger.setLevel(level)
 
 
@@ -57,7 +57,6 @@ class TargetValidator:
         }
 
         try:
-            import time
             start = time.time()
 
             async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:

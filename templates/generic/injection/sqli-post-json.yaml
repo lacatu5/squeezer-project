@@ -2,7 +2,7 @@ id: generic-sqli-post-json
 info:
   name: SQL Injection (POST/JSON)
   severity: critical
-  description: Generic SQL injection testing for POST/JSON bodies
+  description: Generic SQL injection testing for POST/JSON bodies - detects all types automatically
   tags:
     - sqli
     - injection
@@ -11,14 +11,9 @@ info:
 
 generic:
   endpoint: "{{sqli_post}}"
-
   method: POST
-
   content_type: "application/json"
-
-  # Body template - {{payload}} will be replaced with each payload
   body_template: '{"{{parameter}}": "{{payload}}"}'
-
   parameter: "username"
 
   payloads:
@@ -41,18 +36,29 @@ generic:
       value: "' OR '1'='1'--"
 
   matchers:
+    # SQL error messages
+    - type: regex
+      regex:
+        - "SQL syntax.*?near"
+        - "mysql_fetch.*?error"
+        - "Warning.*?mysql_"
+        - "ORA-\\d{5}"
+        - "PostgreSQL.*?ERROR"
+        - "SQLite3::SQLException"
+        - "SQLSTATE\\["
+        - "Unclosed quotation mark"
+        - "Incorrect syntax near"
+
+    # Database function output
+    - type: regex
+      regex:
+        - "@@version\\s*[0-9]"
+        - "version\\(\\)\\s*[0-9]"
+        - "database\\(\\)"
+
+    # Exclude HTML pages
     - type: word
       words:
-        - "You have an error in your SQL syntax"
-        - "mysql_fetch"
-        - "Warning: mysql"
-        - "ORA-01756"
-        - "Syntax error"
-        - "invalid query"
-        - "authentication"
-        - "token"
-        - "welcome"
-      condition: or
-
-    - type: status
-      values: [200, 201]
+        - "<!DOCTYPE html"
+        - "<html>"
+      negative: true

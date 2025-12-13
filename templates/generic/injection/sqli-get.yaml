@@ -2,74 +2,63 @@ id: generic-sqli-get
 info:
   name: SQL Injection (GET)
   severity: critical
-  description: Generic SQL injection testing for GET parameters
+  description: Generic SQL injection testing for GET parameters - detects all types automatically
   tags:
     - sqli
     - injection
     - generic
 
 generic:
-  # Endpoint variable - resolved from target config
   endpoint: "{{sqli}}"
-
   method: GET
-
-  # Parameter name to inject into
   parameter: "id"
 
+  # All payloads - engine auto-detects SQLi type from response
+  # Special names: baseline (for comparison), bool_true, bool_false (for boolean-blind)
   payloads:
+    - name: "baseline"
+      value: "test"
+
+    - name: "bool_true"
+      value: "' OR '1'='1"
+
+    - name: "bool_false"
+      value: "' AND '1'='2"
+
     - name: "single_quote"
       value: "'"
-      description: "Basic single quote test"
-
-    - name: "or_bypass"
-      value: "' OR '1'='1"
-      description: "OR bypass technique"
 
     - name: "union_select"
       value: "' UNION SELECT NULL,user(),database()-- -"
-      description: "UNION SELECT for data extraction"
 
-    - name: "union_select_2"
-      value: "1' UNION SELECT 1,2,3-- -"
-      description: "UNION SELECT with numeric values"
-
-    - name: "and_boolean"
-      value: "' AND 1=1-- -"
-      description: "AND boolean-based"
-
-    - name: "time_based"
-      value: "' AND SLEEP(5)-- -"
-      description: "Time-based blind"
-
-    - name: "error_based"
-      value: "' AND 1=CONVERT(int, (SELECT @@version))-- -"
-      description: "Error-based (MSSQL)"
-
-    - name: "stacked_queries"
-      value: "'; DROP TABLE users-- -"
-      description: "Stacked queries"
+    - name: "time_blind"
+      value: "' AND SLEEP(3)-- -"
 
   matchers:
-    - type: word
-      words:
-        - "You have an error in your SQL syntax"
-        - "mysql_fetch"
-        - "Warning: mysql"
-        - "ORA-01756"
-        - "Microsoft OLE DB Provider for ODBC Drivers"
-        - "PostgreSQL query failed"
-        - "SQLite3::SQLException"
-        - "Unclosed quotation mark"
-        - "Syntax error"
-        - "invalid query"
-      condition: or
+    # SQL error messages
+    - type: regex
+      regex:
+        - "SQL syntax.*?near"
+        - "mysql_fetch.*?error"
+        - "Warning.*?mysql_"
+        - "ORA-\\d{5}"
+        - "PostgreSQL.*?ERROR"
+        - "SQLSTATE\\["
 
+    # Database output (UNION-based)
+    - type: regex
+      regex:
+        - "@@version\\s*[0-9]"
+        - "version\\(\\)"
+        - "database\\(\\)"
+
+    # Time-based
+    - type: time
+      threshold_ms: 2500
+
+    # Exclude HTML pages
     - type: word
       words:
-        - "root"
-        - "localhost"
-        - "database()"
-        - "version()"
-        - "@@version"
-      condition: or
+        - "<!DOCTYPE html"
+        - "<html>"
+      negative: true

@@ -57,20 +57,30 @@ generic:
       description: "URL encoded pipe"
 
   matchers:
-    # Strong indicators of command execution
-    - type: word
-      words:
-        - "root:x:0:0"      # /etc/passwd content
-        - "/bin/bash"       # which bash output
-        - "/bin/sh"         # which sh output
-        - "www-data"        # web server user
-        - "uid="            # id command output
-        - "gid="            # id command output
-      condition: or
+    # Primary matcher: requires SPECIFIC command output patterns
+    # Note: 'condition: and' here sets the combining rule for ALL matchers below
+    - type: regex
+      regex:
+        - "uid=\\d+.*gid=\\d+"       # id command output: uid=1000 gid=1000
+        - "root:x:0:0.*/bin/bash"  # /etc/passwd with shell
+        - "drwxr-xr-x.*\\s+\\d+\\s+"  # ls output with permissions and size
+        - "www-data|apache|nobody"  # Common web server users
+      condition: and
 
-    # ls output patterns (require context)
+    # Secondary matcher: ls header format
+    - type: regex
+      regex:
+        - "total\\s+\\d+"  # "total 42" - ls directory header
+
+    # Negative matcher: exclude if page contains common web elements
+    # (indicates the match is just in page content, not command output)
     - type: word
       words:
-        - "total "          # ls header
-        - "drwxr-xr-x"      # ls directory listing
-      condition: or
+        - "<!DOCTYPE html"
+        - "<html"
+        - "<head>"
+        - "Shopify.routes"
+        - "component-"
+        - "application/json"
+        - "css"
+      negative: true

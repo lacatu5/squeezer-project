@@ -22,9 +22,10 @@ endpoints:
   base: /
   custom:
     # Generic template endpoint mappings
-    sqli: /vulnerabilities/sqli/?id=1&Submit=Submit
+    # Note: parameter name is configured in the template
+    sqli: /vulnerabilities/sqli/?id=
     sqli_post: /vulnerabilities/sqli/
-    command_injection: /vulnerabilities/exec/?127.0.0.1
+    command_injection: /vulnerabilities/exec/?ip=
     xss_reflected: /vulnerabilities/xss_r/?name=
     xss_stored: /vulnerabilities/xss_s/
     path_traversal: /vulnerabilities/fi/?page=

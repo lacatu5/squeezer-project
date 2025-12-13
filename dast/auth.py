@@ -8,7 +8,7 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from dast.config import AuthConfig, AuthType, ExtractorConfig
+from dast.config import AuthConfig, AuthType
 
 
 @dataclass

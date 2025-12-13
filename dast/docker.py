@@ -6,7 +6,6 @@ between test runs (a key requirement from report.tex).
 """
 
 import asyncio
-import signal
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import AsyncIterator, Optional, List

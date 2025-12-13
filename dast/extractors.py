@@ -4,10 +4,11 @@ Extractors enable multi-request workflows by capturing values from responses
 and making them available as variables for subsequent requests.
 """
 
+import importlib.util
 import json
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
 import httpx
 
@@ -317,11 +318,7 @@ class XPathExtractor(Extractor):
 
     def _check_lxml(self) -> bool:
         """Check if lxml is available."""
-        try:
-            from lxml import html as lxml_html
-            return True
-        except ImportError:
-            return False
+        return importlib.util.find_spec("lxml") is not None
 
     def extract(self, response: httpx.Response) -> ExtractionResult:
         """Extract value from HTML using XPath."""

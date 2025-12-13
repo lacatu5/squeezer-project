@@ -1,15 +1,18 @@
 """CLI interface for DAST MVP."""
 
+import argparse
 import asyncio
 import json
+import sys
 from pathlib import Path
 from typing import Optional
 
-import httpx
 from rich.console import Console
+from rich.panel import Panel
 from rich.table import Table
+from rich.text import Text
 
-from dast.config import ScanReport, SeverityLevel, TargetConfig, Template
+from dast.config import EvidenceStrength, ScanProfile, ScanReport, TargetConfig
 from dast.engine import load_templates, run_scan
 from dast.utils import setup_logging
 
@@ -30,14 +33,29 @@ async def scan_command(
     username: Optional[str] = None,
     password: Optional[str] = None,
     token: Optional[str] = None,
+    profile: Optional[str] = None,
     verbose: bool = False,
     no_validate: bool = False,
+    checkpoint: Optional[str] = None,
+    resume: Optional[str] = None,
 ) -> int:
     """Run vulnerability scan."""
     setup_logging(verbose=verbose)
 
     if not verbose:
         print_banner()
+
+    # Parse scan profile (defaults to standard for safety)
+    scan_profile = ScanProfile.STANDARD
+    if profile:
+        try:
+            scan_profile = ScanProfile(profile.lower())
+            if scan_profile in (ScanProfile.THOROUGH, ScanProfile.AGGRESSIVE):
+                console.print("[yellow]Warning: Thorough/Aggressive profiles may cause delays.[/yellow]")
+        except ValueError:
+            console.print(f"[red]Invalid profile: {profile}[/red]")
+            console.print("[dim]Valid profiles: passive, standard, thorough, aggressive[/dim]")
+            return 1
 
     # Load or create target configuration
     if config:
@@ -59,6 +77,8 @@ async def scan_command(
 
     console.print(f"[dim]Target: {target.base_url}[/dim]")
     console.print(f"[dim]Auth: {target.authentication.type or 'none'}[/dim]")
+    if profile:
+        console.print(f"[dim]Profile: {scan_profile.value}[/dim]")
 
     # Load templates
     template_path = Path(template_dir or "templates/generic")
@@ -82,7 +102,18 @@ async def scan_command(
     if not verbose:
         console.print("[yellow]Scanning...[/yellow]\n")
 
-    report = await run_scan(target, templates, validate_target=not no_validate)
+    # Determine checkpoint file (resume takes precedence over checkpoint)
+    checkpoint_file = resume or checkpoint
+    if resume:
+        console.print(f"[dim]Resuming from checkpoint: {resume}[/dim]\n")
+
+    report = await run_scan(
+        target,
+        templates,
+        validate_target=not no_validate,
+        scan_profile=scan_profile,
+        checkpoint_file=checkpoint_file,
+    )
 
     # Display results
     _print_report(report)
@@ -137,9 +168,6 @@ def _print_report(report: ScanReport) -> None:
         console.print("[green]No vulnerabilities found![/green]")
         return
 
-    # Group findings by evidence strength
-    from dast.config import EvidenceStrength
-
     direct = [f for f in report.findings if f.evidence_strength == EvidenceStrength.DIRECT]
     inference = [f for f in report.findings if f.evidence_strength == EvidenceStrength.INFERENCE]
     heuristic = [f for f in report.findings if f.evidence_strength == EvidenceStrength.HEURISTIC]
@@ -162,7 +190,7 @@ def _print_report(report: ScanReport) -> None:
     _print_detailed_findings(report.findings)
 
     # Summary
-    console.print(f"\n[bold]Summary:[/bold]")
+    console.print("\n[bold]Summary:[/bold]")
     console.print(f"  Critical: [red]{report.critical_count}[/red]")
     console.print(f"  High: [red]{report.high_count}[/red]")
     console.print(f"  Medium: [yellow]{report.medium_count}[/yellow]")
@@ -172,9 +200,6 @@ def _print_report(report: ScanReport) -> None:
 
 def _print_detailed_findings(findings: list) -> None:
     """Print detailed findings with URLs, evidence, and remediation."""
-    from rich.panel import Panel
-    from rich.text import Text
-
     for i, finding in enumerate(findings, 1):
         # Severity color
         severity = finding.severity.value.upper()
@@ -219,9 +244,6 @@ def _print_detailed_findings(findings: list) -> None:
 
 def _print_findings_table(findings: list) -> None:
     """Print a table of findings with details."""
-    from rich.table import Table
-    from rich.text import Text
-
     table = Table()
     table.add_column("Severity", width=10)
     table.add_column("Type", width=30)
@@ -280,8 +302,6 @@ def _save_results(report: ScanReport, output: str) -> None:
 
 def main():
     """Main CLI entry point."""
-    import argparse
-
     parser = argparse.ArgumentParser(
         description="DAST MVP - Template-based DAST Framework",
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -305,8 +325,11 @@ Examples:
     scan_parser.add_argument("-u", "--username", help="Username for authentication")
     scan_parser.add_argument("-p", "--password", help="Password for authentication")
     scan_parser.add_argument("--token", help="Bearer token for authentication")
+    scan_parser.add_argument("--profile", help="Scan profile: passive (fast), standard (default), thorough (with delays)", default=None)
     scan_parser.add_argument("-v", "--verbose", help="Enable verbose logging", action="store_true")
     scan_parser.add_argument("--no-validate", help="Skip target connectivity validation", action="store_true")
+    scan_parser.add_argument("--checkpoint", help="Save scan progress to file for resume capability")
+    scan_parser.add_argument("--resume", help="Resume scan from checkpoint file")
 
     # List command
     list_parser = subparsers.add_parser("list", help="List available templates")
@@ -327,8 +350,11 @@ Examples:
             username=args.username,
             password=args.password,
             token=args.token,
+            profile=args.profile,
             verbose=args.verbose,
             no_validate=args.no_validate,
+            checkpoint=getattr(args, 'checkpoint', None),
+            resume=getattr(args, 'resume', None),
         ))
 
     elif args.command == "list":
@@ -338,5 +364,4 @@ Examples:
 
 
 if __name__ == "__main__":
-    import sys
     sys.exit(main())
