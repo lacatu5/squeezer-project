@@ -35,10 +35,48 @@ from pydantic import BaseModel
 from dast.config import (
     AuthConfig,
     AuthType,
-    CrawlerReport,
     EndpointsConfig,
     TargetConfig,
 )
+
+# Pydantic Field
+from pydantic import Field as PDField
+
+
+class SimpleCrawlerReport(BaseModel):
+    """Simple crawler report with minimal, useful data."""
+
+    target: str
+    timestamp: str
+    summary: Dict[str, int]
+    endpoints: List[Dict[str, Any]] = PDField(default_factory=list)
+    cookies: List[str] = PDField(default_factory=list)
+
+    def save_yaml(self, path: str) -> None:
+        """Save report to YAML file."""
+        import yaml
+        from pathlib import Path
+
+        data = {
+            "target": self.target,
+            "timestamp": self.timestamp,
+            "summary": self.summary,
+            "endpoints": self.endpoints,
+        }
+        if self.cookies:
+            data["cookies"] = self.cookies
+
+        Path(path).write_text(yaml.dump(data, sort_keys=False, default_flow_style=False))
+
+    def model_dump(self) -> Dict[str, Any]:
+        """Return dict representation."""
+        return {
+            "target": self.target,
+            "timestamp": self.timestamp,
+            "summary": self.summary,
+            "endpoints": self.endpoints,
+            "cookies": self.cookies,
+        }
 
 
 @dataclass
@@ -99,12 +137,19 @@ class KatanaStatistics:
     """Statistics from Katana crawl."""
 
     total_requests: int = 0
-    unique_endpoints: int = 0
+    successful_requests: int = 0
+    failed_requests: int = 0
+    unique_urls: int = 0  # Match CrawlerStatistics naming
+    unique_domains: int = 0
+    endpoints_by_method: Dict[str, int] = field(default_factory=dict)
+    endpoints_by_status: Dict[str, int] = field(default_factory=dict)
     api_endpoints: int = 0
-    auth_endpoints: int = 0
-    interesting_endpoints: int = 0
-    forms_found: int = 0
+    html_pages: int = 0
+    forms_discovered: int = 0
+    input_fields_discovered: int = 0
+    authentication_detected: List[str] = field(default_factory=list)
     javascript_files: int = 0
+    interesting_endpoints: int = 0
     start_time: str = field(default_factory=lambda: datetime.utcnow().isoformat())
     end_time: Optional[str] = None
     duration_seconds: float = 0.0
@@ -113,12 +158,19 @@ class KatanaStatistics:
         """Convert to dictionary."""
         return {
             "total_requests": self.total_requests,
-            "unique_endpoints": self.unique_endpoints,
+            "successful_requests": self.successful_requests,
+            "failed_requests": self.failed_requests,
+            "unique_urls": self.unique_urls,
+            "unique_domains": self.unique_domains,
+            "endpoints_by_method": self.endpoints_by_method,
+            "endpoints_by_status": self.endpoints_by_status,
             "api_endpoints": self.api_endpoints,
-            "auth_endpoints": self.auth_endpoints,
-            "interesting_endpoints": self.interesting_endpoints,
-            "forms_found": self.forms_found,
+            "html_pages": self.html_pages,
+            "forms_discovered": self.forms_discovered,
+            "input_fields_discovered": self.input_fields_discovered,
+            "authentication_detected": self.authentication_detected,
             "javascript_files": self.javascript_files,
+            "interesting_endpoints": self.interesting_endpoints,
             "start_time": self.start_time,
             "end_time": self.end_time,
             "duration_seconds": self.duration_seconds,
@@ -136,24 +188,28 @@ class KatanaCrawler:
         self,
         base_url: str,
         max_depth: int = 3,
-        js_crawl: bool = True,
-        headless: bool = True,
+        js_crawl: bool = False,
+        headless: bool = False,
         cookies: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
         katana_path: str = "katana",
         timeout: int = 300,
+        filter_static: bool = True,
+        interesting_only: bool = False,
     ):
         """Initialize the Katana crawler.
 
         Args:
             base_url: The base URL to crawl
             max_depth: Maximum crawl depth (default: 3)
-            js_crawl: Enable JavaScript crawling (default: True)
-            headless: Use headless browser (default: True)
+            js_crawl: Enable JavaScript crawling (default: False, requires Chrome)
+            headless: Use headless browser (default: False, requires Chrome)
             cookies: Dictionary of cookies for authentication
             headers: Custom headers to send
             katana_path: Path to Katana binary (default: "katana")
             timeout: Maximum time for crawl in seconds (default: 300)
+            filter_static: Filter out static files (.js, .css, images, etc.) (default: True)
+            interesting_only: Only keep interesting endpoints (api, auth, admin, etc.) (default: False)
         """
         self.base_url = base_url
         self.base_domain = urlparse(base_url).netloc
@@ -164,6 +220,8 @@ class KatanaCrawler:
         self.headers = headers or {}
         self.katana_path = katana_path
         self.timeout = timeout
+        self.filter_static = filter_static
+        self.interesting_only = interesting_only
 
         # State
         self.endpoints: List[KatanaEndpoint] = []
@@ -180,9 +238,9 @@ class KatanaCrawler:
             self.katana_path,
             "-u", self.base_url,
             "-d", str(self.max_depth),
-            "-json",
+            "-jsonl",
             "-silent",
-            "-or",  # Only same-origin URLs
+            # "-or",  # Removed - we do our own same-origin filtering
         ]
 
         if self.js_crawl:
@@ -192,54 +250,21 @@ class KatanaCrawler:
         if self.headless:
             cmd.extend(["-headless"])  # Internal headless mode
 
-        # Add cookies if provided
+        # Add cookies as headers (Katana uses -H for cookies, not -c)
         if self.cookies:
-            cookie_file = self._create_cookie_file()
-            cmd.extend(["-c", cookie_file])
+            cookie_str = "; ".join(f"{k}={v}" for k, v in self.cookies.items())
+            cmd.extend(["-H", f"Cookie: {cookie_str}"])
 
         # Add custom headers if provided
         if self.headers:
-            header_file = self._create_header_file()
-            cmd.extend(["-hdr", header_file])
+            for key, value in self.headers.items():
+                cmd.extend(["-H", f"{key}: {value}"])
 
         # Add output file if specified
         if output_file:
             cmd.extend(["-o", output_file])
 
         return cmd
-
-    def _create_cookie_file(self) -> str:
-        """Create a temporary cookie file for Katana."""
-        # Format: domain\tkey\tvalue (Katana expects a specific format)
-        # Or use JSON format for newer Katana versions
-        cookies_list = []
-        for name, value in self.cookies.items():
-            cookies_list.append({
-                "domain": self.base_domain,
-                "name": name,
-                "value": value,
-            })
-
-        cookie_file = tempfile.NamedTemporaryFile(
-            mode="w",
-            suffix=".json",
-            delete=False,
-        )
-        json.dump(cookies_list, cookie_file)
-        cookie_file.close()
-        return cookie_file.name
-
-    def _create_header_file(self) -> str:
-        """Create a temporary header file for Katana."""
-        header_file = tempfile.NamedTemporaryFile(
-            mode="w",
-            suffix=".txt",
-            delete=False,
-        )
-        for key, value in self.headers.items():
-            header_file.write(f"{key}: {value}\n")
-        header_file.close()
-        return header_file.name
 
     def _parse_katana_output(self, output: str) -> List[KatanaEndpoint]:
         """Parse JSON output from Katana."""
@@ -250,30 +275,79 @@ class KatanaCrawler:
                 continue
             try:
                 data = json.loads(line)
-                endpoint = KatanaEndpoint(
-                    url=data.get("url", data.get("endpoint", "")),
-                    method=data.get("method", "GET"),
-                    status_code=data.get("status_code"),
-                    content_type=data.get("content_type"),
-                    content_length=data.get("content_length", 0),
-                    source=data.get("source", "unknown"),
-                )
+
+                # Handle Katana's JSONL format
+                # {"timestamp":"...", "request":{"method":"GET","endpoint":"..."}, "response":{...}}
+                if "request" in data:
+                    request = data.get("request", {})
+                    response = data.get("response", {})
+
+                    endpoint = KatanaEndpoint(
+                        url=request.get("endpoint", ""),
+                        method=request.get("method", "GET"),
+                        status_code=response.get("status_code"),
+                        content_type=response.get("headers", {}).get("Content-Type"),
+                        content_length=len(response.get("body", "")),
+                        source="katana",
+                    )
+                else:
+                    # Fallback for other formats
+                    endpoint = KatanaEndpoint(
+                        url=data.get("url", data.get("endpoint", "")),
+                        method=data.get("method", "GET"),
+                        status_code=data.get("status_code"),
+                        content_type=data.get("content_type"),
+                        content_length=data.get("content_length", 0),
+                        source=data.get("source", "unknown"),
+                    )
                 endpoints.append(endpoint)
             except json.JSONDecodeError:
-                # Handle non-JSON lines (shouldn't happen with -json flag)
+                # Handle non-JSON lines (shouldn't happen with -jsonl flag)
                 continue
 
         return endpoints
 
     def _deduplicate_endpoints(self, endpoints: List[KatanaEndpoint]) -> List[KatanaEndpoint]:
-        """Deduplicate endpoints by URL."""
+        """Deduplicate endpoints by URL and filter to same-origin only."""
         seen = set()
         unique = []
+
+        # Static file extensions to filter out
+        static_extensions = {
+            '.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
+            '.woff', '.woff2', '.ttf', '.eot', '.mp4', '.mp3', '.wav', '.avi',
+            '.mov', '.wmv', '.flv', '.mkv', '.webp', '.bmp', '.tiff', '.tif',
+            '.map', '.txt', '.xml', 'robots.txt', 'favicon.ico', '.swf'
+        }
+
         for ep in endpoints:
+            # Filter for same-origin only
+            parsed_url = urlparse(ep.url)
+            if parsed_url.netloc != self.base_domain:
+                continue
+
+            # Filter out static files
+            if self.filter_static:
+                url_lower = ep.url.lower()
+                if any(url_lower.endswith(ext) for ext in static_extensions):
+                    continue
+                # Also filter common static paths
+                if any(x in url_lower for x in ['/assets/', '/static/', '/images/', '/fonts/', '/media/', '/_next/static/', '/__webpack__/']):
+                    continue
+
+            # Interesting only filter
+            if self.interesting_only:
+                ep_type = ep._classify_type()
+                if ep_type not in ('api', 'auth', 'admin') and not ep._is_interesting():
+                    continue
+
             # Normalize URL (remove fragments, sort query params)
             url = ep.url.split("#")[0]
-            if url not in seen:
-                seen.add(url)
+            # Remove query string for deduplication
+            url_without_query = url.split("?")[0]
+
+            if url_without_query not in seen:
+                seen.add(url_without_query)
                 unique.append(ep)
         return unique
 
@@ -323,7 +397,7 @@ class KatanaCrawler:
 
         return forms
 
-    async def crawl(self, verify: bool = False) -> CrawlerReport:
+    async def crawl(self, verify: bool = False) -> SimpleCrawlerReport:
         """
         Run the Katana crawler.
 
@@ -331,7 +405,7 @@ class KatanaCrawler:
             verify: Whether to verify endpoints with HTTP requests
 
         Returns:
-            CrawlerReport with all discovered data
+            SimpleCrawlerReport with discovered data
         """
         import time
 
@@ -376,9 +450,13 @@ class KatanaCrawler:
 
             # Update statistics
             self.stats.total_requests = len(raw_endpoints)
-            self.stats.unique_endpoints = len(self.endpoints)
+            self.stats.successful_requests = sum(1 for e in self.endpoints if e.status_code and 200 <= e.status_code < 400)
+            self.stats.failed_requests = sum(1 for e in self.endpoints if e.status_code and e.status_code >= 400)
+            self.stats.unique_urls = len(self.endpoints)
+            self.stats.unique_domains = 1  # Current target domain
             self.stats.api_endpoints = sum(1 for e in self.endpoints if "api" in e.to_dict()["type"])
-            self.stats.auth_endpoints = sum(1 for e in self.endpoints if "auth" in e.to_dict()["type"])
+            self.stats.html_pages = sum(1 for e in self.endpoints if e.to_dict()["type"] == "page")
+            self.stats.forms_discovered = len(self.forms)
             self.stats.interesting_endpoints = sum(1 for e in self.endpoints if e.to_dict()["interesting"])
             self.stats.javascript_files = sum(1 for e in self.endpoints if e.url.endswith(".js"))
 
@@ -395,72 +473,53 @@ class KatanaCrawler:
                 "Or download from: https://github.com/projectdiscovery/katana/releases"
             )
 
-    def _generate_report(self) -> CrawlerReport:
-        """Generate a crawler report from collected data."""
-        # Convert endpoints to dict format
-        endpoints_list = [ep.to_dict() for ep in self.endpoints]
+    def _generate_report(self) -> "SimpleCrawlerReport":
+        """Generate a simple crawler report from collected data."""
+        # Count by type
+        api_count = sum(1 for e in self.endpoints if e._classify_type() == "api")
+        auth_count = sum(1 for e in self.endpoints if e._classify_type() == "auth")
+        admin_count = sum(1 for e in self.endpoints if e._classify_type() == "admin")
+        page_count = sum(1 for e in self.endpoints if e._classify_type() == "page")
 
-        # Build target config
-        custom_endpoints = {}
-        for endpoint in self.endpoints:
-            path = urlparse(endpoint.url).path
-            key = path.strip("/").replace("/", "_").replace("-", "_") or "root"
-            original_key = key
-            counter = 1
-            while key in custom_endpoints:
-                key = f"{original_key}_{counter}"
-                counter += 1
-            custom_endpoints[key] = endpoint.url
+        # Build simple endpoints list
+        endpoints_simple = []
+        for ep in self.endpoints:
+            path = urlparse(ep.url).path
+            endpoints_simple.append({
+                "url": path,
+                "full_url": ep.url,
+                "method": ep.method,
+                "type": ep._classify_type(),
+                "interesting": ep._is_interesting(),
+            })
 
-        # Build auth config
-        auth_config = AuthConfig(
-            type=AuthType.NONE,
-            headers=self.headers.copy(),
-        )
-
-        if self.cookies:
-            auth_config.type = AuthType.FORM
-            # Format cookies as header
-            cookie_str = "; ".join(f"{k}={v}" for k, v in self.cookies.items())
-            auth_config.headers["Cookie"] = cookie_str
-
-        target_config = TargetConfig(
-            name=f"katana_crawled_{self.base_domain}",
-            base_url=self.base_url,
-            authentication=auth_config,
-            endpoints=EndpointsConfig(base="", custom=custom_endpoints),
-        )
-
-        # Build auth data dict
-        auth_data = {
-            "type": "cookie" if self.cookies else "none",
-            "cookies": self.cookies.copy(),
-        }
-
-        return CrawlerReport(
+        return SimpleCrawlerReport(
             target=self.base_url,
-            base_url=self.base_url,
             timestamp=datetime.utcnow().isoformat(),
-            target_config=target_config,
-            endpoints=endpoints_list,
-            forms=self.forms,
-            statistics=self.stats.to_dict(),
-            auth_data=auth_data,
-            storage_data={},
-            discovered_cookies=self.cookies.copy(),
+            summary={
+                "total": len(self.endpoints),
+                "api": api_count,
+                "auth": auth_count,
+                "admin": admin_count,
+                "page": page_count,
+            },
+            endpoints=endpoints_simple,
+            cookies=list(self.cookies.keys()) if self.cookies else [],
         )
 
 
 async def crawl_with_katana(
     url: str,
     max_depth: int = 3,
-    js_crawl: bool = True,
-    headless: bool = True,
+    js_crawl: bool = False,
+    headless: bool = False,
     cookies: Optional[Dict[str, str]] = None,
     headers: Optional[Dict[str, str]] = None,
     verify: bool = False,
     output_file: Optional[str] = None,
-) -> CrawlerReport:
+    filter_static: bool = True,
+    interesting_only: bool = False,
+) -> SimpleCrawlerReport:
     """
     Convenience function to run the Katana crawler.
 
@@ -473,9 +532,11 @@ async def crawl_with_katana(
         headers: Custom headers
         verify: Verify endpoints with HTTP requests
         output_file: Optional file to save the report
+        filter_static: Filter out static files
+        interesting_only: Only keep interesting endpoints
 
     Returns:
-        CrawlerReport with discovered data
+        SimpleCrawlerReport with discovered data
     """
     crawler = KatanaCrawler(
         base_url=url,
@@ -484,6 +545,8 @@ async def crawl_with_katana(
         headless=headless,
         cookies=cookies,
         headers=headers,
+        filter_static=filter_static,
+        interesting_only=interesting_only,
     )
 
     report = await crawler.crawl(verify=verify)
@@ -520,22 +583,6 @@ def parse_cookies_string(cookies_str: str) -> Dict[str, str]:
             cookies[key.strip()] = value.strip()
 
     return cookies
-
-
-def extract_cookies_from_browser(target_domain: str) -> Dict[str, str]:
-    """
-    Extract cookies for a domain from the browser.
-
-    This is a placeholder - actual implementation would read browser
-    cookie databases from Chrome/Firefox/Safari.
-
-    For now, users should manually copy cookies from DevTools.
-    """
-    # TODO: Implement actual browser cookie extraction
-    # Chrome: ~/Library/Application Support/Google/Chrome/Default/Cookies
-    # Firefox: ~/Library/Application Support/Firefox/Profiles/*.cookies.sqlite
-    # Safari: ~/Library/Cookies/Cookies.binarycookies
-    return {}
 
 
 if __name__ == "__main__":
