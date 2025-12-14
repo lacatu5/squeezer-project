@@ -347,6 +347,202 @@ class Finding(BaseModel):
     response_details: Optional[str] = None
 
 
+# ==== Crawler Data Collection ====
+
+
+class ParameterInfo(BaseModel):
+    """Information about a discovered parameter (query, form, JSON, etc.)."""
+
+    name: str
+    type: str = "unknown"  # query, form, json, header, cookie, path
+    location: str = "unknown"  # url, body, header, cookie
+    example_values: List[str] = Field(default_factory=list)
+    required: bool = False
+
+
+class EndpointInfo(BaseModel):
+    """Detailed information about a discovered endpoint."""
+
+    url: str
+    method: str = "GET"
+    path: str = ""
+    status_code: Optional[int] = None
+    content_type: Optional[str] = None
+
+    # Discovered parameters
+    query_params: List[ParameterInfo] = Field(default_factory=list)
+    form_fields: List[ParameterInfo] = Field(default_factory=list)
+    json_params: List[ParameterInfo] = Field(default_factory=list)
+    headers: Dict[str, str] = Field(default_factory=dict)
+    cookies: Dict[str, str] = Field(default_factory=dict)
+
+    # Additional metadata
+    forms: List[Dict[str, Any]] = Field(default_factory=list)  # HTML forms found
+    links: List[str] = Field(default_factory=list)  # Outbound links
+    api_patterns: List[str] = Field(default_factory=list)  # Detected API patterns (e.g., /api/, /rest/)
+    is_api: bool = False  # Whether this looks like an API endpoint
+    requires_auth: bool = False  # Whether auth appears required
+
+    # Response analysis
+    response_size: int = 0
+    has_json: bool = False
+    has_html: bool = False
+    error_indicators: List[str] = Field(default_factory=list)  # Stack traces, etc.
+
+
+class CrawlerStatistics(BaseModel):
+    """Statistics collected during crawling."""
+
+    start_time: str = ""
+    end_time: str = ""
+    duration_seconds: float = 0.0
+
+    total_requests: int = 0
+    successful_requests: int = 0
+    failed_requests: int = 0
+
+    unique_urls: int = 0
+    unique_domains: int = 0
+
+    endpoints_by_method: Dict[str, int] = Field(default_factory=dict)
+    endpoints_by_status: Dict[int, int] = Field(default_factory=dict)
+
+    api_endpoints: int = 0
+    html_pages: int = 0
+    forms_discovered: int = 0
+    input_fields_discovered: int = 0
+
+    authentication_detected: List[str] = Field(default_factory=list)  # JWT, Basic, Session, etc.
+
+
+class CrawlerReport(BaseModel):
+    """Complete report from crawling a target.
+
+    Supports both the legacy string-based format and the new rich format
+    with full TargetConfig, auth data, forms, and storage data.
+    """
+
+    # Legacy fields (kept for backward compatibility)
+    target: str = ""
+    base_url: str = ""
+    timestamp: str = ""
+
+    # Rich format fields
+    target_config: Optional[TargetConfig] = None  # Full TargetConfig for scanning
+
+    # Discovered data
+    endpoints: List[Union[EndpointInfo, Dict[str, Any]]] = Field(default_factory=list)
+    statistics: Union[CrawlerStatistics, Dict[str, Any]] = Field(default_factory=dict)
+
+    # Additional collected data (for agent crawler)
+    forms: List[Dict[str, Any]] = Field(default_factory=list)  # All discovered forms
+    auth_data: Dict[str, Any] = Field(default_factory=dict)  # Auth flow data
+    storage_data: Dict[str, Any] = Field(default_factory=dict)  # Local/session storage
+    discovered_cookies: Dict[str, str] = Field(default_factory=dict)  # Cookies
+
+    def get_endpoints_by_method(self, method: str) -> List[Union[EndpointInfo, Dict[str, Any]]]:
+        """Get all endpoints with a specific HTTP method."""
+        return [
+            e for e in self.endpoints
+            if (isinstance(e, EndpointInfo) and e.method == method) or
+            (isinstance(e, dict) and e.get("method") == method)
+        ]
+
+    def get_api_endpoints(self) -> List[Union[EndpointInfo, Dict[str, Any]]]:
+        """Get all detected API endpoints."""
+        return [
+            e for e in self.endpoints
+            if (isinstance(e, EndpointInfo) and e.is_api) or
+            (isinstance(e, dict) and e.get("type") == "api")
+        ]
+
+    def get_forms(self) -> List[Dict[str, Any]]:
+        """Get all discovered forms across all endpoints."""
+        # Return the forms field if populated
+        if self.forms:
+            return self.forms
+
+        # Legacy: extract from endpoints
+        forms = []
+        for endpoint in self.endpoints:
+            if isinstance(endpoint, EndpointInfo):
+                forms.extend(endpoint.forms)
+            elif isinstance(endpoint, dict):
+                forms.extend(endpoint.get("form_fields", []))
+        return forms
+
+    def get_auth_config(self) -> AuthConfig:
+        """Get an AuthConfig from the discovered auth data."""
+        if self.target_config and self.target_config.authentication:
+            return self.target_config.authentication
+
+        # Build from auth_data
+        auth_type = self.auth_data.get("type", "none")
+        if auth_type == "jwt":
+            return AuthConfig(
+                type=AuthType.BEARER,
+                token=self.auth_data.get("jwt_token"),
+                headers={"Authorization": f"Bearer {self.auth_data.get('jwt_token', '')}"},
+            )
+        elif auth_type == "session":
+            cookie_name = self.auth_data.get("cookie_name", "session")
+            return AuthConfig(
+                type=AuthType.FORM,
+                headers={"Cookie": f"{cookie_name}={self.auth_data.get('jwt_token', '')}"},
+            )
+
+        return AuthConfig()
+
+    def to_target_config(self, name: Optional[str] = None) -> TargetConfig:
+        """Generate a TargetConfig for scanning from discovered endpoints."""
+        if self.target_config:
+            return self.target_config
+
+        custom_endpoints = {}
+        for endpoint in self.endpoints:
+            if isinstance(endpoint, EndpointInfo):
+                url = endpoint.url
+                path = endpoint.path
+            else:
+                url = endpoint.get("url", "")
+                path = urlparse(url).path
+
+            key = path.strip("/").replace("/", "_").replace("-", "_") or "root"
+            original_key = key
+            counter = 1
+            while key in custom_endpoints:
+                key = f"{original_key}_{counter}"
+                counter += 1
+            custom_endpoints[key] = url
+
+        base = self.base_url or self.target
+        parsed = urlparse(base)
+        target_name = name or f"agent_crawled_{parsed.netloc}"
+
+        self.target_config = TargetConfig(
+            name=target_name,
+            base_url=base,
+            authentication=self.get_auth_config(),
+            endpoints=EndpointsConfig(base="", custom=custom_endpoints),
+        )
+        return self.target_config
+
+    def save_yaml(self, path: Union[str, Path]) -> None:
+        """Save the crawler report as YAML."""
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, "w") as f:
+            yaml.dump(self.model_dump(exclude_none=True), f, sort_keys=False)
+
+    @classmethod
+    def from_yaml(cls, path: Union[str, Path]) -> "CrawlerReport":
+        """Load a crawler report from YAML."""
+        path = Path(path)
+        with open(path) as f:
+            data = yaml.safe_load(f)
+        return cls(**data)
+
+
 class ScanReport(BaseModel):
     """Complete scan report with checkpoint support for resume capability."""
 

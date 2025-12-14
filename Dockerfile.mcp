@@ -1,0 +1,41 @@
+# DAST MCP Server - Dockerfile
+# Runs the DAST intelligent crawler as an MCP server
+
+FROM python:3.13-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget \
+    gnupg \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Playwright browsers
+RUN wget -qO- https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome.gpg
+RUN echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list
+RUN apt-get update && apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy the project files
+COPY . /app/
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -e . && \
+    pip install --no-cache-dir playwright && \
+    playwright install chromium
+
+# Create storage directory for crawler data
+RUN mkdir -p /app/storage
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PLAYWRIGHT_BROWSERS_PATH=/root/.cache/ms-playwright
+
+# Expose MCP server runs on stdio, but we can expose a port if using SSE
+EXPOSE 8000
+
+# Default command runs the MCP server
+CMD ["python", "-m", "dast.mcp_server"]

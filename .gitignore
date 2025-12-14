@@ -69,3 +69,31 @@ report.tex
 reports/
 *.db
 *.sqlite
+
+# Crawler storage (contains scan data, crawled endpoints)
+storage/
+
+# Python linter cache
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+
+# Scanned/crawled target configs with real URLs
+*.crawled.yaml
+*-crawled.yaml
+*-private.yaml
+
+# Scan results and findings (may contain sensitive data)
+*_results.yaml
+*_results.json
+findings/
+scan-results/
+
+# Baseline files (may reveal app structure)
+baseline/
+*.baseline.json
+
+# Traffic logs (may contain sensitive data)
+traffic/
+*.traffic.log
+*.har

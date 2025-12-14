@@ -1,0 +1,40 @@
+name: esenziaclub.com
+base_url: https://esenziaclub.com
+
+authentication:
+  type: form
+  username: "ollteod@gmail.com"
+  password: "xehBaz-vuxkeq-8pecfy"
+  login:
+    url: /account/login
+    method: POST
+    payload:
+      customer[email]: "{{AUTH_USERNAME}}"
+      customer[password]: "{{AUTH_PASSWORD}}"
+      form_type: customer_login
+      utf8: "✓"
+    headers:
+      Content-Type: application/x-www-form-urlencoded
+    extract:
+      - name: token
+        selector: "Set-Cookie"
+        location: header
+
+variables:
+  USER_EMAIL: "ollteod@gmail.com"
+  USER_PASSWORD: "xehBaz-vuxkeq-8pecfy"
+
+endpoints:
+  base: /
+  custom:
+    # Generic vulnerability testing endpoints
+    sqli: /search?q=
+    sqli_post: /account/login
+    command_injection: /search?q=
+    xss_reflected: /search?q=
+    xss_stored: /contact
+    path_traversal: /?page=
+    ssrf: /?url=
+
+timeout: 30.0
+parallel: 3

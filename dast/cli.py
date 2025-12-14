@@ -9,9 +9,11 @@ from typing import Optional
 
 from rich.console import Console
 from rich.panel import Panel
+from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 
+from dast.agent_crawler import AgentCrawler
 from dast.config import EvidenceStrength, ScanProfile, ScanReport, TargetConfig
 from dast.engine import load_templates, run_scan
 from dast.utils import setup_logging
@@ -158,6 +160,132 @@ def list_command(template_dir: Optional[str] = None) -> int:
     console.print(f"\n[dim]Total: {len(templates)} templates[/dim]")
 
     return 0
+
+
+async def crawl_command(
+    target_url: str,
+    output: Optional[str] = None,
+    max_pages: int = 500,
+    max_depth: int = 5,
+    headless: bool = True,
+    extract_javascript: bool = True,
+    discover_apis: bool = True,
+    analyze_forms: bool = True,
+    verbose: bool = False,
+) -> int:
+    """Run the intelligent agent crawler to discover endpoints."""
+    setup_logging(verbose=verbose)
+
+    if not verbose:
+        print_banner()
+
+    console.print(f"[dim]Target: {target_url}[/dim]")
+    console.print(f"[dim]Max Pages: {max_pages} | Max Depth: {max_depth}[/dim]")
+    console.print()
+
+    crawler = AgentCrawler(
+        base_url=target_url,
+        max_pages=max_pages,
+        max_depth=max_depth,
+        headless=headless,
+        extract_javascript=extract_javascript,
+        discover_apis=discover_apis,
+        analyze_forms=analyze_forms,
+    )
+
+    # Run crawler with progress indicator
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        task = progress.add_task("[cyan]Crawling target...", total=None)
+
+        try:
+            report = await crawler.crawl()
+            progress.update(task, completed=True)
+
+        except Exception as e:
+            console.print(f"[red]Error during crawling: {e}[/red]")
+            return 1
+
+    # Display results
+    _print_crawl_report(report)
+
+    # Save report if requested
+    if output:
+        report.save_yaml(output)
+        console.print(f"\n[green]Report saved to: {output}[/green]")
+
+    return 0
+
+
+def _print_crawl_report(report) -> None:
+    """Print the crawler report."""
+    console.print("\n[bold]Crawl Results[/bold]\n")
+
+    # Statistics
+    stats = report.statistics
+    if isinstance(stats, dict):
+        total_requests = stats.get("total_requests", 0)
+        unique_endpoints = stats.get("unique_endpoints", 0)
+        api_endpoints = stats.get("api_endpoints", 0)
+        forms_discovered = stats.get("forms_discovered", 0)
+        js_endpoints = stats.get("js_endpoints_extracted", 0)
+        interesting = stats.get("interesting_endpoints", 0)
+    else:
+        total_requests = stats.total_requests
+        unique_endpoints = stats.unique_urls
+        api_endpoints = stats.api_endpoints
+        forms_discovered = stats.forms_discovered
+        js_endpoints = 0
+        interesting = 0
+
+    console.print(f"[cyan]Total Requests:[/cyan] {total_requests}")
+    console.print(f"[cyan]Unique Endpoints:[/cyan] {unique_endpoints}")
+    console.print(f"[cyan]API Endpoints:[/cyan] {api_endpoints}")
+    console.print(f"[cyan]Forms Discovered:[/cyan] {forms_discovered}")
+    console.print(f"[cyan]JS Endpoints Extracted:[/cyan] {js_endpoints}")
+    if interesting > 0:
+        console.print(f"[yellow]Interesting Endpoints:[/yellow] {interesting} 🎯")
+
+    # Authentication data
+    if report.auth_data:
+        console.print("\n[bold]Authentication:[/bold]")
+        auth_type = report.auth_data.get("type", "unknown")
+        console.print(f"  Type: {auth_type}")
+        if report.auth_data.get("jwt_token"):
+            console.print(f"  JWT: [dim]{report.auth_data['jwt_token'][:30]}...[/dim]")
+
+    # Interesting endpoints
+    interesting_endpoints = [
+        e for e in report.endpoints
+        if isinstance(e, dict) and e.get("interesting")
+    ]
+    if interesting_endpoints:
+        console.print(f"\n[bold yellow]Interesting Endpoints:[/bold yellow]")
+        for ep in interesting_endpoints[:10]:  # Show first 10
+            url = ep.get("url", "")
+            method = ep.get("method", "GET")
+            hints = ep.get("vulnerability_hints", [])
+            hints_str = f" | [red]{', '.join(hints)}[/red]" if hints else ""
+            console.print(f"  [{method}] {url}{hints_str}")
+        if len(interesting_endpoints) > 10:
+            console.print(f"  ... and {len(interesting_endpoints) - 10} more")
+
+    # Forms
+    if report.forms:
+        console.print(f"\n[bold]Forms ({len(report.forms)}):[/bold]")
+        for form in report.forms[:5]:  # Show first 5
+            action = form.get("action", "unknown")
+            method = form.get("method", "GET")
+            fields = form.get("fields", form.get("form_fields", []))
+            console.print(f"  [{method}] {action}")
+            if fields:
+                field_names = [f.get("name", "?") for f in fields[:3]]
+                console.print(f"    Fields: {', '.join(field_names)}")
+        if len(report.forms) > 5:
+            console.print(f"  ... and {len(report.forms) - 5} more")
 
 
 def _print_report(report: ScanReport) -> None:
@@ -311,6 +439,12 @@ Examples:
   dast scan http://example.com -c configs/myapp.yaml -t templates/generic -o results.json
   dast scan http://localhost:8080 -t templates/generic
   dast scan http://localhost:3000 -t templates/apps/juice-shop  # Business logic
+
+  # Agent Crawler
+  dast crawl http://localhost:3000 -o juice-shop-crawled.yaml
+  dast crawl http://example.com --max-pages 1000 --max-depth 3
+
+  # List templates
   dast list -t templates/generic
         """,
     )
@@ -330,6 +464,18 @@ Examples:
     scan_parser.add_argument("--no-validate", help="Skip target connectivity validation", action="store_true")
     scan_parser.add_argument("--checkpoint", help="Save scan progress to file for resume capability")
     scan_parser.add_argument("--resume", help="Resume scan from checkpoint file")
+
+    # Crawl command
+    crawl_parser = subparsers.add_parser("crawl", help="Run intelligent agent crawler")
+    crawl_parser.add_argument("target", help="Target URL (e.g., http://localhost:3000)")
+    crawl_parser.add_argument("-o", "--output", help="Output YAML file for the crawler report")
+    crawl_parser.add_argument("--max-pages", type=int, default=500, help="Maximum pages to visit (default: 500)")
+    crawl_parser.add_argument("--max-depth", type=int, default=5, help="Maximum crawl depth (default: 5)")
+    crawl_parser.add_argument("--no-headless", action="store_false", dest="headless", help="Run browser in visible mode")
+    crawl_parser.add_argument("--no-js-extract", action="store_false", dest="extract_javascript", help="Don't extract endpoints from JavaScript")
+    crawl_parser.add_argument("--no-api-discover", action="store_false", dest="discover_apis", help="Don't discover API endpoints")
+    crawl_parser.add_argument("--no-forms", action="store_false", dest="analyze_forms", help="Don't analyze forms")
+    crawl_parser.add_argument("-v", "--verbose", help="Enable verbose logging", action="store_true")
 
     # List command
     list_parser = subparsers.add_parser("list", help="List available templates")
@@ -355,6 +501,19 @@ Examples:
             no_validate=args.no_validate,
             checkpoint=getattr(args, 'checkpoint', None),
             resume=getattr(args, 'resume', None),
+        ))
+
+    elif args.command == "crawl":
+        return asyncio.run(crawl_command(
+            target_url=args.target,
+            output=args.output,
+            max_pages=args.max_pages,
+            max_depth=args.max_depth,
+            headless=args.headless,
+            extract_javascript=args.extract_javascript,
+            discover_apis=args.discover_apis,
+            analyze_forms=args.analyze_forms,
+            verbose=args.verbose,
         ))
 
     elif args.command == "list":
