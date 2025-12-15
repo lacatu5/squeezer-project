@@ -19,10 +19,7 @@ Or download binaries from: https://github.com/projectdiscovery/katana/releases
 
 import asyncio
 import json
-import os
 import re
-import subprocess
-import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
@@ -44,7 +41,10 @@ from pydantic import Field as PDField
 
 
 class SimpleCrawlerReport(BaseModel):
-    """Simple crawler report with minimal, useful data."""
+    """Simple crawler report with minimal, useful data.
+
+    Can be converted directly to TargetConfig for vulnerability scanning.
+    """
 
     target: str
     timestamp: str
@@ -52,10 +52,181 @@ class SimpleCrawlerReport(BaseModel):
     endpoints: List[Dict[str, Any]] = PDField(default_factory=list)
     cookies: List[str] = PDField(default_factory=list)
 
+    # Static file extensions to blacklist
+    _STATIC_EXTENSIONS: Set[str] = {
+        '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
+        '.woff', '.woff2', '.ttf', '.eot', '.otf',
+        '.mp4', '.mp3', '.wav', '.avi', '.mov', '.wmv', '.flv', '.mkv',
+        '.webp', '.bmp', '.tiff', '.tif',
+        '.map', '.txt', '.xml', 'robots.txt', 'favicon.ico', '.swf',
+        '.webmanifest', '.json', '.yaml', '.yml',
+    }
+
+    # Static path patterns to blacklist
+    _STATIC_PATH_PATTERNS: Set[str] = {
+        '/assets/', '/static/', '/images/', '/img/', '/fonts/',
+        '/media/', '/_next/static/', '/__webpack__/', '/public/',
+        '/node_modules/', '/vendor/', '/.well-known/',
+    }
+
+    def _is_static_asset(self, url: str) -> bool:
+        """Check if a URL points to a static asset."""
+        url_lower = url.lower()
+
+        # Check extension
+        for ext in self._STATIC_EXTENSIONS:
+            if url_lower.endswith(ext):
+                return True
+
+        # Check static path patterns
+        for pattern in self._STATIC_PATH_PATTERNS:
+            if pattern in url_lower:
+                return True
+
+        return False
+
+    def _get_endpoint_priority(self, endpoint: Dict[str, Any]) -> int:
+        """Calculate priority score for an endpoint (higher = scan first)."""
+        score = 0
+        url_lower = endpoint.get('url', '').lower()
+        ep_type = endpoint.get('type', '')
+        full_url = endpoint.get('full_url', url_lower)
+
+        # API endpoints are highest priority
+        if ep_type == 'api':
+            score += 100
+
+        # Auth endpoints
+        if ep_type == 'auth' or any(x in url_lower for x in ['login', 'signin', 'auth', 'logout']):
+            score += 80
+
+        # Admin endpoints
+        if ep_type == 'admin' or any(x in url_lower for x in ['admin', 'dashboard', 'panel']):
+            score += 70
+
+        # Endpoints with query parameters (injection points)
+        if '?' in full_url:
+            score += 50
+
+        # Known interesting paths
+        interesting_keywords = [
+            'user', 'profile', 'search', 'filter', 'sort',
+            'api', 'rest', 'graphql', 'query',
+            'upload', 'download', 'export', 'import',
+            'config', 'settings', 'account',
+            'cart', 'checkout', 'order', 'payment',
+            'product', 'item', 'list',
+        ]
+        for keyword in interesting_keywords:
+            if keyword in url_lower:
+                score += 30
+                break  # Only count once
+
+        return score
+
+    def _sanitize_endpoint_key(self, path: str) -> str:
+        """Convert a URL path to a valid endpoint key name."""
+        import re
+
+        # Remove leading/trailing slashes and special chars
+        clean = path.strip('/').replace('-', '_').replace('.', '_')
+
+        # Replace remaining slashes with underscores
+        clean = clean.replace('/', '_')
+
+        # Remove consecutive underscores
+        clean = re.sub(r'_+', '_', clean)
+
+        # Return "root" if empty
+        return clean or "root"
+
+    def _generate_endpoint_key(self, url: str, existing_keys: Dict[str, str]) -> str:
+        """Generate a unique endpoint key from a URL."""
+        from urllib.parse import urlparse
+
+        parsed = urlparse(url)
+        path = parsed.path or '/'
+
+        base_key = self._sanitize_endpoint_key(path)
+        key = base_key
+        counter = 1
+
+        # Ensure uniqueness by appending counter if needed
+        while key in existing_keys:
+            key = f"{base_key}_{counter}"
+            counter += 1
+
+        return key
+
+    def to_target_config(
+        self,
+        config_name: Optional[str] = None,
+        prioritize: bool = True,
+        exclude_static: bool = True,
+    ) -> TargetConfig:
+        """Convert crawler report to TargetConfig for vulnerability scanning.
+
+        Args:
+            config_name: Optional name for the target (defaults to "crawled_target")
+            prioritize: Sort endpoints by priority (high-value targets first)
+            exclude_static: Filter out static assets (.css, .png, etc.)
+
+        Returns:
+            TargetConfig ready for vulnerability scanning
+        """
+        from urllib.parse import urlparse
+
+        # Parse base URL from report
+        parsed_base = urlparse(self.target)
+        target_name = config_name or f"crawled_{parsed_base.netloc.replace('.', '_')}"
+
+        # Filter and process endpoints
+        filtered_endpoints: List[Dict[str, Any]] = []
+
+        for ep in self.endpoints:
+            url = ep.get('full_url', ep.get('url', ''))
+
+            # Skip static assets if enabled
+            if exclude_static and self._is_static_asset(url):
+                continue
+
+            filtered_endpoints.append(ep)
+
+        # Sort by priority if requested
+        if prioritize:
+            filtered_endpoints.sort(key=self._get_endpoint_priority, reverse=True)
+
+        # Build custom endpoints dict
+        custom_endpoints: Dict[str, str] = {}
+        for ep in filtered_endpoints:
+            url = ep.get('full_url', ep.get('url', ''))
+            key = self._generate_endpoint_key(url, custom_endpoints)
+            custom_endpoints[key] = url
+
+        # Build authentication config from cookies
+        auth_config = AuthConfig()
+        if self.cookies:
+            # Convert cookie list to auth headers
+            cookie_str = '; '.join([f"{c}=value" for c in self.cookies])
+            auth_config = AuthConfig(
+                type=AuthType.NONE,  # Cookies are just headers, not a specific auth type
+                headers={"Cookie": cookie_str},
+            )
+
+        # Create TargetConfig
+        return TargetConfig(
+            name=target_name,
+            base_url=self.target,
+            authentication=auth_config,
+            endpoints=EndpointsConfig(
+                base="",
+                custom=custom_endpoints,
+            ),
+        )
+
     def save_yaml(self, path: str) -> None:
         """Save report to YAML file."""
         import yaml
-        from pathlib import Path
 
         data = {
             "target": self.target,

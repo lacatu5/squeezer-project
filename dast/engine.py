@@ -372,6 +372,9 @@ class TemplateEngine:
             return self._expand_generic_template(template)
         return template.requests
 
+    # Broadcast endpoint keyword for targeting all discovered endpoints
+    BROADCAST_KEYWORD = "all_discovered"
+
     def _expand_generic_template(self, template: Template) -> List[RequestConfig]:
         """Expand a generic template into concrete requests based on payloads.
 
@@ -379,6 +382,11 @@ class TemplateEngine:
         Supports detection_tiers for layered vulnerability scanning.
         Also supports automatic boolean-blind detection via naming convention.
         Supports loading payloads from external files.
+
+        Broadcast Mode:
+            When endpoint is set to {{all_discovered}}, the template will be expanded
+            to target ALL endpoints in the target config. For injection templates (SQLi, XSS),
+            only endpoints with query parameters are targeted.
         """
         generic = template.generic
         if not generic:
@@ -387,6 +395,11 @@ class TemplateEngine:
         # Resolve endpoint from target config
         endpoints = self.target.get_endpoints()
         endpoint_key = generic.endpoint.lstrip("{{").rstrip("}}")
+
+        # Check for broadcast mode - target all discovered endpoints
+        if endpoint_key == self.BROADCAST_KEYWORD:
+            return self._expand_broadcast_template(template, generic, endpoints)
+
         endpoint_path = endpoints.get(endpoint_key)
 
         if not endpoint_path:
@@ -456,6 +469,140 @@ class TemplateEngine:
                 }
 
             requests.append(request)
+
+        return requests
+
+    def _expand_broadcast_template(
+        self,
+        template: Template,
+        generic: "GenericTemplate",
+        endpoints: Dict[str, str],
+    ) -> List[RequestConfig]:
+        """Expand a template to broadcast against all discovered endpoints.
+
+        This creates a RequestConfig for every endpoint in the TargetConfig.
+        For injection templates (SQLi, XSS), only targets endpoints with query
+        parameters or body content. Ignores static HTML pages for these tests.
+
+        Args:
+            template: The template being expanded
+            generic: The generic template configuration
+            endpoints: Dict of endpoint_name -> url from target config
+
+        Returns:
+            List of RequestConfig to execute
+        """
+        from urllib.parse import urlparse
+
+        requests = []
+        vuln_name = template.id.replace("-", "_").upper()
+
+        # Determine template type for smart filtering
+        template_tags = template.info.tags
+        is_injection_template = any(tag in template_tags for tag in ['sqli', 'xss', 'injection', 'ssti', 'xxe'])
+
+        # Filter endpoints based on template type
+        filtered_endpoints = {}
+        for name, url in endpoints.items():
+            if not is_injection_template:
+                # Non-injection templates target all endpoints
+                filtered_endpoints[name] = url
+            else:
+                # Injection templates only target endpoints with potential injection points
+                parsed = urlparse(url)
+                has_params = bool(parsed.query) or '?' in url
+
+                # Also target API endpoints (likely to have params in body)
+                is_api = '/api/' in url.lower() or '/rest/' in url.lower()
+
+                if has_params or is_api:
+                    filtered_endpoints[name] = url
+                else:
+                    logger.debug(f"Skipping {url} for {template.id}: no injection points")
+
+        if not filtered_endpoints:
+            logger.warning(f"Broadcast mode: no suitable endpoints found for {template.id}")
+            return []
+
+        logger.info(f"Broadcast mode: targeting {len(filtered_endpoints)} endpoints for {template.id}")
+
+        # Check if template uses detection_tiers
+        if generic.detection_tiers:
+            # For broadcast with tiers, expand each endpoint through tier system
+            for endpoint_name, endpoint_path in filtered_endpoints.items():
+                tier_requests = self._expand_with_tiers(template, endpoint_path, generic)
+                # Annotate with endpoint name for tracking
+                for req in tier_requests:
+                    if not req.on_match:
+                        req.on_match = {}
+                    req.on_match["endpoint_name"] = endpoint_name
+                requests.extend(tier_requests)
+            return requests
+
+        # Load payloads from file if specified
+        payloads_to_use = list(generic.payloads)
+        if generic.payloads_file:
+            file_payloads = self._load_payloads_from_file(generic.payloads_file)
+            payloads_to_use.extend(file_payloads)
+
+        # Check for boolean-blind naming convention
+        payload_names = [p.name if isinstance(p, PayloadConfig) else p[:30] for p in payloads_to_use]
+        has_bool_blind = "baseline" in payload_names and ("bool_true" in payload_names or "bool_false" in payload_names)
+
+        # Expand each endpoint with each payload
+        for endpoint_name, endpoint_path in filtered_endpoints.items():
+            for payload in payloads_to_use:
+                # Normalize payload to PayloadConfig
+                if isinstance(payload, str):
+                    payload_cfg = PayloadConfig(name=payload[:30], value=payload)
+                else:
+                    payload_cfg = payload
+
+                # Build request based on method
+                if generic.method.upper() == "GET":
+                    request = self._build_get_request(endpoint_path, generic, payload_cfg)
+                elif generic.method.upper() == "POST":
+                    request = self._build_post_request(endpoint_path, generic, payload_cfg)
+                else:
+                    continue
+
+                # Add endpoint name to the request name for traceability
+                original_name = request.name or ""
+                request.name = f"{endpoint_name}:{original_name}" if original_name else endpoint_name
+
+                # Handle boolean-blind naming convention
+                if has_bool_blind and payload_cfg.name in ("baseline", "bool_true", "bool_false"):
+                    if payload_cfg.name == "baseline":
+                        # Per-endpoint baseline cache key
+                        cache_key = f"{template.id}_{endpoint_name}_baseline"
+                        request.matchers = []
+                        request.on_match = {
+                            "vulnerability": vuln_name,
+                            "message": f"{template.info.name} (baseline: {endpoint_name})",
+                            "is_baseline": True,
+                            "cache_key": cache_key,
+                            "endpoint_name": endpoint_name,
+                        }
+                    else:
+                        compare_key = f"{template.id}_{endpoint_name}_baseline"
+                        request.matchers = generic.matchers
+                        request.on_match = {
+                            "vulnerability": vuln_name,
+                            "message": f"{template.info.name} (boolean-blind: {payload_cfg.name} on {endpoint_name})",
+                            "compare_with": compare_key,
+                            "detection_type": "boolean_blind",
+                            "endpoint_name": endpoint_name,
+                        }
+                else:
+                    # Regular payloads
+                    request.matchers = generic.matchers
+                    request.on_match = {
+                        "vulnerability": vuln_name,
+                        "message": f"{template.info.name}: {payload_cfg.name} on {endpoint_name}",
+                        "endpoint_name": endpoint_name,
+                    }
+
+                requests.append(request)
 
         return requests
 

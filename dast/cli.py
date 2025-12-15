@@ -17,6 +17,7 @@ from dast.katana_crawler import KatanaCrawler, parse_cookies_string
 from dast.config import EvidenceStrength, ScanProfile, ScanReport, TargetConfig
 from dast.engine import load_templates, run_scan
 from dast.utils import setup_logging
+from dast.bridge import merge_configs
 
 
 console = Console()
@@ -40,8 +41,16 @@ async def scan_command(
     no_validate: bool = False,
     checkpoint: Optional[str] = None,
     resume: Optional[str] = None,
+    crawl: bool = False,
+    cookies: Optional[str] = None,
 ) -> int:
-    """Run vulnerability scan."""
+    """Run vulnerability scan.
+
+    If --crawl is specified, runs the Katana crawler first to discover endpoints,
+    then automatically tests them for vulnerabilities.
+
+    Crawler defaults: js-crawl enabled, interesting-only enabled, max-depth=3
+    """
     setup_logging(verbose=verbose)
 
     if not verbose:
@@ -59,15 +68,71 @@ async def scan_command(
             console.print("[dim]Valid profiles: passive, standard, thorough, aggressive[/dim]")
             return 1
 
-    # Load or create target configuration
-    if config:
-        target = TargetConfig.from_yaml(config)
-        target.base_url = target_url
-    else:
-        target = TargetConfig(
-            name="Target",
+    # Step 1: Run crawler if --crawl is specified
+    if crawl:
+        console.print(f"[cyan]Phase 1: Crawling {target_url}[/cyan]")
+        console.print("[dim]JS Crawl: enabled | Interesting-only: enabled | Max Depth: 3[/dim]\n")
+
+        # Parse cookies if provided (shared with scan command)
+        parsed_cookies = {}
+        if cookies:
+            parsed_cookies = parse_cookies_string(cookies)
+
+        crawler = KatanaCrawler(
             base_url=target_url,
+            max_depth=3,  # Fixed default
+            js_crawl=True,  # Always enabled for --crawl
+            cookies=parsed_cookies,
+            filter_static=True,  # Always filter static
+            interesting_only=True,  # Always use interesting-only
         )
+
+        # Run crawler with progress indicator
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            task = progress.add_task("[cyan]Discovering endpoints...[/cyan]", total=None)
+
+            try:
+                report = await crawler.crawl()
+                progress.update(task, completed=True)
+            except Exception as e:
+                console.print(f"[red]Crawl failed: {e}[/red]")
+                console.print("[dim]Make sure Katana is installed: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
+                return 1
+
+        # Display crawl results
+        console.print(f"[green]Found {len(report.endpoints)} endpoints[/green]")
+        console.print(f"[dim]  API: {report.summary.get('api', 0)} | Auth: {report.summary.get('auth', 0)} | Admin: {report.summary.get('admin', 0)}[/dim]\n")
+
+        # Convert crawler report to TargetConfig (method on report itself)
+        crawled_config = report.to_target_config(
+            config_name="crawled_target",
+            prioritize=True,
+            exclude_static=True,
+        )
+
+        # Merge with user config if provided
+        if config:
+            base_config = TargetConfig.from_yaml(config)
+            base_config.base_url = target_url
+            target = merge_configs(base_config, crawled_config)
+            console.print("[dim]Merged with user config[/dim]\n")
+        else:
+            target = crawled_config
+            target.base_url = target_url
+    else:
+        # Load or create target configuration (no crawl)
+        if config:
+            target = TargetConfig.from_yaml(config)
+            target.base_url = target_url
+        else:
+            target = TargetConfig(
+                name="Target",
+                base_url=target_url,
+            )
 
     # Override credentials from CLI
     if username:
@@ -79,6 +144,7 @@ async def scan_command(
 
     console.print(f"[dim]Target: {target.base_url}[/dim]")
     console.print(f"[dim]Auth: {target.authentication.type or 'none'}[/dim]")
+    console.print(f"[dim]Endpoints: {len(target.get_endpoints())}[/dim]")
     if profile:
         console.print(f"[dim]Profile: {scan_profile.value}[/dim]")
 
@@ -101,7 +167,9 @@ async def scan_command(
         return 1
 
     # Run scan
-    if not verbose:
+    if crawl:
+        console.print("[cyan]Phase 2: Scanning for vulnerabilities[/cyan]\n")
+    elif not verbose:
         console.print("[yellow]Scanning...[/yellow]\n")
 
     # Determine checkpoint file (resume takes precedence over checkpoint)
@@ -181,9 +249,9 @@ async def crawl_command(
     console.print(f"[dim]Target: {target_url}[/dim]")
     console.print(f"[dim]Max Depth: {max_depth} | JS Crawl: {js_crawl}[/dim]")
     if interesting_only:
-        console.print(f"[dim]Filter: interesting only (api, auth, admin)[/dim]")
+        console.print("[dim]Filter: interesting only (api, auth, admin)[/dim]")
     if no_filter_static:
-        console.print(f"[dim]Filter: none (keeping all files)[/dim]")
+        console.print("[dim]Filter: none (keeping all files)[/dim]")
 
     # Parse cookies from user-provided string
     parsed_cookies = {}
@@ -216,7 +284,7 @@ async def crawl_command(
 
         except Exception as e:
             console.print(f"[red]Error during crawling: {e}[/red]")
-            console.print(f"[dim]Make sure Katana is installed: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
+            console.print("[dim]Make sure Katana is installed: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
             return 1
 
     # Display results
@@ -250,7 +318,7 @@ def _print_crawl_report(report) -> None:
 
         # Show sample endpoints
         if report.endpoints:
-            console.print(f"\n[bold]Sample Endpoints:[/bold]")
+            console.print("\n[bold]Sample Endpoints:[/bold]")
             for ep in report.endpoints[:10]:
                 url = ep.get("url", "")
                 method = ep.get("method", "GET")
@@ -312,7 +380,7 @@ def _print_crawl_report(report) -> None:
         if isinstance(e, dict) and e.get("interesting")
     ]
     if interesting_endpoints:
-        console.print(f"\n[bold yellow]Interesting Endpoints:[/bold yellow]")
+        console.print("\n[bold yellow]Interesting Endpoints:[/bold yellow]")
         for ep in interesting_endpoints[:10]:  # Show first 10
             url = ep.get("url", "")
             method = ep.get("method", "GET")
@@ -484,14 +552,16 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
+  # Crawl then scan (automatic discovery)
+  dast scan http://localhost:3000 --crawl --cookies '{"token": "..."}'
+  dast scan http://localhost:3000 --crawl -c myapp.yaml -o results.json
+
+  # Scan with existing config
   dast scan http://localhost:3000 --config configs/examples/juice-shop.yaml
   dast scan http://example.com -c configs/myapp.yaml -t templates/generic -o results.json
-  dast scan http://localhost:8080 -t templates/generic
-  dast scan http://localhost:3000 -t templates/apps/juice-shop  # Business logic
 
-  # Katana Crawler
-  dast crawl http://localhost:3000 -o juice-shop-crawled.yaml
-  dast crawl http://example.com --max-depth 5 --cookies "session=abc123"
+  # Standalone crawl
+  dast crawl http://localhost:3000 -o juice-shop.yaml --cookies '{"token": "..."}'
 
   # List templates
   dast list -t templates/generic
@@ -513,6 +583,8 @@ Examples:
     scan_parser.add_argument("--no-validate", help="Skip target connectivity validation", action="store_true")
     scan_parser.add_argument("--checkpoint", help="Save scan progress to file for resume capability")
     scan_parser.add_argument("--resume", help="Resume scan from checkpoint file")
+    scan_parser.add_argument("--crawl", help="Crawl target first to auto-discover endpoints before scanning", action="store_true")
+    scan_parser.add_argument("--cookies", help="Cookies for authentication (format: 'key=value; key2=value2' or JSON)")
 
     # Crawl command
     crawl_parser = subparsers.add_parser("crawl", help="Run Katana web crawler")
@@ -549,6 +621,8 @@ Examples:
             no_validate=args.no_validate,
             checkpoint=getattr(args, 'checkpoint', None),
             resume=getattr(args, 'resume', None),
+            crawl=getattr(args, 'crawl', False),
+            cookies=getattr(args, 'cookies', None),
         ))
 
     elif args.command == "crawl":
