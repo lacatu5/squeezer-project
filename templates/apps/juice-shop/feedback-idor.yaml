@@ -1,7 +1,6 @@
 id: feedback-idor
 info:
   name: Feedback IDOR Vulnerability
-  severity: medium
   description: Detects IDOR on feedback endpoints
   tags:
     - idor

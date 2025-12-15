@@ -1,7 +1,6 @@
 id: generic-jwt-no-expiration
 info:
   name: JWT Missing Expiration Validation
-  severity: medium
   description: Tests if server accepts JWT without expiration claim
   tags:
     - jwt

@@ -5,7 +5,8 @@ import asyncio
 import json
 import sys
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
+from urllib.parse import urlparse
 
 from rich.console import Console
 from rich.panel import Panel
@@ -13,11 +14,17 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 
-from dast.katana_crawler import KatanaCrawler, parse_cookies_string
+from dast.crawler import KatanaCrawler, parse_cookies_string
 from dast.config import EvidenceStrength, ScanProfile, ScanReport, TargetConfig
-from dast.engine import load_templates, run_scan
+from dast.scanner import load_templates, run_scan
 from dast.utils import setup_logging
-from dast.bridge import merge_configs
+from dast.merger import merge_configs
+from dast.scanner.param_mapper import (
+    build_auto_target_config,
+    get_injectable_parameters,
+    summarize_parameters,
+)
+from dast.scanner.json_discovery import quick_discover
 
 
 console = Console()
@@ -26,6 +33,155 @@ console = Console()
 def print_banner():
     """Print application banner."""
     console.print("\n[bold cyan]DAST MVP[/bold cyan] - Template-based DAST Framework\n")
+
+
+def add_json_injection_endpoints(
+    target: TargetConfig,
+    endpoints: list,
+) -> None:
+    """Add JSON injection endpoints to the target config.
+
+    Analyzes discovered endpoints and adds known JSON injection points
+    for common REST API patterns.
+
+    Args:
+        target: TargetConfig to modify
+        endpoints: List of discovered endpoint dicts
+    """
+    from dast.utils import logger
+
+    # Extract unique endpoint paths
+    paths = set()
+    for ep in endpoints:
+        path = ep.get('url', '').strip('/')
+        if path:
+            paths.add(f"/{path}")
+
+    # Known JSON injection endpoints for common APIs
+    # Format: endpoint_variable -> (path, json_field_name)
+    json_injection_points = {
+        "xss_json_post": ("/rest/feedback", "comment"),
+        "xss_json_search": ("/rest/products/search", "q"),
+        "xss_json_comment": ("/rest/comments", "comment"),
+        "command_search": ("/rest/products/search", "q"),
+        "sqli_basket": ("/rest/basket/", "quantity"),
+        "sqli_products": ("/rest/products/", "quantity"),
+    }
+
+    # Add matching endpoints to target config
+    added_count = 0
+    for var_name, (path, field) in json_injection_points.items():
+        # Check if this path exists in discovered endpoints
+        for discovered_path in paths:
+            if discovered_path.startswith(path.rstrip('/')) or path.startswith(discovered_path.rstrip('/')):
+                # Add the JSON injection endpoint
+                # Format: /rest/feedback with JSON body {"comment": "PAYLOAD"}
+                target._endpoints_custom[var_name] = f"{path}?{field}="
+                added_count += 1
+                break
+
+    if added_count > 0:
+        logger.info(f"Added {added_count} JSON injection endpoints for testing")
+
+
+async def discover_and_add_json_endpoints(
+    target: TargetConfig,
+    endpoints: list,
+    cookies: Optional[Dict[str, str]] = None,
+) -> None:
+    """Discover JSON body fields from API endpoints.
+
+    Probes POST endpoints to discover what JSON fields they accept,
+    then adds them to the target config for vulnerability testing.
+
+    Args:
+        target: TargetConfig to modify
+        endpoints: List of discovered endpoint dicts
+        cookies: Optional cookies for authentication
+    """
+    from dast.scanner.json_discovery import quick_discover
+
+    # Build headers
+    headers = {}
+    if cookies:
+        cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
+        headers["Cookie"] = cookie_str
+
+    # Get discovered endpoint paths
+    endpoint_paths = list(set(ep.get('url', '') for ep in endpoints))
+
+    # Quick discovery based on known API patterns
+    json_fields = await quick_discover(target.base_url, endpoint_paths, headers)
+
+    # Initialize custom endpoints if needed
+    if not target.endpoints.custom:
+        target.endpoints.custom = {}
+
+    # Map discovered JSON fields to template variables
+    # Template -> (path_pattern, field_pattern) mappings
+    template_mappings = {
+        "xss_stored": [
+            ("/rest/feedback", "comment"),
+            ("/rest/feedbacks", "comment"),
+            ("/api/Feedback", "comment"),
+            ("/api/Feedbacks", "comment"),
+            ("/rest/comments", "comment"),
+            ("/api/Comments", "comment"),
+        ],
+        "xss_reflected": [("/rest/products/search", "q"), ("/api/Products/search", "q")],
+        "command_injection": [("/rest/products/search", "q"), ("/api/Products/search", "q")],
+        "sqli_post": [("/rest/basket/", "quantity"), ("/rest/products/", "quantity")],
+        "path_traversal": [("/rest/file/upload", "file")],
+        "ssrf": [("/rest/redirect", "url")],
+        "ssti": [("/rest", "input"), ("/api", "input"), ("/rest/", "name"), ("/api/", "name")],
+        "xxe": [("/rest", "data"), ("/api", "data"), ("/rest/upload", "file"), ("/api/upload", "file")],
+    }
+
+    count = 0
+    # Check each discovered endpoint/field against template mappings
+    for path, fields in json_fields.items():
+        for field in fields:
+            # Find matching template
+            for template_var, mappings in template_mappings.items():
+                for mapping_path, mapping_field in mappings:
+                    # Check if this matches the discovered endpoint
+                    if path.startswith(mapping_path.rstrip('/')) or mapping_path.startswith(path.rstrip('/')):
+                        if field == mapping_field or mapping_field == "*":
+                            # Add this endpoint with the template variable name
+                            target.endpoints.custom[template_var] = f"JSON:{path}:{field}"
+                            count += 1
+                            break
+
+    if count > 0:
+        from dast.utils import logger
+        logger.info(f"Added {count} JSON injection endpoints for testing")
+        console.print(f"[dim]  → {count} JSON injection points discovered[/dim]")
+    else:
+        # Fallback: add common JSON endpoints if discovered
+        common_endpoints = {
+            "xss_stored": "JSON:/rest/feedback:comment",
+            "xss_reflected": "JSON:/rest/products/search:q",
+            "command_injection": "JSON:/rest/products/search:q",
+        }
+        for var, spec in common_endpoints.items():
+            # Check if the path exists in discovered endpoints
+            path = spec.split(":")[1]
+            if any(path in ep.get('url', '') for ep in endpoints):
+                target.endpoints.custom[var] = spec
+                count += 1
+
+        if count > 0:
+            console.print(f"[dim]  → {count} JSON injection endpoints added (fallback)[/dim]")
+
+    # Always add SSTI and XXE endpoints for testing if API endpoints exist
+    has_api = any(ep.get('url', '').startswith('/api/') or ep.get('url', '').startswith('/rest/') for ep in endpoints)
+    if has_api:
+        # Add generic SSTI endpoint
+        target.endpoints.custom.setdefault("ssti", "JSON:/rest/products:input")
+        # Add generic XXE endpoint
+        target.endpoints.custom.setdefault("xxe", "XML:/rest/data")
+        count += 2
+        console.print(f"[dim]  → Added SSTI and XXE endpoints for testing[/dim]")
 
 
 async def scan_command(
@@ -105,24 +261,96 @@ async def scan_command(
 
         # Display crawl results
         console.print(f"[green]Found {len(report.endpoints)} endpoints[/green]")
-        console.print(f"[dim]  API: {report.summary.get('api', 0)} | Auth: {report.summary.get('auth', 0)} | Admin: {report.summary.get('admin', 0)}[/dim]\n")
+        console.print(f"[dim]  API: {report.summary.get('api', 0)} | Auth: {report.summary.get('auth', 0)} | Admin: {report.summary.get('admin', 0)}[/dim]")
+
+        # Auto-detect injectable parameters from crawled endpoints
+        from dast.scanner.param_mapper import extract_parameters_from_url
+        from dast.config import EndpointInfo
+
+        # Build EndpointInfo objects from raw endpoints for parameter analysis
+        endpoint_infos = []
+        for ep in report.endpoints:
+            url = ep.get('full_url', ep.get('url', ''))
+            if url:
+                params = extract_parameters_from_url(url, ep.get('method', 'GET'))
+                endpoint_infos.append(EndpointInfo(
+                    url=url,
+                    method=ep.get('method', 'GET'),
+                    path=urlparse(url).path,
+                    query_params=params,
+                    is_api=ep.get('type') == 'api',
+                ))
+
+        # Show parameter summary
+        if endpoint_infos:
+            param_summary = summarize_parameters(endpoint_infos)
+            if param_summary:
+                console.print("[cyan]Detected injectable parameters:[/cyan]")
+                for vuln_type, count in sorted(param_summary.items(), key=lambda x: -x[1]):
+                    console.print(f"  [dim]- {vuln_type}: {count} parameters[/dim]")
+
+                # Show injectable endpoints
+                injectable = get_injectable_parameters(endpoint_infos)
+                if injectable:
+                    console.print("\n[cyan]Endpoints with injectable parameters:[/cyan]")
+                    for path, params_list in list(injectable.items())[:5]:  # Show first 5
+                        param_names = [p['name'] for p in params_list[:3]]  # Show first 3 params
+                        types = ', '.join(set(t for p in params_list for t in p['vuln_types']))
+                        console.print(f"  [dim]{path}?{'&'.join(param_names)} → {types}[/dim]")
+                    if len(injectable) > 5:
+                        console.print(f"  [dim]... and {len(injectable) - 5} more[/dim]")
+                console.print()
 
         # Convert crawler report to TargetConfig (method on report itself)
-        crawled_config = report.to_target_config(
-            config_name="crawled_target",
-            prioritize=True,
-            exclude_static=True,
-        )
+        try:
+            crawled_config = report.to_target_config(
+                name="crawled_target",
+                prioritize=True,
+                exclude_static=True,
+            )
+        except Exception as e:
+            console.print(f"[red]Failed to generate target config: {e}[/red]")
+            return 1
+
+        # Validate endpoints exist
+        if not crawled_config.get_endpoints():
+            console.print("[yellow]No scanable endpoints found after crawling[/yellow]")
+            return 1
 
         # Merge with user config if provided
         if config:
-            base_config = TargetConfig.from_yaml(config)
-            base_config.base_url = target_url
-            target = merge_configs(base_config, crawled_config)
-            console.print("[dim]Merged with user config[/dim]\n")
+            try:
+                base_config = TargetConfig.from_yaml(config)
+                base_config.base_url = target_url
+                target = merge_configs(base_config, crawled_config)
+                console.print("[dim]Merged with user config[/dim]\n")
+            except ValueError as e:
+                console.print(f"[red]Config merge failed: {e}[/red]")
+                return 1
         else:
             target = crawled_config
             target.base_url = target_url
+
+        # Discover JSON injection points from POST endpoints
+        try:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
+            ) as progress:
+                task = progress.add_task("[cyan]Discovering JSON injection points...[/cyan]", total=None)
+
+                await discover_and_add_json_endpoints(
+                    target=target,
+                    endpoints=report.endpoints,
+                    cookies=parsed_cookies if crawl else None,
+                )
+
+                progress.update(task, completed=True)
+        except Exception as e:
+            logger.debug(f"JSON discovery failed: {e}")
+            # Continue without JSON endpoints
+            pass
     else:
         # Load or create target configuration (no crawl)
         if config:
@@ -434,33 +662,38 @@ def _print_report(report: ScanReport) -> None:
     console.print("\n[bold]Detailed Findings:[/bold]\n")
     _print_detailed_findings(report.findings)
 
-    # Summary
-    console.print("\n[bold]Summary:[/bold]")
-    console.print(f"  Critical: [red]{report.critical_count}[/red]")
-    console.print(f"  High: [red]{report.high_count}[/red]")
-    console.print(f"  Medium: [yellow]{report.medium_count}[/yellow]")
-    console.print(f"  Low: [green]{report.low_count}[/green]")
+    # Summary by OWASP Top 10 2025
+    console.print("\n[bold]Summary (by OWASP Top 10 2025):[/bold]")
+    owasp_summary = report.get_owasp_summary()
+    for category, count in owasp_summary.items():
+        if count > 0:
+            # Color code based on category priority
+            if any(x in category for x in ["A01", "A05", "A07"]):
+                color = "red"
+            elif any(x in category for x in ["A02", "A03", "A04", "A06"]):
+                color = "yellow"
+            else:
+                color = "green"
+            console.print(f"  {category}: [{color}]{count}[/{color}]")
     console.print(f"\n[dim]Duration: {report.duration_seconds:.1f}s | Templates: {report.templates_executed}[/dim]")
 
 
 def _print_detailed_findings(findings: list) -> None:
     """Print detailed findings with URLs, evidence, and remediation."""
     for i, finding in enumerate(findings, 1):
-        # Severity color
-        severity = finding.severity.value.upper()
-        if severity == "CRITICAL":
-            severity_color = "bold red"
-        elif severity == "HIGH":
-            severity_color = "red"
-        elif severity == "MEDIUM":
-            severity_color = "yellow"
+        # OWASP category color
+        owasp_category = finding.owasp_category.value
+        if any(x in owasp_category for x in ["A01", "A05", "A07"]):
+            category_color = "bold red"
+        elif any(x in owasp_category for x in ["A02", "A03", "A04", "A06"]):
+            category_color = "yellow"
         else:
-            severity_color = "green"
+            category_color = "green"
 
         # Build details
         details_text = Text()
         details_text.append(f"#{i} ", style="bold")
-        details_text.append(f"[{severity}]", style=severity_color)
+        details_text.append(f"[{owasp_category}]", style=category_color)
         details_text.append(f" {finding.vulnerability_type}\n", style="bold")
 
         details_text.append("URL: ", style="dim")
@@ -483,29 +716,27 @@ def _print_detailed_findings(findings: list) -> None:
                 if key not in ("matcher_evidence",):
                     details_text.append(f"{key}={value} ", style="cyan")
 
-        console.print(Panel(details_text, border_style=severity_color))
+        console.print(Panel(details_text, border_style=category_color))
         console.print()
 
 
 def _print_findings_table(findings: list) -> None:
     """Print a table of findings with details."""
     table = Table()
-    table.add_column("Severity", width=10)
+    table.add_column("OWASP Category", width=18)
     table.add_column("Type", width=30)
     table.add_column("Evidence", width=15)
     table.add_column("Details", width=50)
 
     for finding in findings:
-        # Severity with color
-        severity = finding.severity.value.upper()
-        if severity == "CRITICAL":
-            severity = f"[bold red]{severity}[/bold red]"
-        elif severity == "HIGH":
-            severity = f"[red]{severity}[/red]"
-        elif severity == "MEDIUM":
-            severity = f"[yellow]{severity}[/yellow]"
+        # OWASP category with color
+        owasp = finding.owasp_category.value
+        if any(x in owasp for x in ["A01", "A05", "A07"]):
+            owasp_display = f"[bold red]{owasp}[/bold red]"
+        elif any(x in owasp for x in ["A02", "A03", "A04", "A06"]):
+            owasp_display = f"[yellow]{owasp}[/yellow]"
         else:
-            severity = f"[green]{severity}[/green]"
+            owasp_display = f"[green]{owasp}[/green]"
 
         # Evidence strength
         evidence = finding.evidence_strength.value.replace("_", " ").title()
@@ -521,7 +752,7 @@ def _print_findings_table(findings: list) -> None:
         if finding.response_details:
             details = f"{details} | {finding.response_details[:30]}"
 
-        table.add_row(severity, finding.vulnerability_type[:30], evidence, details[:50])
+        table.add_row(owasp_display, finding.vulnerability_type[:30], evidence, details[:50])
 
     console.print(table)
 

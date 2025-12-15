@@ -1,7 +1,6 @@
 id: basket-idor
 info:
   name: Basket IDOR Vulnerability
-  severity: high
   description: Detects insecure direct object reference on basket endpoints
   tags:
     - idor

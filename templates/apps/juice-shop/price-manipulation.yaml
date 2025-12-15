@@ -1,7 +1,6 @@
 id: price-manipulation
 info:
   name: Price Manipulation Business Logic Flaw
-  severity: critical
   description: Detects if client-provided price is accepted without validation
   tags:
     - business-logic

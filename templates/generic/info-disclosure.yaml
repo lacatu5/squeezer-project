@@ -1,7 +1,6 @@
 id: generic-info-disclosure
 info:
   name: Information Disclosure - 404/500 Errors
-  severity: low
   description: Tests for verbose error messages that leak sensitive information
   tags:
     - information-disclosure

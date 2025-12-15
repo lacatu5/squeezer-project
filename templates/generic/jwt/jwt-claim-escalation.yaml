@@ -1,7 +1,6 @@
 id: generic-jwt-claim-escalation
 info:
   name: JWT Claim Manipulation / Privilege Escalation
-  severity: critical
   description: Tests for JWT claim manipulation to escalate privileges
   tags:
     - jwt

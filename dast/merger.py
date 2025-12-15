@@ -1,7 +1,7 @@
-"""Bridge utilities for combining crawler and user configurations.
+"""Config merger utilities for combining crawler and user configurations.
 
-The crawler now directly provides TargetConfig via SimpleCrawlerReport.to_target_config().
-This module only handles merging configs when both user config and crawled config exist.
+The crawler provides TargetConfig via SimpleCrawlerReport.to_target_config().
+This module handles merging configs when both user config and crawled config exist.
 """
 
 from dast.config import (
@@ -30,7 +30,17 @@ def merge_configs(
 
     Returns:
         Merged TargetConfig
+
+    Raises:
+        ValueError: If base_urls don't match between configs
     """
+    # Validate that base_urls match
+    if base_config.base_url != crawled_config.base_url:
+        raise ValueError(
+            f"Cannot merge configs with different base URLs: "
+            f"{base_config.base_url} != {crawled_config.base_url}"
+        )
+
     # Merge endpoints
     merged_custom = {}
 

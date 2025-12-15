@@ -1,7 +1,6 @@
 id: excessive-quantity
 info:
   name: Excessive Quantity Business Logic Flaw
-  severity: medium
   description: Detects if server accepts unrealistically large quantity values
   tags:
     - business-logic

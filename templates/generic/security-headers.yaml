@@ -1,7 +1,6 @@
 id: generic-security-headers
 info:
   name: Missing Security Headers
-  severity: low
   description: Tests for presence of security headers
   tags:
     - security-headers

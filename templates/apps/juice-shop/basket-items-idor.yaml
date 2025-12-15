@@ -1,7 +1,6 @@
 id: basket-items-idor
 info:
   name: Basket Items IDOR Vulnerability
-  severity: high
   description: Detects IDOR on basket item enumeration
   tags:
     - idor

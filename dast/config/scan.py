@@ -1,335 +1,20 @@
-"""Configuration schemas for DAST scanning."""
+"""Scan result and crawler data models."""
 
 import json
-from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
+from urllib.parse import urlparse
 
 import yaml
 from pydantic import BaseModel, Field
 
-
-class SeverityLevel(str, Enum):
-    """Severity levels for vulnerabilities."""
-
-    CRITICAL = "critical"
-    HIGH = "high"
-    MEDIUM = "medium"
-    LOW = "low"
-    INFO = "info"
-
-
-class ScanProfile(str, Enum):
-    """Scan intensity profiles - controls which detection tiers run."""
-
-    PASSIVE = "passive"
-    """Fast, safe techniques only - no observable side effects."""
-
-    STANDARD = "standard"
-    """Passive + active techniques - safe for most production systems."""
-
-    THOROUGH = "thorough"
-    """All techniques including time-based - may cause delays."""
-
-    AGGRESSIVE = "aggressive"
-    """Maximum detection - includes fuzzing and multiple request variations."""
-
-
-class DetectionTier(str, Enum):
-    """Detection tier levels - ordered by invasiveness."""
-
-    PASSIVE = "passive"
-    """Error-based, pattern matching - no observable impact."""
-
-    ACTIVE = "active"
-    """Boolean-blind, diff-based - sends crafted payloads."""
-
-    AGGRESSIVE = "aggressive"
-    """Time-based, heavy delays - may cause temporary slowdown."""
-
-
-class EvidenceStrength(str, Enum):
-    """Strength of evidence for a vulnerability finding.
-
-    Reflects how directly the vulnerability was observed, not a statistical confidence.
-    """
-
-    DIRECT = "direct_observation"
-    """We saw the vulnerability happen - server accepted malicious input."""
-
-    INFERENCE = "inference"
-    """Strong indirect evidence - behavior consistent with vulnerability."""
-
-    HEURISTIC = "heuristic"
-    """Pattern suggests possible vulnerability - requires manual verification."""
-
-
-class AuthType(str, Enum):
-    """Authentication types."""
-
-    NONE = "none"
-    BASIC = "basic"
-    BEARER = "bearer"
-    FORM = "form"
-
-
-# ==== Target Configuration ====
-
-
-class ExtractorConfig(BaseModel):
-    """Data extractor configuration."""
-
-    name: str
-    location: str = "body"  # body, header
-    selector: Optional[str] = None
-    regex: Optional[str] = None
-    group: int = 1
-
-
-class LoginConfig(BaseModel):
-    """Login configuration for form auth."""
-
-    url: str
-    method: str = "POST"
-    payload: Dict[str, Any] = Field(default_factory=dict)
-    headers: Dict[str, str] = Field(default_factory=dict)
-    extract: List[ExtractorConfig] = Field(default_factory=list)
-    apply: Dict[str, Any] = Field(default_factory=dict)
-
-
-class AuthConfig(BaseModel):
-    """Authentication configuration."""
-
-    type: AuthType = AuthType.NONE
-    login: Optional[LoginConfig] = None
-    username: Optional[str] = None
-    password: Optional[str] = None
-    token: Optional[str] = None
-    headers: Dict[str, str] = Field(default_factory=dict)
-
-
-class EndpointsConfig(BaseModel):
-    """Endpoint mappings."""
-
-    base: str = ""
-    custom: Optional[Dict[str, str]] = None
-
-    def get_custom(self) -> Dict[str, str]:
-        """Get custom endpoints dict, defaulting to empty dict."""
-        return self.custom or {}
-
-
-class TargetConfig(BaseModel):
-    """Target application configuration."""
-
-    name: str
-    base_url: str
-    authentication: AuthConfig = Field(default_factory=AuthConfig)
-    endpoints: EndpointsConfig = Field(default_factory=EndpointsConfig)
-    variables: Optional[Dict[str, Any]] = None
-
-    def get_variables(self) -> Dict[str, Any]:
-        """Get variables dict, defaulting to empty dict."""
-        return self.variables or {}
-
-    def get_endpoints(self) -> Dict[str, str]:
-        """Get endpoints dict, defaulting to empty dict."""
-        return self.endpoints.get_custom()
-
-    # Scanner settings
-    timeout: float = 30.0
-    parallel: int = 5
-    request_delay: float = 0.0  # Delay between requests in seconds
-    boolean_diff_threshold: float = 0.1  # Threshold for boolean-blind detection (10%)
-    time_samples: int = 1  # Number of samples for time-based detection (1-3 recommended)
-
-    @classmethod
-    def from_yaml(cls, path: Union[str, Path]) -> "TargetConfig":
-        """Load configuration from YAML file."""
-        path = Path(path)
-        with open(path) as f:
-            data = yaml.safe_load(f) or {}
-        return cls(**data)
-
-
-# ==== Template Configuration ====
-
-
-class MatcherConfig(BaseModel):
-    """Matcher configuration for response validation."""
-
-    type: str  # status, word, regex, json
-    condition: str = "and"  # and, or, equals, contains, etc.
-    negative: bool = False
-
-    # Status matcher
-    status: Optional[Union[int, List[int]]] = Field(default=None, alias="values")
-
-    # Word matcher
-    words: Optional[List[str]] = None
-    part: str = "body"  # body, header, all
-    case_sensitive: bool = False
-
-    # Regex matcher
-    regex: Optional[List[str]] = None
-
-    # JSON matcher
-    selector: Optional[str] = None
-    value: Optional[Any] = None
-
-    class Config:
-        populate_by_name = True
-
-
-class RequestConfig(BaseModel):
-    """HTTP request configuration."""
-
-    name: Optional[str] = None
-    method: str = "GET"
-    path: str = "/"
-    headers: Dict[str, str] = Field(default_factory=dict)
-    body: Optional[str] = None
-    json_body: Optional[Dict[str, Any]] = Field(default=None, alias="json")
-    cookies: Dict[str, str] = Field(default_factory=dict)
-
-    matchers: List[MatcherConfig] = Field(default_factory=list)
-    extractors: List[ExtractorConfig] = Field(default_factory=list)
-
-    # Metadata for findings
-    on_match: Optional[Dict[str, Any]] = None
-
-    model_config = {"populate_by_name": True}
-
-
-class TemplateInfo(BaseModel):
-    """Template metadata."""
-
-    name: str
-    author: Optional[str] = None
-    severity: SeverityLevel = SeverityLevel.MEDIUM
-    description: Optional[str] = None
-    tags: List[str] = Field(default_factory=list)
-
-
-class Template(BaseModel):
-    """Vulnerability scan template.
-
-    Supports two modes:
-    1. Generic mode: Uses 'generic' field with payloads for cross-app testing
-    2. Direct mode: Uses 'requests' field for specific test cases
-    """
-
-    id: str
-    info: TemplateInfo
-    variables: Dict[str, Any] = Field(default_factory=dict)
-    requests: List[RequestConfig] = Field(default_factory=list)
-
-    # Generic template fields
-    generic: Optional["GenericTemplate"] = None
-
-    @classmethod
-    def from_yaml(cls, path: Union[str, Path]) -> "Template":
-        """Load template from YAML file."""
-        path = Path(path)
-        with open(path) as f:
-            data = yaml.safe_load(f)
-        if not data:
-            raise ValueError(f"Empty template: {path}")
-        return cls(**data)
-
-
-class DetectionTierConfig(BaseModel):
-    """Configuration for a single detection tier.
-
-    Each tier represents a different detection technique with increasing invasiveness.
-    """
-
-    tier: Union[DetectionTier, str]
-    """The tier level - passive, active, or aggressive."""
-
-    # Detection type for special techniques
-    detection_type: Optional[str] = None
-    """Type: error_based, boolean_blind, time_blind, union_based."""
-
-    # Baseline payload for diff-based detection (boolean blind)
-    baseline_payload: Optional[str] = None
-    """Normal payload to compare against (e.g., "test")."""
-
-    # True/false payloads for boolean detection
-    true_payload: Optional[str] = None
-    """Payload that should make condition TRUE (e.g., "' OR '1'='1")."""
-
-    false_payload: Optional[str] = None
-    """Payload that should make condition FALSE (e.g., "' AND '1'='2")."""
-
-    # Time threshold for time-based detection
-    threshold_ms: int = 5000
-    """Response time threshold in milliseconds for time-based detection."""
-
-    # Matchers for this tier
-    matchers: List[MatcherConfig] = Field(default_factory=list)
-    """Matchers to validate responses for this tier."""
-
-    def get_tier(self) -> DetectionTier:
-        """Get tier as DetectionTier enum."""
-        if isinstance(self.tier, str):
-            return DetectionTier(self.tier)
-        return self.tier
-
-    class Config:
-        use_enum_values = True
-
-
-class GenericTemplate(BaseModel):
-    """Generic template configuration for cross-application vulnerability testing.
-
-    Allows defining payload variations that work across different applications.
-    The endpoint and parameters are resolved from the target config.
-
-    Supports detection tiers for layered vulnerability scanning.
-    """
-
-    # Endpoint variable name (resolved from target config's endpoints.custom)
-    endpoint: str
-
-    # HTTP method
-    method: str = "GET"
-
-    # Parameter name to inject payloads into
-    parameter: Optional[str] = None
-
-    # Request body template for POST requests (supports {{payload}} placeholder)
-    body_template: Optional[str] = None
-
-    # Content type for POST requests
-    content_type: str = "application/x-www-form-urlencoded"
-
-    # List of payload variations to test
-    payloads: List[Union[str, "PayloadConfig"]] = Field(default_factory=list)
-
-    # Load payloads from external file (one per line, # comments ignored)
-    payloads_file: Optional[str] = None
-
-    # Headers (beyond auth headers)
-    headers: Dict[str, str] = Field(default_factory=dict)
-
-    # Matchers to validate responses (legacy - use detection_tiers instead)
-    matchers: List[MatcherConfig] = Field(default_factory=list)
-
-    # NEW: Detection tiers for layered scanning
-    detection_tiers: List[DetectionTierConfig] = Field(default_factory=list)
-    """Detection tiers for passive/active/aggressive scanning."""
-
-
-class PayloadConfig(BaseModel):
-    """A single payload configuration."""
-
-    name: str
-    value: str
-    description: Optional[str] = None
-
-
-# ==== Scan Results ====
+from dast.config.common import (
+    AuthType,
+    EvidenceStrength,
+    OWASPCategory,
+    SeverityLevel,
+)
+from dast.config.target import AuthConfig, EndpointsConfig, TargetConfig
 
 
 class Finding(BaseModel):
@@ -337,7 +22,9 @@ class Finding(BaseModel):
 
     template_id: str
     vulnerability_type: str
-    severity: SeverityLevel
+    severity: SeverityLevel  # Legacy severity for backward compatibility
+    owasp_category: OWASPCategory = OWASPCategory.A02_SECURITY_MISCONFIGURATION
+    """OWASP Top 10 2025 category for this finding."""
     evidence_strength: EvidenceStrength
     url: str
     evidence: Dict[str, Any] = Field(default_factory=dict)
@@ -345,9 +32,6 @@ class Finding(BaseModel):
     remediation: str = ""
     request_details: Optional[str] = None
     response_details: Optional[str] = None
-
-
-# ==== Crawler Data Collection ====
 
 
 class ParameterInfo(BaseModel):
@@ -379,7 +63,7 @@ class EndpointInfo(BaseModel):
     # Additional metadata
     forms: List[Dict[str, Any]] = Field(default_factory=list)  # HTML forms found
     links: List[str] = Field(default_factory=list)  # Outbound links
-    api_patterns: List[str] = Field(default_factory=list)  # Detected API patterns (e.g., /api/, /rest/)
+    api_patterns: List[str] = Field(default_factory=list)  # Detected API patterns
     is_api: bool = False  # Whether this looks like an API endpoint
     requires_auth: bool = False  # Whether auth appears required
 
@@ -435,10 +119,10 @@ class CrawlerReport(BaseModel):
     statistics: Union[CrawlerStatistics, Dict[str, Any]] = Field(default_factory=dict)
 
     # Additional collected data (for agent crawler)
-    forms: List[Dict[str, Any]] = Field(default_factory=list)  # All discovered forms
-    auth_data: Dict[str, Any] = Field(default_factory=dict)  # Auth flow data
-    storage_data: Dict[str, Any] = Field(default_factory=dict)  # Local/session storage
-    discovered_cookies: Dict[str, str] = Field(default_factory=dict)  # Cookies
+    forms: List[Dict[str, Any]] = Field(default_factory=list)
+    auth_data: Dict[str, Any] = Field(default_factory=dict)
+    storage_data: Dict[str, Any] = Field(default_factory=dict)
+    discovered_cookies: Dict[str, str] = Field(default_factory=dict)
 
     def get_endpoints_by_method(self, method: str) -> List[Union[EndpointInfo, Dict[str, Any]]]:
         """Get all endpoints with a specific HTTP method."""
@@ -458,7 +142,6 @@ class CrawlerReport(BaseModel):
 
     def get_forms(self) -> List[Dict[str, Any]]:
         """Get all discovered forms across all endpoints."""
-        # Return the forms field if populated
         if self.forms:
             return self.forms
 
@@ -556,6 +239,7 @@ class ScanReport(BaseModel):
     checkpoint_file: Optional[str] = None
     completed_templates: List[str] = Field(default_factory=list)
 
+    # Legacy severity counts (for backward compatibility)
     @property
     def critical_count(self) -> int:
         return sum(1 for f in self.findings if f.severity == SeverityLevel.CRITICAL)
@@ -571,6 +255,62 @@ class ScanReport(BaseModel):
     @property
     def low_count(self) -> int:
         return sum(1 for f in self.findings if f.severity == SeverityLevel.LOW)
+
+    # OWASP Top 10 2025 category counts
+    @property
+    def a01_broken_access_control_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A01_BROKEN_ACCESS_CONTROL)
+
+    @property
+    def a02_security_misconfiguration_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A02_SECURITY_MISCONFIGURATION)
+
+    @property
+    def a03_software_supply_chain_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A03_SOFTWARE_SUPPLY_CHAIN)
+
+    @property
+    def a04_cryptographic_failures_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A04_CRYPTOGRAPHIC_FAILURES)
+
+    @property
+    def a05_injection_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A05_INJECTION)
+
+    @property
+    def a06_insecure_design_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A06_INSECURE_DESIGN)
+
+    @property
+    def a07_authentication_failures_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A07_AUTHENTICATION_FAILURES)
+
+    @property
+    def a08_integrity_failures_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A08_INTEGRITY_FAILURES)
+
+    @property
+    def a09_logging_failures_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A09_LOGGING_FAILURES)
+
+    @property
+    def a10_exception_conditions_count(self) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A10_EXCEPTION_CONDITIONS)
+
+    def get_owasp_summary(self) -> Dict[str, int]:
+        """Get a summary of findings grouped by OWASP Top 10 2025 categories."""
+        return {
+            "A01:2025 - Broken Access Control": self.a01_broken_access_control_count,
+            "A02:2025 - Security Misconfiguration": self.a02_security_misconfiguration_count,
+            "A03:2025 - Software Supply Chain Failures": self.a03_software_supply_chain_count,
+            "A04:2025 - Cryptographic Failures": self.a04_cryptographic_failures_count,
+            "A05:2025 - Injection": self.a05_injection_count,
+            "A06:2025 - Insecure Design": self.a06_insecure_design_count,
+            "A07:2025 - Authentication Failures": self.a07_authentication_failures_count,
+            "A08:2025 - Software or Data Integrity Failures": self.a08_integrity_failures_count,
+            "A09:2025 - Security Logging and Alerting Failures": self.a09_logging_failures_count,
+            "A10:2025 - Mishandling of Exceptional Conditions": self.a10_exception_conditions_count,
+        }
 
     def add_finding(self, finding: Finding) -> None:
         self.findings.append(finding)

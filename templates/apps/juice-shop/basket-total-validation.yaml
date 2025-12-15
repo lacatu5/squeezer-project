@@ -1,7 +1,6 @@
 id: basket-total-validation
 info:
   name: Basket Total Validation Flaw
-  severity: high
   description: Detects if basket total is properly validated against item prices
   tags:
     - business-logic

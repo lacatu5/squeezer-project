@@ -27,7 +27,7 @@ from dast.config import (
     ScanReport,
 )
 
-from dast.engine import (
+from dast.scanner import (
     ExecutionContext,
     TemplateEngine,
     load_templates,
@@ -65,14 +65,11 @@ from dast.matchers import (
 )
 
 # Specialized modules
-from dast.sessions import (
+from dast.auth import (
     SessionContext,
     ResourceIdentifier,
     SessionManager,
     create_idor_scanner,
-)
-
-from dast.jwt import (
     JWTForge,
     JWTVulnerabilityScanner,
     parse_jwt_from_auth_header,

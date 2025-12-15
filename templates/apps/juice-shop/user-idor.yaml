@@ -1,7 +1,6 @@
 id: user-idor
 info:
   name: User Profile IDOR Vulnerability
-  severity: high
   description: Detects IDOR on user profile endpoints
   tags:
     - idor

@@ -1,7 +1,6 @@
 id: negative-quantity
 info:
   name: Negative Quantity Business Logic Flaw
-  severity: high
   description: Detects if server accepts negative quantity values in basket items
   tags:
     - business-logic

@@ -1,7 +1,6 @@
 id: mass-assignment
 info:
   name: Mass Assignment Role Escalation
-  severity: critical
   description: Detects if user registration accepts role parameter for privilege escalation
   tags:
     - business-logic

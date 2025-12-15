@@ -1,7 +1,6 @@
 id: generic-path-traversal
 info:
   name: Path Traversal
-  severity: high
   description: Generic path traversal / local file inclusion testing
   tags:
     - path-traversal

@@ -1,7 +1,6 @@
 id: generic-jwt-none-algorithm
 info:
   name: JWT None Algorithm Confusion
-  severity: critical
   description: Tests for JWT algorithm confusion vulnerability (none algorithm)
   tags:
     - jwt

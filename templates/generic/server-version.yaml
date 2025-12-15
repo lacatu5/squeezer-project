@@ -1,7 +1,6 @@
 id: generic-server-version
 info:
   name: Server Version Disclosure
-  severity: low
   description: Tests for server version disclosure in headers
   tags:
     - information-disclosure

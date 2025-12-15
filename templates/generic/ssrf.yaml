@@ -1,7 +1,6 @@
 id: generic-ssrf
 info:
   name: Server-Side Request Forgery
-  severity: high
   description: Generic SSRF testing
   tags:
     - ssrf

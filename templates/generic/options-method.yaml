@@ -1,7 +1,6 @@
 id: generic-options-method
 info:
   name: HTTP Options Method Enabled
-  severity: low
   description: Tests OPTIONS method for information disclosure
   tags:
     - information-disclosure

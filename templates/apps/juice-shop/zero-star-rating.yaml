@@ -1,7 +1,6 @@
 id: zero-star-rating
 info:
   name: Zero Star Rating Business Logic Flaw
-  severity: low
   description: Detects if server accepts zero as a valid rating value
   tags:
     - business-logic

