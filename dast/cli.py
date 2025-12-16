@@ -394,6 +394,24 @@ async def scan_command(
         console.print("[red]No templates to execute[/red]")
         return 1
 
+    # Smart endpoint mapping: auto-map crawled endpoints to template variables
+    if crawl and endpoint_infos:
+        from dast.scanner.param_mapper import build_auto_target_config
+
+        auto_endpoints = build_auto_target_config(
+            endpoints=endpoint_infos,
+            templates=templates,
+            base_url=target_url,
+        )
+
+        # Add auto-mapped endpoints to target config
+        for var_name, path in auto_endpoints.items():
+            if var_name not in target.endpoints.custom:
+                target.endpoints.custom[var_name] = path
+
+        if auto_endpoints:
+            console.print(f"[dim]Auto-mapped {len(auto_endpoints)} endpoint variables[/dim]")
+
     # Run scan
     if crawl:
         console.print("[cyan]Phase 2: Scanning for vulnerabilities[/cyan]\n")

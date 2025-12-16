@@ -2,6 +2,7 @@ id: generic-sqli-get
 info:
   name: SQL Injection (GET) - Multi-Tier Detection
   description: SQL injection with error-based, boolean-blind, and time-based detection
+  owasp_category: A05:2025
   tags:
     - sqli
     - injection

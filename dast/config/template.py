@@ -64,12 +64,14 @@ class TemplateInfo(BaseModel):
     name: str
     author: Optional[str] = None
     severity: Union[SeverityLevel, OWASPCategory, str] = SeverityLevel.MEDIUM
-    """Severity level or OWASP Top 10 2025 category.
+    """Legacy severity level (deprecated, use owasp_category instead)."""
+    owasp_category: Optional[Union[OWASPCategory, str]] = None
+    """OWASP Top 10 2025 category.
 
     Can be:
-    - Legacy severity: critical, high, medium, low, info
-    - OWASP 2025 category: A01:2025, A02:2025, etc.
-    - Full category name: A01_BROKEN_ACCESS_CONTROL, etc.
+    - Short form: A01:2025, A02:2025, etc.
+    - Full enum name: A01_BROKEN_ACCESS_CONTROL, etc.
+    - If not specified, derived from tags.
     """
     description: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
@@ -77,54 +79,108 @@ class TemplateInfo(BaseModel):
     def get_owasp_category(self) -> OWASPCategory:
         """Get the OWASP Top 10 2025 category for this template.
 
-        Maps legacy severity levels and returns the appropriate OWASP category.
+        1. Uses explicit owasp_category field if specified
+        2. Falls back to tag-based inference
+        3. Final fallback to severity-based mapping
         """
-        # If already an OWASPCategory, return it
+        # 1. Check explicit owasp_category field first
+        if self.owasp_category is not None:
+            if isinstance(self.owasp_category, OWASPCategory):
+                return self.owasp_category
+            # Parse string value
+            category_str = str(self.owasp_category).strip()
+            # Handle short form (A01:2025)
+            if category_str.startswith("A0") and ":2025" in category_str:
+                for category in OWASPCategory:
+                    if category.value == category_str:
+                        return category
+            # Handle enum name form (A01_BROKEN_ACCESS_CONTROL)
+            for category in OWASPCategory:
+                if category.name == category_str or category.name.replace("_", "") == category_str.replace("_", "").replace(":", "").upper():
+                    return category
+
+        # 2. Check legacy severity field for OWASP value (backward compatibility)
         if isinstance(self.severity, OWASPCategory):
             return self.severity
 
-        # If it's a string, try to parse it
         severity_str = str(self.severity)
-
-        # Check if it's already an OWASP category format (A01:2025, etc.)
         if severity_str.startswith("A0") and ":2025" in severity_str:
             for category in OWASPCategory:
                 if category.value == severity_str:
                     return category
 
-        # Map legacy severity strings to OWASP categories based on vulnerability type
-        # This is a default mapping; templates should specify owasp_category directly
-        if severity_str.lower() in ("critical", "high"):
-            # Default critical/high to A05 (Injection) for most exploit-based vulns
-            # But check tags for better mapping
-            tags_lower = [t.lower() for t in self.tags]
-            if any(tag in tags_lower for tag in ["access", "idor", "privilege", "authz"]):
-                return OWASPCategory.A01_BROKEN_ACCESS_CONTROL
-            if any(tag in tags_lower for tag in ["auth", "jwt", "session", "login"]):
-                return OWASPCategory.A07_AUTHENTICATION_FAILURES
-            if any(tag in tags_lower for tag in ["crypt", "crypto", "hash"]):
-                return OWASPCategory.A04_CRYPTOGRAPHIC_FAILURES
-            if any(tag in tags_lower for tag in ["supply", "dependency", "component"]):
-                return OWASPCategory.A03_SOFTWARE_SUPPLY_CHAIN
+        # 3. Tag-based inference (fallback)
+        tags_lower = [t.lower() for t in self.tags]
+
+        # A01: Broken Access Control
+        if any(tag in tags_lower for tag in [
+            "access", "idor", "privilege", "authz", "authorization",
+            "bypass", "escalation", "admin", "race", "directory"
+        ]):
+            return OWASPCategory.A01_BROKEN_ACCESS_CONTROL
+
+        # A05: Injection (most critical)
+        if any(tag in tags_lower for tag in [
+            "sqli", "sql", "injection", "nosql", "mongo", "ldap",
+            "xss", "ssti", "template", "xxe", "command", "rce"
+        ]):
             return OWASPCategory.A05_INJECTION
 
-        elif severity_str.lower() == "medium":
-            # Medium severity often maps to misconfiguration or design issues
-            tags_lower = [t.lower() for t in self.tags]
-            if any(tag in tags_lower for tag in ["config", "header", "misconfig"]):
-                return OWASPCategory.A02_SECURITY_MISCONFIGURATION
-            if any(tag in tags_lower for tag in ["design", "architecture"]):
-                return OWASPCategory.A06_INSECURE_DESIGN
+        # A07: Authentication Failures
+        if any(tag in tags_lower for tag in [
+            "auth", "jwt", "session", "login", "credential",
+            "password", "token", "csrf", "brute"
+        ]):
+            return OWASPCategory.A07_AUTHENTICATION_FAILURES
+
+        # A04: Cryptographic Failures
+        if any(tag in tags_lower for tag in [
+            "crypt", "crypto", "hash", "encryption", "tls", "ssl",
+            "certificate", "key", "exposure", "sensitive"
+        ]):
+            return OWASPCategory.A04_CRYPTOGRAPHIC_FAILURES
+
+        # A02: Security Misconfiguration
+        if any(tag in tags_lower for tag in [
+            "config", "header", "misconfig", "default", "debug",
+            "stack", "disclosure", "info", "version", "fingerprint"
+        ]):
             return OWASPCategory.A02_SECURITY_MISCONFIGURATION
 
-        elif severity_str.lower() == "low":
-            # Low severity often maps to error handling or logging
-            tags_lower = [t.lower() for t in self.tags]
-            if any(tag in tags_lower for tag in ["log", "monitor", "audit"]):
-                return OWASPCategory.A09_LOGGING_FAILURES
+        # A08: Integrity Failures
+        if any(tag in tags_lower for tag in [
+            "integrity", "supply", "dependency", "component", "ssrf",
+            "redirect", "open", "pollution", "prototype"
+        ]):
+            return OWASPCategory.A08_INTEGRITY_FAILURES
+
+        # A06: Insecure Design
+        if any(tag in tags_lower for tag in [
+            "design", "architecture", "mass", "limit", "rate",
+            "hpp", "parameter"
+        ]):
+            return OWASPCategory.A06_INSECURE_DESIGN
+
+        # A10: Exception Conditions
+        if any(tag in tags_lower for tag in [
+            "error", "exception", "handling", "debug", "stack"
+        ]):
             return OWASPCategory.A10_EXCEPTION_CONDITIONS
 
-        else:  # info
+        # A09: Logging Failures (default for info disclosure type issues)
+        if any(tag in tags_lower for tag in [
+            "log", "monitor", "audit", "detection"
+        ]):
+            return OWASPCategory.A09_LOGGING_FAILURES
+
+        # 4. Final fallback: Use severity-based mapping
+        if severity_str.lower() in ("critical", "high"):
+            return OWASPCategory.A05_INJECTION
+        elif severity_str.lower() == "medium":
+            return OWASPCategory.A02_SECURITY_MISCONFIGURATION
+        elif severity_str.lower() == "low":
+            return OWASPCategory.A10_EXCEPTION_CONDITIONS
+        else:  # info or unknown
             return OWASPCategory.A09_LOGGING_FAILURES
 
 

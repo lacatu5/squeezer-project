@@ -239,11 +239,25 @@ def build_auto_target_config(
     template_to_var = {
         "generic-sqli-get": "sqli",
         "generic-sqli-post-json": "sqli_post",
+        "generic-sqli-union": "search_endpoint",
         "generic-xss-reflected": "xss_reflected",
         "generic-xss-stored": "xss_stored",
         "generic-command-injection": "command_injection",
         "generic-path-traversal": "path_traversal",
         "generic-ssrf": "ssrf",
+        "generic-nosql-mongo": "nosql_injection",
+        "generic-prototype-pollution": "prototype_endpoint",
+        "generic-http-parameter-pollution": "hpp_endpoint",
+        "generic-login-sqli-bypass": "login_endpoint",
+        "generic-idor": "user_endpoint",
+        "generic-open-redirect": "redirect_endpoint",
+    }
+
+    # Fallback endpoint mappings for JWT tests (using common API patterns)
+    jwt_fallbacks = {
+        "admin_endpoint": "/api/Challenges",
+        "protected_endpoint": "/rest/basket/1",
+        "jwt_endpoint": "/rest/user/login",
     }
 
     for template_id, targets in mappings.items():
@@ -265,6 +279,48 @@ def build_auto_target_config(
                         auto_endpoints[var_name] = f"{best['path']}?{best['parameter']}="
                 else:
                     auto_endpoints[var_name] = best["path"]
+
+    # Add fallback endpoints for templates that need specific endpoints
+    auto_endpoints.update(jwt_fallbacks)
+
+    # Add smart fallbacks based on discovered endpoints
+    endpoint_paths = {e.path for e in endpoints if e.path}
+
+    # Map login-like endpoints
+    login_paths = [p for p in endpoint_paths if "login" in p.lower() or "auth" in p.lower()]
+    if login_paths and "login_endpoint" not in auto_endpoints:
+        auto_endpoints["login_endpoint"] = login_paths[0]
+
+    # Map user/account endpoints
+    user_paths = [p for p in endpoint_paths if "user" in p.lower() or "account" in p.lower() or "profile" in p.lower()]
+    if user_paths and "user_endpoint" not in auto_endpoints:
+        auto_endpoints["user_endpoint"] = user_paths[0]
+
+    # Map admin endpoints
+    admin_paths = [p for p in endpoint_paths if "admin" in p.lower() or "challenge" in p.lower()]
+    if admin_paths and "admin_endpoint" not in auto_endpoints:
+        auto_endpoints["admin_endpoint"] = admin_paths[0]
+
+    # Map search endpoints
+    search_paths = [p for p in endpoint_paths if "search" in p.lower() or "product" in p.lower()]
+    if search_paths and "search_endpoint" not in auto_endpoints:
+        auto_endpoints["search_endpoint"] = search_paths[0]
+
+    # Map feedback/comment endpoints for XSS
+    feedback_paths = [p for p in endpoint_paths if "feedback" in p.lower() or "comment" in p.lower()]
+    if feedback_paths and "xss_stored" not in auto_endpoints:
+        # Use as stored XSS target
+        auto_endpoints["xss_stored"] = f"JSON:{feedback_paths[0]}:comment"
+
+    # Map file/ftp endpoints for path traversal
+    file_paths = [p for p in endpoint_paths if "ftp" in p.lower() or "file" in p.lower() or "download" in p.lower()]
+    if file_paths and "path_traversal" not in auto_endpoints:
+        auto_endpoints["path_traversal"] = file_paths[0]
+
+    # Map redirect endpoints
+    redirect_paths = [p for p in endpoint_paths if "redirect" in p.lower()]
+    if redirect_paths and "redirect_endpoint" not in auto_endpoints:
+        auto_endpoints["redirect_endpoint"] = redirect_paths[0]
 
     return auto_endpoints
 
