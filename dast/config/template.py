@@ -13,7 +13,7 @@ from dast.config.target import ExtractorConfig
 class MatcherConfig(BaseModel):
     """Matcher configuration for response validation."""
 
-    type: str  # status, word, regex, json
+    type: str  # status, word, regex, json, semantic, dsl, diff, time
     condition: str = "and"  # and, or, equals, contains, etc.
     negative: bool = False
 
@@ -32,8 +32,25 @@ class MatcherConfig(BaseModel):
     selector: Optional[str] = None
     value: Optional[Any] = None
 
+    # DSL matcher
+    dsl: Optional[str] = None
+    expression: Optional[str] = None
+
+    # Semantic matcher (uses selector, condition, value)
+    expected_type: Optional[str] = None
+
+    # Diff matcher
+    base_response: Optional[str] = None
+    diff_condition: str = "different"  # different, same, subset
+
+    # Time matcher
+    threshold_ms: int = 1000
+    threshold_sec: Optional[int] = None
+    diff_threshold_ms: Optional[int] = None
+
     class Config:
         populate_by_name = True
+        extra = "allow"  # Allow additional fields for custom matchers
 
 
 class RequestConfig(BaseModel):
@@ -48,6 +65,9 @@ class RequestConfig(BaseModel):
     cookies: Dict[str, str] = Field(default_factory=dict)
 
     matchers: List[MatcherConfig] = Field(default_factory=list)
+    # Global condition for combining all matchers: and/or
+    # If set, overrides individual matcher conditions for the overall evaluation
+    matchers_condition: str = Field(default="and", description="Global condition for all matchers: and|or")
 
     # Extractors for data extraction from responses
     extractors: List[ExtractorConfig] = Field(default_factory=list, exclude=True)
@@ -242,6 +262,9 @@ class DetectionTierConfig(BaseModel):
     # Matchers for this tier
     matchers: List[MatcherConfig] = Field(default_factory=list)
     """Matchers to validate responses for this tier."""
+
+    # Global condition for combining all matchers in this tier
+    matchers_condition: str = Field(default="and", description="Global condition for all matchers: and|or")
 
     def get_tier(self) -> DetectionTier:
         """Get tier as DetectionTier enum."""

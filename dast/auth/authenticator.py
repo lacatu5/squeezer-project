@@ -84,9 +84,26 @@ class Authenticator:
         if not token:
             return AuthContext(authenticated=False, error="Token required for Bearer auth")
 
+        # Build headers with Bearer token AND any additional headers (cookies, etc)
+        headers = {"Authorization": f"Bearer {token}"}
+        if config.headers:
+            headers.update(config.headers)
+
+        # Extract cookies from headers if present
+        cookies = {}
+        if "Cookie" in headers:
+            cookie_str = headers.pop("Cookie")
+            # Parse cookie string (format: "key1=val1; key2=val2")
+            for pair in cookie_str.split(";"):
+                pair = pair.strip()
+                if "=" in pair:
+                    k, v = pair.split("=", 1)
+                    cookies[k.strip()] = v.strip()
+
         return AuthContext(
             authenticated=True,
-            headers={"Authorization": f"Bearer {token}"},
+            headers=headers,
+            cookies=cookies,
         )
 
     async def _auth_form(self, config: AuthConfig) -> AuthContext:

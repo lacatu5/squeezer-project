@@ -1,7 +1,8 @@
 """Request execution logic for DAST scanning."""
 
+import asyncio
 import json
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 
@@ -10,6 +11,55 @@ from dast.extractors import create_extractor
 from dast.matchers import MatchResult, create_matcher, evaluate_matchers
 from dast.scanner.context import ExecutionContext
 from dast.utils import logger
+
+
+async def _execute_request_with_retry(
+    method: str,
+    path: str,
+    kwargs: Dict[str, Any],
+    get_client_fn,
+    max_retries: int = 3,
+) -> Tuple[httpx.Response, bool]:
+    """Execute a request with retry for consistency checking.
+
+    Args:
+        method: HTTP method
+        path: Request path
+        kwargs: Request kwargs (headers, body, cookies, etc.)
+        get_client_fn: Function to get HTTP client
+        max_retries: Maximum number of retries for consistency
+
+    Returns:
+        Tuple of (response, is_consistent)
+    """
+    responses = []
+    client = get_client_fn()
+
+    for attempt in range(max_retries):
+        try:
+            response = await client.request(method, path, **kwargs)
+            responses.append(response)
+
+            # If this is the first attempt, continue to collect more samples
+            if attempt < max_retries - 1:
+                await asyncio.sleep(0.1)  # Small delay between retries
+                continue
+
+        except httpx.HTTPError as e:
+            if attempt == max_retries - 1:
+                raise
+            await asyncio.sleep(0.2)
+            continue
+
+    # Check consistency if we have multiple responses
+    if len(responses) > 1:
+        from dast.validators import ConsistencyChecker
+        is_consistent = ConsistencyChecker.are_consistent(responses)
+        # Return the first response (most representative)
+        return responses[0], is_consistent
+
+    # Single response - assume consistent
+    return responses[0], True if responses else None
 
 
 async def execute_request(
@@ -61,9 +111,21 @@ async def execute_request(
         kwargs["cookies"].update(config.cookies)
 
     try:
-        # Execute request
-        client = get_client_fn()
-        response = await client.request(method, path, **kwargs)
+        # Execute request with retry for consistency checking
+        # Check if retry is enabled in config (default: True for high-severity templates)
+        use_retry = (
+            template.info.severity in ("critical", "high") and
+            not config.on_match  # No retry for baseline/cache requests
+        )
+
+        if use_retry:
+            response, is_consistent = await _execute_request_with_retry(
+                method, path, kwargs, get_client_fn, max_retries=3
+            )
+        else:
+            client = get_client_fn()
+            response = await client.request(method, path, **kwargs)
+            is_consistent = True
 
         context.responses.append(response)
         context.request_count += 1
@@ -105,30 +167,32 @@ async def execute_request(
         if on_match.get("compare_with"):
             cache_key = on_match["compare_with"]
             if cache_key in response_cache:
+                from dast.validators import compare_responses
+
                 baseline_response = response_cache[cache_key]
-                # Compare responses - they must be different for boolean-blind SQLi
-                if responses_differ(baseline_response, response, target):
-                    # Responses differ - possible SQLi
-                    # For boolean-blind, only check negative matchers (to exclude false positives)
+
+                # Get false response if available (for proper boolean-blind comparison)
+                false_response = response_cache.get(f"{cache_key}_false", baseline_response)
+
+                # Use professional comparison from validators module
+                comparison = compare_responses(baseline_response, response, false_response)
+
+                if comparison["is_vulnerable"]:
+                    # For boolean-blind, check negative matchers to exclude false positives
                     negative_matchers = [m for m in config.matchers if getattr(m, 'negative', False)]
                     if negative_matchers:
-                        # Check if negative matchers pass
                         matchers = [create_matcher(m) for m in negative_matchers]
                         result = evaluate_matchers(matchers, response, "and")
-                        # For negative matchers: matched=True means patterns NOT found (good)
                         if not result.matched:
                             return None
+
                     result = MatchResult(
                         matched=True,
-                        evidence={
-                            "baseline_length": len(baseline_response.text),
-                            "response_length": len(response.text),
-                            "difference": abs(len(baseline_response.text) - len(response.text)),
-                            "detection_type": "boolean_blind",
-                        },
-                        message="Boolean-blind: response differs from baseline",
+                        evidence=comparison["evidence"],
+                        message=f"Boolean-blind SQLi detected (confidence: {comparison['confidence']})",
+                        evidence_strength=EvidenceStrength.INFERENCE,
                     )
-                    return create_finding(config, template, response, result)
+                    return create_finding(config, template, response, result, comparison["confidence"])
             return None  # No baseline to compare
 
         # Check matchers (standard detection)
@@ -146,10 +210,21 @@ async def execute_request(
                 else:
                     matchers.append(create_matcher(matcher_config))
 
-            result = evaluate_matchers(matchers, response, config.matchers[0].condition or "and")
+            # Use global matchers_condition if available, otherwise fall back to first matcher's condition
+            condition = config.matchers_condition if hasattr(config, 'matchers_condition') else (config.matchers[0].condition if config.matchers else "and")
+
+            result = evaluate_matchers(matchers, response, condition)
 
             if result.matched:
-                return create_finding(config, template, response, result)
+                # Calculate confidence from evidence strength and matcher count
+                from dast.validators import ConfidenceCalculator
+                confidence = ConfidenceCalculator.calculate(
+                    result.evidence_strength,
+                    len(matchers),
+                    sum(1 for m in matchers if m.matches(response).matched),
+                    is_consistent=is_consistent,  # Use actual consistency from retry
+                )
+                return create_finding(config, template, response, result, confidence)
 
     except httpx.HTTPError as e:
         logger.debug(f"HTTP error during request: {e}")
@@ -247,8 +322,17 @@ def create_finding(
     template: Template,
     response: httpx.Response,
     match_result: MatchResult,
+    confidence: str = "medium",
 ) -> Finding:
-    """Create a finding from a successful match."""
+    """Create a finding from a successful match.
+
+    Args:
+        config: Request configuration
+        template: Template being executed
+        response: HTTP response
+        match_result: Matcher evaluation result
+        confidence: Confidence level (high/medium/low)
+    """
     on_match = config.on_match or {}
 
     # Use evidence_strength from match result, default to HEURISTIC
@@ -274,6 +358,7 @@ def create_finding(
         evidence={
             "status_code": response.status_code,
             "matcher_evidence": match_result.evidence,
+            "confidence": confidence,
         },
         message=on_match.get("message") or template.info.description or template.info.name,
         remediation=on_match.get("remediation") or "",

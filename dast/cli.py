@@ -17,17 +17,116 @@ from rich.text import Text
 from dast.crawler import KatanaCrawler, parse_cookies_string
 from dast.config import EvidenceStrength, ScanProfile, ScanReport, TargetConfig
 from dast.scanner import load_templates, run_scan
-from dast.utils import setup_logging
-from dast.merger import merge_configs
-from dast.scanner.param_mapper import (
-    build_auto_target_config,
-    get_injectable_parameters,
-    summarize_parameters,
-)
-from dast.scanner.json_discovery import quick_discover
+from dast.utils import setup_logging, logger
 
 
 console = Console()
+
+
+# Simple parameter mapping utilities (replaces deleted param_mapper.py)
+from urllib.parse import parse_qs
+from typing import List, Dict, Any
+
+# Common injectable parameter patterns by vulnerability type
+INJECTABLE_PATTERNS = {
+    "sqli": [r"id", r"search", r"query", r"q", r"filter", r"find", r"item",
+             r"product", r"user", r"category", r"email", r"username", r"name"],
+    "xss": [r"name", r"comment", r"message", r"text", r"content", r"input",
+            r"desc", r"feedback", r"review", r"callback", r"redirect"],
+    "path_traversal": [r"file", r"path", r"folder", r"document", r"image",
+                       r"download", r"include", r"template", r"lang", r"filename"],
+    "ssrf": [r"url", r"link", r"redirect", r"next", r"dest", r"target",
+             r"callback", r"return", r"feed", r"site", r"uri", r"forward"],
+    "command": [r"host", r"hostname", r"ip", r"port", r"cmd", r"exec",
+                r"command", r"ping", r"traceroute"],
+}
+
+
+def extract_parameters_from_url(url: str, method: str = "GET") -> List[Dict[str, Any]]:
+    """Extract query parameters from a URL."""
+    parsed = urlparse(url)
+    params = []
+    if parsed.query:
+        for name, values in parse_qs(parsed.query).items():
+            params.append({
+                "name": name,
+                "value": values[0] if values else "",
+                "location": "query",
+            })
+    return params
+
+
+def classify_parameter(param_name: str) -> List[str]:
+    """Classify a parameter by potential vulnerability types."""
+    vuln_types = []
+    param_lower = param_name.lower()
+    for vuln_type, patterns in INJECTABLE_PATTERNS.items():
+        for pattern in patterns:
+            if pattern in param_lower:
+                vuln_types.append(vuln_type)
+                break
+    return vuln_types or ["generic"]
+
+
+def summarize_parameters(endpoint_infos: List[Any]) -> Dict[str, int]:
+    """Summarize injectable parameters by vulnerability type."""
+    summary = {}
+    for ep in endpoint_infos:
+        for param in getattr(ep, 'query_params', []):
+            if isinstance(param, dict):
+                param_name = param.get('name', '')
+            else:
+                param_name = str(param)
+            vuln_types = classify_parameter(param_name)
+            for vuln_type in vuln_types:
+                summary[vuln_type] = summary.get(vuln_type, 0) + 1
+    return summary
+
+
+def get_injectable_parameters(endpoint_infos: List[Any]) -> Dict[str, List[Dict]]:
+    """Get injectable parameters grouped by endpoint path."""
+    result = {}
+    for ep in endpoint_infos:
+        path = getattr(ep, 'path', urlparse(getattr(ep, 'url', '')).path)
+        params = getattr(ep, 'query_params', [])
+        injectable = []
+        for param in params:
+            if isinstance(param, dict):
+                param_name = param.get('name', '')
+            else:
+                param_name = str(param)
+            vuln_types = classify_parameter(param_name)
+            if vuln_types != ["generic"]:
+                injectable.append({
+                    "name": param_name,
+                    "vuln_types": vuln_types,
+                })
+        if injectable:
+            result[path] = injectable
+    return result
+
+
+def build_auto_target_config(
+    endpoints: List[Any],
+    templates: List[Any],
+    base_url: str,
+) -> Dict[str, str]:
+    """Build auto-mapped endpoint configuration from crawled endpoints."""
+    # Simple mapping: find endpoints that match template patterns
+    auto_endpoints = {}
+    for ep in endpoints:
+        path = getattr(ep, 'path', urlparse(getattr(ep, 'url', '')).path)
+        method = getattr(ep, 'method', 'GET')
+        # Map common paths to template variable names
+        if "/rest/user/login" in path or "/api/user/login" in path:
+            auto_endpoints["login"] = f"{base_url}{path}"
+        elif "/rest/products/search" in path or "/api/products/search" in path:
+            auto_endpoints["search"] = f"{base_url}{path}"
+        elif "/rest/basket" in path or "/api/basket" in path:
+            auto_endpoints["basket"] = f"{base_url}{path}"
+        elif "/rest/feedback" in path or "/api/feedback" in path:
+            auto_endpoints["feedback"] = f"{base_url}{path}"
+    return auto_endpoints
 
 
 def print_banner():
@@ -186,12 +285,8 @@ async def discover_and_add_json_endpoints(
 
 async def scan_command(
     target_url: str,
-    config: Optional[str] = None,
     template_dir: Optional[str] = None,
     output: Optional[str] = None,
-    username: Optional[str] = None,
-    password: Optional[str] = None,
-    token: Optional[str] = None,
     profile: Optional[str] = None,
     verbose: bool = False,
     no_validate: bool = False,
@@ -224,26 +319,27 @@ async def scan_command(
             console.print("[dim]Valid profiles: passive, standard, thorough, aggressive[/dim]")
             return 1
 
-    # Step 1: Run crawler if --crawl is specified
+    # Parse cookies
+    parsed_cookies = {}
+    if cookies:
+        parsed_cookies = parse_cookies_string(cookies)
+
+    # Crawler for endpoint discovery
+    endpoint_infos = []
+
     if crawl:
         console.print(f"[cyan]Phase 1: Crawling {target_url}[/cyan]")
         console.print("[dim]JS Crawl: enabled | Interesting-only: enabled | Max Depth: 3[/dim]\n")
 
-        # Parse cookies if provided (shared with scan command)
-        parsed_cookies = {}
-        if cookies:
-            parsed_cookies = parse_cookies_string(cookies)
-
         crawler = KatanaCrawler(
             base_url=target_url,
-            max_depth=3,  # Fixed default
-            js_crawl=True,  # Always enabled for --crawl
+            max_depth=3,
+            js_crawl=True,
             cookies=parsed_cookies,
-            filter_static=True,  # Always filter static
-            interesting_only=True,  # Always use interesting-only
+            filter_static=True,
+            interesting_only=True,
         )
 
-        # Run crawler with progress indicator
         with Progress(
             SpinnerColumn(),
             TextColumn("[progress.description]{task.description}"),
@@ -256,19 +352,14 @@ async def scan_command(
                 progress.update(task, completed=True)
             except Exception as e:
                 console.print(f"[red]Crawl failed: {e}[/red]")
-                console.print("[dim]Make sure Katana is installed: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
+                console.print("[dim]Install Katana: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
                 return 1
 
-        # Display crawl results
         console.print(f"[green]Found {len(report.endpoints)} endpoints[/green]")
         console.print(f"[dim]  API: {report.summary.get('api', 0)} | Auth: {report.summary.get('auth', 0)} | Admin: {report.summary.get('admin', 0)}[/dim]")
 
-        # Auto-detect injectable parameters from crawled endpoints
-        from dast.scanner.param_mapper import extract_parameters_from_url
+        # Build endpoint info for analysis
         from dast.config import EndpointInfo
-
-        # Build EndpointInfo objects from raw endpoints for parameter analysis
-        endpoint_infos = []
         for ep in report.endpoints:
             url = ep.get('full_url', ep.get('url', ''))
             if url:
@@ -281,29 +372,9 @@ async def scan_command(
                     is_api=ep.get('type') == 'api',
                 ))
 
-        # Show parameter summary
-        if endpoint_infos:
-            param_summary = summarize_parameters(endpoint_infos)
-            if param_summary:
-                console.print("[cyan]Detected injectable parameters:[/cyan]")
-                for vuln_type, count in sorted(param_summary.items(), key=lambda x: -x[1]):
-                    console.print(f"  [dim]- {vuln_type}: {count} parameters[/dim]")
-
-                # Show injectable endpoints
-                injectable = get_injectable_parameters(endpoint_infos)
-                if injectable:
-                    console.print("\n[cyan]Endpoints with injectable parameters:[/cyan]")
-                    for path, params_list in list(injectable.items())[:5]:  # Show first 5
-                        param_names = [p['name'] for p in params_list[:3]]  # Show first 3 params
-                        types = ', '.join(set(t for p in params_list for t in p['vuln_types']))
-                        console.print(f"  [dim]{path}?{'&'.join(param_names)} → {types}[/dim]")
-                    if len(injectable) > 5:
-                        console.print(f"  [dim]... and {len(injectable) - 5} more[/dim]")
-                console.print()
-
-        # Convert crawler report to TargetConfig (method on report itself)
+        # Convert to TargetConfig
         try:
-            crawled_config = report.to_target_config(
+            target = report.to_target_config(
                 name="crawled_target",
                 prioritize=True,
                 exclude_static=True,
@@ -312,26 +383,11 @@ async def scan_command(
             console.print(f"[red]Failed to generate target config: {e}[/red]")
             return 1
 
-        # Validate endpoints exist
-        if not crawled_config.get_endpoints():
-            console.print("[yellow]No scanable endpoints found after crawling[/yellow]")
+        if not target.get_endpoints():
+            console.print("[yellow]No scanable endpoints found[/yellow]")
             return 1
 
-        # Merge with user config if provided
-        if config:
-            try:
-                base_config = TargetConfig.from_yaml(config)
-                base_config.base_url = target_url
-                target = merge_configs(base_config, crawled_config)
-                console.print("[dim]Merged with user config[/dim]\n")
-            except ValueError as e:
-                console.print(f"[red]Config merge failed: {e}[/red]")
-                return 1
-        else:
-            target = crawled_config
-            target.base_url = target_url
-
-        # Discover JSON injection points from POST endpoints
+        # Discover JSON injection points
         try:
             with Progress(
                 SpinnerColumn(),
@@ -339,36 +395,26 @@ async def scan_command(
                 console=console,
             ) as progress:
                 task = progress.add_task("[cyan]Discovering JSON injection points...[/cyan]", total=None)
-
-                await discover_and_add_json_endpoints(
-                    target=target,
-                    endpoints=report.endpoints,
-                    cookies=parsed_cookies if crawl else None,
-                )
-
+                await discover_and_add_json_endpoints(target, report.endpoints, parsed_cookies)
                 progress.update(task, completed=True)
-        except Exception as e:
-            logger.debug(f"JSON discovery failed: {e}")
-            # Continue without JSON endpoints
-            pass
+        except Exception:
+            pass  # Continue without JSON endpoints
     else:
-        # Load or create target configuration (no crawl)
-        if config:
-            target = TargetConfig.from_yaml(config)
-            target.base_url = target_url
-        else:
-            target = TargetConfig(
-                name="Target",
-                base_url=target_url,
-            )
+        # Simple target config without crawl
+        target = TargetConfig(name="Target", base_url=target_url)
 
-    # Override credentials from CLI
-    if username:
-        target.authentication.username = username
-    if password:
-        target.authentication.password = password
-    if token:
-        target.authentication.token = token
+    # Set auth from cookies
+    if parsed_cookies:
+        from dast.config.common import AuthType
+        # If cookie has 'token', use as bearer AND add cookies
+        if 'token' in parsed_cookies:
+            target.authentication.type = AuthType.BEARER
+            target.authentication.token = parsed_cookies['token']
+
+        # Build cookie string for ALL cookies (including token if present)
+        # This ensures cookies like 'language', 'session', etc. are sent
+        cookie_str = "; ".join(f"{k}={v}" for k, v in parsed_cookies.items())
+        target.authentication.headers["Cookie"] = cookie_str
 
     console.print(f"[dim]Target: {target.base_url}[/dim]")
     console.print(f"[dim]Auth: {target.authentication.type or 'none'}[/dim]")
@@ -396,8 +442,6 @@ async def scan_command(
 
     # Smart endpoint mapping: auto-map crawled endpoints to template variables
     if crawl and endpoint_infos:
-        from dast.scanner.param_mapper import build_auto_target_config
-
         auto_endpoints = build_auto_target_config(
             endpoints=endpoint_infos,
             templates=templates,
@@ -803,14 +847,16 @@ def main():
 Examples:
   # Crawl then scan (automatic discovery)
   dast scan http://localhost:3000 --crawl --cookies '{"token": "..."}'
-  dast scan http://localhost:3000 --crawl -c myapp.yaml -o results.json
+  dast scan http://localhost:3000 --crawl -o results.json
 
-  # Scan with existing config
-  dast scan http://localhost:3000 --config configs/examples/juice-shop.yaml
-  dast scan http://example.com -c configs/myapp.yaml -t templates/generic -o results.json
+  # Quick scan with cookies
+  dast scan http://localhost:3000 --cookies 'token=eyJhbGci...'
+
+  # Passive scan (fast, less intrusive)
+  dast scan http://localhost:3000 --profile passive
 
   # Standalone crawl
-  dast crawl http://localhost:3000 -o juice-shop.yaml --cookies '{"token": "..."}'
+  dast crawl http://localhost:3000 --cookies '{"token": "..."}'
 
   # List templates
   dast list -t templates/generic
@@ -821,19 +867,15 @@ Examples:
     # Scan command
     scan_parser = subparsers.add_parser("scan", help="Run vulnerability scan")
     scan_parser.add_argument("target", help="Target URL (e.g., http://localhost:3000)")
-    scan_parser.add_argument("-c", "--config", help="Target configuration file (YAML)")
     scan_parser.add_argument("-t", "--template-dir", help="Templates directory (default: templates/generic)", default="templates/generic")
     scan_parser.add_argument("-o", "--output", help="Output JSON file for results")
-    scan_parser.add_argument("-u", "--username", help="Username for authentication")
-    scan_parser.add_argument("-p", "--password", help="Password for authentication")
-    scan_parser.add_argument("--token", help="Bearer token for authentication")
     scan_parser.add_argument("--profile", help="Scan profile: passive (fast), standard (default), thorough (with delays)", default=None)
     scan_parser.add_argument("-v", "--verbose", help="Enable verbose logging", action="store_true")
     scan_parser.add_argument("--no-validate", help="Skip target connectivity validation", action="store_true")
     scan_parser.add_argument("--checkpoint", help="Save scan progress to file for resume capability")
     scan_parser.add_argument("--resume", help="Resume scan from checkpoint file")
     scan_parser.add_argument("--crawl", help="Crawl target first to auto-discover endpoints before scanning", action="store_true")
-    scan_parser.add_argument("--cookies", help="Cookies for authentication (format: 'key=value; key2=value2' or JSON)")
+    scan_parser.add_argument("--cookies", help="Cookies for auth (e.g., 'token=eyJ...' or 'key1=val1; key2=val2'). If 'token' present, sets Bearer.")
 
     # Crawl command
     crawl_parser = subparsers.add_parser("crawl", help="Run Katana web crawler")
@@ -859,12 +901,8 @@ Examples:
     if args.command == "scan":
         return asyncio.run(scan_command(
             target_url=args.target,
-            config=args.config,
             template_dir=args.template_dir,
             output=args.output,
-            username=args.username,
-            password=args.password,
-            token=args.token,
             profile=args.profile,
             verbose=args.verbose,
             no_validate=args.no_validate,

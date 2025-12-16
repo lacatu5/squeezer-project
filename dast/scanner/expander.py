@@ -19,22 +19,42 @@ BROADCAST_KEYWORD = "all_discovered"
 # Tags that indicate injection-based templates
 _INJECTION_TAGS = {'sqli', 'xss', 'injection', 'ssti', 'xxe'}
 
-# Parameter patterns for auto-mapping (same as param_mapper)
+# Parameter patterns for auto-mapping (expanded)
 _PARAM_PATTERNS = {
     "sqli": [r"id", r"search", r"query", r"q", r"filter", r"find", r"lookup",
              r"item", r"product", r"user", r"category", r"sort", r"order",
              r"where", r"limit", r"offset", r"email", r"username", r"name",
-             r"keyword", r"searchterm", r"input", r"value", r"data"],
+             r"keyword", r"searchterm", r"input", r"value", r"data",
+             # Expanded patterns
+             r"id_\w+", r"\w+_id", r"code", r"ref", r"reference", r"key",
+             r"number", r"num", r"page", r"size", r"start", r"end",
+             r"date", r"time", r"year", r"month", r"group", r"type",
+             r"status", r"state", r"role", r"level", r"sort_by", r"sortOrder"],
     "xss": [r"name", r"comment", r"message", r"text", r"content", r"input",
-            r"desc", r"description", r"feedback", r"review", r"search"],
+            r"desc", r"description", r"feedback", r"review", r"search",
+            # Expanded patterns
+            r"title", r"subject", r"body", r"note", r"remark", r"field",
+            r"param", r"argument", r"var", r"variable", r"string"],
     "command": [r"host", r"hostname", r"ip", r"port", r"url", r"dest", r"target",
-                r"file", r"path", r"filename", r"cmd", r"exec"],
+                r"file", r"path", r"filename", r"cmd", r"exec",
+                # Expanded patterns
+                r"domain", r"server", r"addr", r"address", r"command",
+                r"execute", r"run", r"call", r"invoke"],
     "ssrf": [r"url", r"link", r"redirect", r"next", r"dest", r"target", r"to",
-            r"callback", r"return", r"feed", r"site", r"uri", r"forward", r"goto"],
+            r"callback", r"return", r"feed", r"site", r"uri", r"forward", r"goto",
+            # Expanded patterns
+            r"link_to", r"file_url", r"image", r"img", r"src", r"href",
+            r"endpoint", r"api", r"webhook", r"postback"],
     "idor": [r"\bid\b", r"user_id", r"user", r"account", r"profile", r"order_id",
-             r"order", r"basket_id", r"cart_id", r"item_id", r"document_id"],
+             r"order", r"basket_id", r"cart_id", r"item_id", r"document_id",
+             # Expanded patterns
+             r"\w+_id$", r"uid", r"cid", r"pid", r"sid", r"oid",
+             r"customer", r"profile", r"document", r"file", r"resource"],
     "path_traversal": [r"file", r"path", r"folder", r"directory", r"document",
-                       r"download", r"include", r"require", r"template", r"lang"],
+                       r"download", r"include", r"require", r"template", r"lang",
+                       # Expanded patterns
+                       r"filename", r"filepath", r"foldername", r"file_url",
+                       r"image", r"img", r"src", r"document_url", r"attachment"],
 }
 
 
@@ -102,6 +122,8 @@ def find_auto_mapped_endpoints(
         "path_traversal": "path_traversal",
         "ssrf": "ssrf",
         "idor": "idor",
+        "nosql_injection": "sqli",  # Reuse sqli patterns
+        "generic_nosql_injection": "sqli",
     }
 
     vuln_type = endpoint_to_vuln.get(endpoint_key)
@@ -116,18 +138,55 @@ def find_auto_mapped_endpoints(
     for name, url in endpoints.items():
         parsed = urlparse(url)
 
+        # For API endpoints, include them even without query params
+        # They might accept JSON POST bodies
+        is_api = '/api/' in url.lower() or '/rest/' in url.lower()
+
+        if not parsed.query and not is_api:
+            continue
+
         if not parsed.query:
+            # API endpoint without params - use first param name from template
+            # or a generic one
+            if is_api:
+                mapped[url] = "input"  # Generic param name
             continue
 
         params = parse_qs(parsed.query, keep_blank_values=True)
 
+        # Try to find best matching parameter
+        best_param = None
         for param_name in params.keys():
             # Check if parameter matches the vulnerability pattern
             for pattern in patterns:
                 if re.search(pattern, param_name, re.IGNORECASE):
-                    # Build URL with parameter ready for injection
-                    # e.g., /rest/user/security-question?email=
-                    mapped[url] = param_name
+                    best_param = param_name
+                    break
+            if best_param:
+                break
+
+        # If no pattern match but endpoint has params, use first param
+        if not best_param and params:
+            best_param = list(params.keys())[0]
+
+        if best_param:
+            mapped[url] = best_param
+
+    # Fallback: if nothing found but we have API endpoints, use one
+    if not mapped:
+        for name, url in endpoints.items():
+            if '/api/' in url.lower() or '/rest/' in url.lower():
+                # Use a common parameter for API endpoints
+                if '?' in url:
+                    # Has params, use it
+                    mapped[url] = url.split('?')[1].split('=')[0].split('&')[0]
+                else:
+                    # No params, add generic input param
+                    if '?' in url:
+                        mapped[url] = "input"
+                    else:
+                        mapped[url + "?input="] = "input"
+                if len(mapped) >= 5:  # Limit fallback to 5 endpoints
                     break
 
     return mapped if mapped else None

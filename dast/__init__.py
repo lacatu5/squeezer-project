@@ -3,9 +3,7 @@
 A modular vulnerability scanning framework with support for:
 - Multi-request workflows with state propagation
 - Semantic validation for business logic flaws
-- Dual-context sessions for IDOR detection
 - JWT manipulation testing
-- Docker-based clean-slate container testing
 """
 
 __version__ = "0.2.0"
@@ -44,7 +42,6 @@ from dast.extractors import (
     JsonExtractor,
     HeaderExtractor,
     CookieExtractor,
-    XPathExtractor,
     KataExtractor,
     create_extractor,
     extract_all,
@@ -65,23 +62,7 @@ from dast.matchers import (
 )
 
 # Specialized modules
-from dast.auth import (
-    SessionContext,
-    ResourceIdentifier,
-    SessionManager,
-    create_idor_scanner,
-    JWTForge,
-    JWTVulnerabilityScanner,
-    parse_jwt_from_auth_header,
-)
-
-from dast.docker import (
-    ContainerInfo,
-    ContainerManager,
-    ephemeral_container,
-    check_docker_requirement,
-    get_skip_container_warning,
-)
+from dast.auth import JWTForge
 
 __all__ = [
     # Version
@@ -115,7 +96,6 @@ __all__ = [
     "JsonExtractor",
     "HeaderExtractor",
     "CookieExtractor",
-    "XPathExtractor",
     "KataExtractor",
     "create_extractor",
     "extract_all",
@@ -129,21 +109,9 @@ __all__ = [
     "SemanticMatcher",
     "DiffMatcher",
     "TimeMatcher",
+    "DSLMatcher",
     "create_matcher",
     "evaluate_matchers",
-    # Sessions
-    "SessionContext",
-    "ResourceIdentifier",
-    "SessionManager",
-    "create_idor_scanner",
     # JWT
     "JWTForge",
-    "JWTVulnerabilityScanner",
-    "parse_jwt_from_auth_header",
-    # Docker
-    "ContainerInfo",
-    "ContainerManager",
-    "ephemeral_container",
-    "check_docker_requirement",
-    "get_skip_container_warning",
 ]

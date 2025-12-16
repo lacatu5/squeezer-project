@@ -579,6 +579,131 @@ class TimeMatcher(Matcher):
         ))
 
 
+class DSLMatcher(Matcher):
+    """DSL expression matcher for dynamic response evaluation.
+
+    Supports simple comparison expressions:
+    - compare(response.status,200) - status equals 200
+    - compare(response.status,200,">=") - status >= 200
+    - compare(response.content_length,100,">=") - content length >= 100
+    - compare(response.time,2000) - response time > 2000ms
+    - compare(response.time,3000,">") - response time > 3000ms
+
+    Operators: ==, !=, >, >=, <, <=, contains
+    """
+
+    def __init__(self, config: MatcherConfig):
+        super().__init__(config)
+        self.dsl_expression = getattr(config, 'dsl', None) or getattr(config, 'expression', '')
+
+    def _parse_compare(self, expr: str) -> tuple:
+        """Parse a compare() DSL expression.
+
+        Returns: (field, value, operator) or (field, value, '==')
+        """
+        import re
+
+        # Match: compare(response.<field>, <value>[, <operator>])
+        pattern = r'compare\(response\.(\w+),\s*([^,\)]+)(?:,\s*["\']([^"\']+)["\'])?\)'
+        match = re.search(pattern, expr)
+
+        if match:
+            field = match.group(1)
+            value = match.group(2)
+            operator = match.group(3) if match.group(3) else '=='
+            return field, value, operator
+
+        return None, None, '=='
+
+    def _get_field_value(self, response: Response, field: str):
+        """Extract field value from response."""
+        if field == 'status':
+            return response.status_code
+        elif field in ('status_code', 'code'):
+            return response.status_code
+        elif field == 'content_length':
+            return len(response.content)
+        elif field == 'length':
+            return len(response.content)
+        elif field == 'time':
+            return response.elapsed.total_seconds() * 1000  # Convert to ms
+        elif field == 'size':
+            return len(response.content)
+        else:
+            return None
+
+    def _compare_values(self, actual, expected, operator):
+        """Compare two values using the specified operator."""
+        try:
+            # Try to convert expected to number
+            if isinstance(expected, str) and expected.isdigit():
+                expected = int(expected)
+            elif isinstance(expected, str):
+                # Try float
+                try:
+                    expected = float(expected)
+                except ValueError:
+                    pass  # Keep as string
+        except (ValueError, TypeError):
+            pass
+
+        if operator == '==' or operator == 'equals':
+            return actual == expected
+        elif operator == '!=' or operator == 'not_equals':
+            return actual != expected
+        elif operator == '>' or operator == 'gt':
+            try:
+                return float(actual) > float(expected)
+            except (ValueError, TypeError):
+                return False
+        elif operator == '>=' or operator == 'gte':
+            try:
+                return float(actual) >= float(expected)
+            except (ValueError, TypeError):
+                return False
+        elif operator == '<' or operator == 'lt':
+            try:
+                return float(actual) < float(expected)
+            except (ValueError, TypeError):
+                return False
+        elif operator == '<=' or operator == 'lte':
+            try:
+                return float(actual) <= float(expected)
+            except (ValueError, TypeError):
+                return False
+        elif operator == 'contains':
+            return str(expected) in str(actual)
+        else:
+            return actual == expected
+
+    def matches(self, response: Response) -> MatchResult:
+        field, value, operator = self._parse_compare(self.dsl_expression)
+
+        if field is None:
+            # Invalid DSL expression
+            return MatchResult(
+                matched=False,
+                evidence={"dsl": self.dsl_expression},
+                message=f"Invalid DSL expression: {self.dsl_expression}",
+            )
+
+        actual = self._get_field_value(response, field)
+        matched = self._compare_values(actual, value, operator)
+
+        return self._apply_negative(MatchResult(
+            matched=matched,
+            evidence={
+                "field": field,
+                "actual": actual,
+                "expected": value,
+                "operator": operator,
+                "dsl": self.dsl_expression
+            },
+            message=f"DSL: {field} {operator} {value} (actual: {actual})",
+            evidence_strength=EvidenceStrength.INFERENCE,
+        ))
+
+
 def create_matcher(config: MatcherConfig, **kwargs) -> Matcher:
     """Create a matcher from configuration."""
     matcher_type = config.type.lower()
@@ -589,8 +714,10 @@ def create_matcher(config: MatcherConfig, **kwargs) -> Matcher:
         return WordMatcher(config)
     elif matcher_type == "regex":
         return RegexMatcher(config)
-    elif matcher_type in ("json", "body_json", "dsl"):
+    elif matcher_type in ("json", "body_json"):
         return JsonMatcher(config)
+    elif matcher_type == "dsl":
+        return DSLMatcher(config)
     elif matcher_type == "semantic":
         return SemanticMatcher(config)
     elif matcher_type == "diff":
@@ -602,28 +729,63 @@ def create_matcher(config: MatcherConfig, **kwargs) -> Matcher:
 
 
 def evaluate_matchers(matchers: List[Matcher], response: Response, condition: str) -> MatchResult:
-    """Evaluate multiple matchers against a response."""
+    """Evaluate multiple matchers against a response.
+
+    Uses hybrid logic for better false positive reduction:
+    - Positive matchers (negative=false): Combined with OR if condition='or', AND if condition='and'
+    - Negative matchers (negative=true): Always combined with AND (all must pass, i.e., NOT match)
+
+    This allows templates to have multiple alternative positive indicators (OR)
+    while ensuring all negative filters apply (AND).
+    """
     if not matchers:
         return MatchResult(matched=False, evidence={}, message="No matchers")
 
     results = []
+    positive_results = []
+    negative_results = []
+
     for matcher in matchers:
         result = matcher.matches(response)
         results.append(result)
 
-    if condition == "or":
-        matched = any(r.matched for r in results)
+        # Track positive and negative matchers separately
+        if matcher.negative:
+            negative_results.append(result)
+        else:
+            positive_results.append(result)
+
+    # Evaluate positive matchers with the configured condition
+    if positive_results:
+        if condition == "or":
+            positive_matched = any(r.matched for r in positive_results)
+        else:
+            positive_matched = all(r.matched for r in positive_results)
     else:
-        matched = all(r.matched for r in results)
+        # No positive matchers - require at least one negative to pass
+        positive_matched = True
+
+    # Evaluate negative matchers with AND (all must pass, i.e., NOT match)
+    # For negative matchers, matched=true means the negative condition was triggered (bad)
+    # So we need all negative matchers to have matched=true (meaning they excluded the pattern)
+    negative_matched = all(r.matched for r in negative_results) if negative_results else True
+
+    # Overall match: positive must match AND all negatives must pass
+    matched = positive_matched and negative_matched
 
     evidence = {}
     for i, r in enumerate(results):
         evidence[f"matcher_{i}"] = r.evidence
 
-    # Determine evidence strength: use highest from matchers that matched
+    # Add breakdown to evidence
+    evidence["positive_matchers"] = f"{sum(r.matched for r in positive_results)}/{len(positive_results)}" if positive_results else "0/0"
+    evidence["negative_matchers"] = f"{sum(r.matched for r in negative_results)}/{len(negative_results)}" if negative_results else "0/0"
+    evidence["condition"] = condition
+
+    # Determine evidence strength: use highest from positive matchers that matched
     # Priority: DIRECT > INFERENCE > HEURISTIC
     strength = EvidenceStrength.HEURISTIC
-    for r in results:
+    for r in positive_results:
         if r.matched:
             if r.evidence_strength == EvidenceStrength.DIRECT:
                 strength = EvidenceStrength.DIRECT
@@ -634,6 +796,7 @@ def evaluate_matchers(matchers: List[Matcher], response: Response, condition: st
     return MatchResult(
         matched=matched,
         evidence=evidence,
-        message=f"Combined {condition.upper()}: {sum(r.matched for r in results)}/{len(results)} matched",
+        message=f"Combined {condition.upper()}: {sum(r.matched for r in positive_results)}/{len(positive_results)} positive, "
+                f"{sum(r.matched for r in negative_results)}/{len(negative_results)} negative passed",
         evidence_strength=strength,
     )

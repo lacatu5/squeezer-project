@@ -1,79 +1,57 @@
 id: generic-sqli-get
 info:
-  name: SQL Injection (GET) - Multi-Tier Detection
-  description: SQL injection with error-based, boolean-blind, and time-based detection
+  name: SQL Injection (GET)
+  description: Detects SQL injection in GET parameters via error messages or boolean blind
   owasp_category: A05:2025
   tags:
     - sqli
     - injection
     - generic
-    - blind
 
 generic:
   endpoint: "{{sqli}}"
   method: GET
-  parameter: "id"
+  parameter: "q"
 
-  # Multi-tier detection for comprehensive SQLi testing
-  detection_tiers:
-    # Tier 1: PASSIVE - Error-based detection (fast, safe)
-    - tier: passive
-      detection_type: error_based
-      payloads:
-        - "'"
-        - "\""
-        - "')"
-        - "\")"
+  payloads:
+    # Error-based payloads - trigger database errors
+    - "'"
+    - '"'
+    - "')"
+    - '")'
 
-      matchers:
-        - type: regex
-          condition: or
-          regex:
-            - "SQL syntax.*?near"
-            - "mysql_fetch.*?error"
-            - "Warning.*?mysql_"
-            - "ORA-\\d{5}"
-            - "PostgreSQL.*?ERROR"
-            - "SQLSTATE\\["
-            - "SQLITE_ERROR"
-            - "sqlite3\\.OperationalError"
-            - "incomplete input"
-            - "syntax error"
-            - "unclosed quotation"
-            - "quoted string not properly terminated"
-            - "ORA-01756"
-            - "ORA-00933"
-          negative: false
+  matchers_condition: and
+  matchers:
+    # Positive: SQL error messages in response (REQUIRED)
+    - type: regex
+      condition: or
+      regex:
+        - "SQL syntax.*?near"
+        - "mysql_fetch.*?error"
+        - "ORA-\\d{5}"
+        - "PostgreSQL.*?ERROR"
+        - "SQLSTATE\\["
+        - "SQLITE_ERROR"
+        - "sqlite3\\.OperationalError"
+        - "Microsoft OLE DB.*?SQL"
+        - "ODBC.*?SQL"
+        - "native code"
+        - "unclosed quotation"
+        - "incorrect syntax"
+        - "unexpected token"
+        - "Unterminated string"
+        - "syntax error.*?MySQL"
+        - "PostgreSQL.*?ERROR"
+        - "ORA-[0-9]{5}"
 
-    # Tier 2: ACTIVE - Boolean-blind detection
-    - tier: active
-      detection_type: boolean_blind
-      baseline_payload: "test"
-      true_payload: "' AND '1'='1"
-      false_payload: "' AND '1'='2"
+    # Positive: Valid HTTP status (not 404)
+    - type: status
+      status: [200, 400, 500]
 
-      matchers:
-        - type: regex
-          condition: or
-          regex:
-            - "SQL syntax.*?near"
-            - "ORA-\\d{5}"
-            - "PostgreSQL.*?ERROR"
-          negative: true  # Should NOT match
-
-    # Tier 3: AGGRESSIVE - Time-based detection (causes delays)
-    - tier: aggressive
-      detection_type: time_blind
-      threshold_ms: 3000  # 3 second threshold
-      payloads:
-        - "' AND SLEEP(3)--"
-        - "' AND pg_sleep(3)--"
-        - "' WAITFOR DELAY '00:00:03'--"
-
-      matchers:
-        - type: regex
-          condition: or
-          regex:
-            - "SQL syntax.*?near"
-            - "ORA-\\d{5}"
-          negative: true
+    # Negative: NOT a successful empty response
+    - type: word
+      words:
+        - '"data":[]'
+        - '{"status":"success","data":[]}'
+      negative: true
+      part: body

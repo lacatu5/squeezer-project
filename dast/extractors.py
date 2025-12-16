@@ -4,7 +4,6 @@ Extractors enable multi-request workflows by capturing values from responses
 and making them available as variables for subsequent requests.
 """
 
-import importlib.util
 import json
 import re
 from abc import ABC, abstractmethod
@@ -293,74 +292,6 @@ class CookieExtractor(Extractor):
         return ExtractionResult(self.name, value, True)
 
 
-class XPathExtractor(Extractor):
-    """Extract data from HTML using XPath selectors."""
-
-    def __init__(
-        self,
-        name: str,
-        xpath: str,
-        attribute: Optional[str] = None,
-        internal: bool = False,
-    ):
-        """Initialize XPath extractor.
-
-        Args:
-            name: Variable name to store the extracted value
-            xpath: XPath expression to select element
-            attribute: Optional attribute name to extract (default: text content)
-            internal: If True, don't include in findings
-        """
-        super().__init__(name, internal=internal)
-        self.xpath = xpath
-        self.attribute = attribute
-        self._lxml_available = self._check_lxml()
-
-    def _check_lxml(self) -> bool:
-        """Check if lxml is available."""
-        return importlib.util.find_spec("lxml") is not None
-
-    def extract(self, response: httpx.Response) -> ExtractionResult:
-        """Extract value from HTML using XPath."""
-        if not self._lxml_available:
-            # Fallback to regex-based extraction
-            return self._fallback_extract(response)
-
-        try:
-            from lxml import html as lxml_html, etree
-
-            doc = lxml_html.fromstring(response.content)
-            elements = doc.xpath(self.xpath)
-
-            if not elements:
-                return ExtractionResult(self.name, None, False)
-
-            # Get first matching element
-            element = elements[0]
-
-            if self.attribute:
-                value = element.get(self.attribute)
-            elif isinstance(element, etree._Element):
-                value = element.text_content().strip()
-            else:
-                value = str(element)
-
-            return ExtractionResult(self.name, value, True)
-
-        except Exception:
-            return ExtractionResult(self.name, None, False)
-
-    def _fallback_extract(self, response: httpx.Response) -> ExtractionResult:
-        """Fallback extraction without lxml (basic regex)."""
-        # Simple extraction for common patterns
-        if self.attribute:
-            pattern = rf'{self.attribute}=["\']([^"\']+)["\']'
-            match = re.search(pattern, response.text)
-            if match:
-                return ExtractionResult(self.name, match.group(1), True)
-        return ExtractionResult(self.name, None, False)
-
-
 class KataExtractor(Extractor):
     """Extract data using KQL (Kotlin Query Language) like syntax.
 
@@ -402,7 +333,7 @@ def create_extractor(config: Dict[str, Any]) -> Extractor:
 
     Args:
         config: Extractor configuration dict with keys:
-            - type: Extractor type (regex, json, header, cookie, xpath, kata)
+            - type: Extractor type (regex, json, header, cookie, kata)
             - name: Variable name
             - [type-specific params]
 
@@ -450,14 +381,6 @@ def create_extractor(config: Dict[str, Any]) -> Extractor:
             cookie=config.get("cookie", ""),
             regex=config.get("regex"),
             group=config.get("group", 1),
-            internal=internal,
-        )
-
-    elif extractor_type == "xpath":
-        return XPathExtractor(
-            name=name,
-            xpath=config.get("xpath", ""),
-            attribute=config.get("attribute"),
             internal=internal,
         )
 
