@@ -22,9 +22,8 @@ class Finding(BaseModel):
 
     template_id: str
     vulnerability_type: str
-    severity: SeverityLevel  # Legacy severity for backward compatibility
+    severity: SeverityLevel
     owasp_category: OWASPCategory = OWASPCategory.A02_SECURITY_MISCONFIGURATION
-    """OWASP Top 10 2025 category for this finding."""
     evidence_strength: EvidenceStrength
     url: str
     evidence: Dict[str, Any] = Field(default_factory=dict)
@@ -38,8 +37,8 @@ class ParameterInfo(BaseModel):
     """Information about a discovered parameter (query, form, JSON, etc.)."""
 
     name: str
-    type: str = "unknown"  # query, form, json, header, cookie, path
-    location: str = "unknown"  # url, body, header, cookie
+    type: str = "unknown"
+    location: str = "unknown"
     example_values: List[str] = Field(default_factory=list)
     required: bool = False
 
@@ -53,25 +52,22 @@ class EndpointInfo(BaseModel):
     status_code: Optional[int] = None
     content_type: Optional[str] = None
 
-    # Discovered parameters
     query_params: List[ParameterInfo] = Field(default_factory=list)
     form_fields: List[ParameterInfo] = Field(default_factory=list)
     json_params: List[ParameterInfo] = Field(default_factory=list)
     headers: Dict[str, str] = Field(default_factory=dict)
     cookies: Dict[str, str] = Field(default_factory=dict)
 
-    # Additional metadata
-    forms: List[Dict[str, Any]] = Field(default_factory=list)  # HTML forms found
-    links: List[str] = Field(default_factory=list)  # Outbound links
-    api_patterns: List[str] = Field(default_factory=list)  # Detected API patterns
-    is_api: bool = False  # Whether this looks like an API endpoint
-    requires_auth: bool = False  # Whether auth appears required
+    forms: List[Dict[str, Any]] = Field(default_factory=list)
+    links: List[str] = Field(default_factory=list)
+    api_patterns: List[str] = Field(default_factory=list)
+    is_api: bool = False
+    requires_auth: bool = False
 
-    # Response analysis
     response_size: int = 0
     has_json: bool = False
     has_html: bool = False
-    error_indicators: List[str] = Field(default_factory=list)  # Stack traces, etc.
+    error_indicators: List[str] = Field(default_factory=list)
 
 
 class CrawlerStatistics(BaseModel):
@@ -96,36 +92,27 @@ class CrawlerStatistics(BaseModel):
     forms_discovered: int = 0
     input_fields_discovered: int = 0
 
-    authentication_detected: List[str] = Field(default_factory=list)  # JWT, Basic, Session, etc.
+    authentication_detected: List[str] = Field(default_factory=list)
 
 
 class CrawlerReport(BaseModel):
-    """Complete report from crawling a target.
+    """Complete report from crawling a target."""
 
-    Supports both the legacy string-based format and the new rich format
-    with full TargetConfig, auth data, forms, and storage data.
-    """
-
-    # Legacy fields (kept for backward compatibility)
     target: str = ""
     base_url: str = ""
     timestamp: str = ""
 
-    # Rich format fields
-    target_config: Optional[TargetConfig] = None  # Full TargetConfig for scanning
+    target_config: Optional[TargetConfig] = None
 
-    # Discovered data
     endpoints: List[Union[EndpointInfo, Dict[str, Any]]] = Field(default_factory=list)
     statistics: Union[CrawlerStatistics, Dict[str, Any]] = Field(default_factory=dict)
 
-    # Additional collected data (for agent crawler)
     forms: List[Dict[str, Any]] = Field(default_factory=list)
     auth_data: Dict[str, Any] = Field(default_factory=dict)
     storage_data: Dict[str, Any] = Field(default_factory=dict)
     discovered_cookies: Dict[str, str] = Field(default_factory=dict)
 
     def get_endpoints_by_method(self, method: str) -> List[Union[EndpointInfo, Dict[str, Any]]]:
-        """Get all endpoints with a specific HTTP method."""
         return [
             e for e in self.endpoints
             if (isinstance(e, EndpointInfo) and e.method == method) or
@@ -133,7 +120,6 @@ class CrawlerReport(BaseModel):
         ]
 
     def get_api_endpoints(self) -> List[Union[EndpointInfo, Dict[str, Any]]]:
-        """Get all detected API endpoints."""
         return [
             e for e in self.endpoints
             if (isinstance(e, EndpointInfo) and e.is_api) or
@@ -141,11 +127,9 @@ class CrawlerReport(BaseModel):
         ]
 
     def get_forms(self) -> List[Dict[str, Any]]:
-        """Get all discovered forms across all endpoints."""
         if self.forms:
             return self.forms
 
-        # Legacy: extract from endpoints
         forms = []
         for endpoint in self.endpoints:
             if isinstance(endpoint, EndpointInfo):
@@ -155,11 +139,9 @@ class CrawlerReport(BaseModel):
         return forms
 
     def get_auth_config(self) -> AuthConfig:
-        """Get an AuthConfig from the discovered auth data."""
         if self.target_config and self.target_config.authentication:
             return self.target_config.authentication
 
-        # Build from auth_data
         auth_type = self.auth_data.get("type", "none")
         if auth_type == "jwt":
             return AuthConfig(
@@ -177,7 +159,6 @@ class CrawlerReport(BaseModel):
         return AuthConfig()
 
     def to_target_config(self, name: Optional[str] = None) -> TargetConfig:
-        """Generate a TargetConfig for scanning from discovered endpoints."""
         if self.target_config:
             return self.target_config
 
@@ -211,7 +192,6 @@ class CrawlerReport(BaseModel):
         return self.target_config
 
     def save_yaml(self, path: Union[str, Path]) -> None:
-        """Save the crawler report as YAML."""
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "w") as f:
@@ -235,11 +215,9 @@ class ScanReport(BaseModel):
     errors: List[str] = Field(default_factory=list)
     duration_seconds: float = 0.0
 
-    # Checkpoint fields for resume capability
     checkpoint_file: Optional[str] = None
     completed_templates: List[str] = Field(default_factory=list)
 
-    # Legacy severity counts (for backward compatibility)
     @property
     def critical_count(self) -> int:
         return sum(1 for f in self.findings if f.severity == SeverityLevel.CRITICAL)
@@ -256,7 +234,6 @@ class ScanReport(BaseModel):
     def low_count(self) -> int:
         return sum(1 for f in self.findings if f.severity == SeverityLevel.LOW)
 
-    # OWASP Top 10 2025 category counts
     @property
     def a01_broken_access_control_count(self) -> int:
         return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A01_BROKEN_ACCESS_CONTROL)
@@ -298,7 +275,6 @@ class ScanReport(BaseModel):
         return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A10_EXCEPTION_CONDITIONS)
 
     def get_owasp_summary(self) -> Dict[str, int]:
-        """Get a summary of findings grouped by OWASP Top 10 2025 categories."""
         return {
             "A01:2025 - Broken Access Control": self.a01_broken_access_control_count,
             "A02:2025 - Security Misconfiguration": self.a02_security_misconfiguration_count,
@@ -313,6 +289,11 @@ class ScanReport(BaseModel):
         }
 
     def add_finding(self, finding: Finding) -> None:
+        self.findings.append(finding)
+
+    def add_finding_from_dict(self, data: Dict[str, Any]) -> None:
+        from dast.validators import create_finding_from_dict
+        finding = create_finding_from_dict(data)
         self.findings.append(finding)
 
     def add_error(self, error: str) -> None:

@@ -83,8 +83,7 @@ class TemplateInfo(BaseModel):
 
     name: str
     author: Optional[str] = None
-    severity: Union[SeverityLevel, OWASPCategory, str] = SeverityLevel.MEDIUM
-    """Legacy severity level (deprecated, use owasp_category instead)."""
+    severity: Union[SeverityLevel, str] = SeverityLevel.MEDIUM
     owasp_category: Optional[Union[OWASPCategory, str]] = None
     """OWASP Top 10 2025 category.
 
@@ -97,49 +96,26 @@ class TemplateInfo(BaseModel):
     tags: List[str] = Field(default_factory=list)
 
     def get_owasp_category(self) -> OWASPCategory:
-        """Get the OWASP Top 10 2025 category for this template.
-
-        1. Uses explicit owasp_category field if specified
-        2. Falls back to tag-based inference
-        3. Final fallback to severity-based mapping
-        """
-        # 1. Check explicit owasp_category field first
         if self.owasp_category is not None:
             if isinstance(self.owasp_category, OWASPCategory):
                 return self.owasp_category
-            # Parse string value
             category_str = str(self.owasp_category).strip()
-            # Handle short form (A01:2025)
             if category_str.startswith("A0") and ":2025" in category_str:
                 for category in OWASPCategory:
                     if category.value == category_str:
                         return category
-            # Handle enum name form (A01_BROKEN_ACCESS_CONTROL)
             for category in OWASPCategory:
                 if category.name == category_str or category.name.replace("_", "") == category_str.replace("_", "").replace(":", "").upper():
                     return category
 
-        # 2. Check legacy severity field for OWASP value (backward compatibility)
-        if isinstance(self.severity, OWASPCategory):
-            return self.severity
-
-        severity_str = str(self.severity)
-        if severity_str.startswith("A0") and ":2025" in severity_str:
-            for category in OWASPCategory:
-                if category.value == severity_str:
-                    return category
-
-        # 3. Tag-based inference (fallback)
         tags_lower = [t.lower() for t in self.tags]
 
-        # A01: Broken Access Control
         if any(tag in tags_lower for tag in [
             "access", "idor", "privilege", "authz", "authorization",
             "bypass", "escalation", "admin", "race", "directory"
         ]):
             return OWASPCategory.A01_BROKEN_ACCESS_CONTROL
 
-        # A05: Injection (most critical)
         if any(tag in tags_lower for tag in [
             "sqli", "sql", "injection", "nosql", "mongo", "ldap",
             "xss", "ssti", "template", "xxe", "command", "rce"
@@ -187,21 +163,12 @@ class TemplateInfo(BaseModel):
         ]):
             return OWASPCategory.A10_EXCEPTION_CONDITIONS
 
-        # A09: Logging Failures (default for info disclosure type issues)
         if any(tag in tags_lower for tag in [
             "log", "monitor", "audit", "detection"
         ]):
             return OWASPCategory.A09_LOGGING_FAILURES
 
-        # 4. Final fallback: Use severity-based mapping
-        if severity_str.lower() in ("critical", "high"):
-            return OWASPCategory.A05_INJECTION
-        elif severity_str.lower() == "medium":
-            return OWASPCategory.A02_SECURITY_MISCONFIGURATION
-        elif severity_str.lower() == "low":
-            return OWASPCategory.A10_EXCEPTION_CONDITIONS
-        else:  # info or unknown
-            return OWASPCategory.A09_LOGGING_FAILURES
+        return OWASPCategory.A02_SECURITY_MISCONFIGURATION
 
 
 class Template(BaseModel):
@@ -306,15 +273,11 @@ class GenericTemplate(BaseModel):
     # Load payloads from external file (one per line, # comments ignored)
     payloads_file: Optional[str] = None
 
-    # Headers (beyond auth headers)
     headers: Dict[str, str] = Field(default_factory=dict)
 
-    # Matchers to validate responses (legacy - use detection_tiers instead)
     matchers: List[MatcherConfig] = Field(default_factory=list)
 
-    # NEW: Detection tiers for layered scanning
     detection_tiers: List[DetectionTierConfig] = Field(default_factory=list)
-    """Detection tiers for passive/active/aggressive scanning."""
 
 
 class PayloadConfig(BaseModel):

@@ -10,13 +10,13 @@ Or download binaries from: https://github.com/projectdiscovery/katana/releases
 
 import asyncio
 import json
-import re
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin, urlparse
 
 import httpx
 from pydantic import BaseModel
+from selectolax.parser import HTMLParser
 
 from dast.crawler.models import KatanaEndpoint, KatanaStatistics
 from dast.crawler.report import SimpleCrawlerReport
@@ -220,22 +220,67 @@ class KatanaCrawler:
         return verified
 
     def _extract_forms_from_html(self, html: str, url: str) -> List[Dict[str, Any]]:
-        """Extract forms from HTML using regex."""
+        """Extract forms from HTML using selectolax parser."""
         forms = []
 
-        # Simple regex-based form extraction
-        form_pattern = r'<form[^>]*action=["\']([^"\']*)["\'][^>]*method=["\']([^"\']*)["\'].*?>'
-        for match in re.finditer(form_pattern, html, re.IGNORECASE):
-            action = match.group(1)
-            method = match.group(2).upper() or "GET"
+        tree = HTMLParser(html)
+
+        for form_node in tree.css("form"):
+            action = form_node.attrs.get("action", "")
+            method = (form_node.attrs.get("method", "GET") or "GET").upper()
 
             if not action.startswith("http"):
                 action = urljoin(url, action)
 
+            fields = []
+
+            for input_node in form_node.css("input"):
+                field = {
+                    "name": input_node.attrs.get("name", ""),
+                    "type": input_node.attrs.get("type", "text"),
+                    "value": input_node.attrs.get("value", ""),
+                }
+                if field["name"]:
+                    fields.append(field)
+
+            for textarea in form_node.css("textarea"):
+                field = {
+                    "name": textarea.attrs.get("name", ""),
+                    "type": "textarea",
+                    "value": textarea.text().strip() or textarea.attrs.get("value", ""),
+                }
+                if field["name"]:
+                    fields.append(field)
+
+            for select in form_node.css("select"):
+                options = [
+                    opt.attrs.get("value", opt.text().strip())
+                    for opt in select.css("option")
+                    if opt.attrs.get("value") or opt.text().strip()
+                ]
+                field = {
+                    "name": select.attrs.get("name", ""),
+                    "type": "select",
+                    "value": select.attrs.get("value", options[0] if options else ""),
+                    "options": options,
+                }
+                if field["name"]:
+                    fields.append(field)
+
+            for btn in form_node.css("button"):
+                field = {
+                    "name": btn.attrs.get("name", ""),
+                    "type": btn.attrs.get("type", "submit"),
+                    "value": btn.attrs.get("value", btn.text().strip()),
+                }
+                if field["name"]:
+                    fields.append(field)
+
             forms.append({
                 "action": action,
                 "method": method,
-                "fields": [],  # Would need more complex parsing
+                "fields": fields,
+                "field_count": len(fields),
             })
 
         return forms

@@ -5,12 +5,33 @@ import json
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)
 
-from dast.config import EvidenceStrength, Finding, RequestConfig, Template
+from dast.config import EvidenceStrength, Finding, RequestConfig, SeverityLevel, Template
 from dast.extractors import create_extractor
 from dast.matchers import MatchResult, create_matcher, evaluate_matchers
 from dast.scanner.context import ExecutionContext
 from dast.utils import logger
+
+
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=4, max=10),
+    retry=retry_if_exception_type((httpx.NetworkError, httpx.TimeoutException, OSError)),
+    reraise=True,
+)
+async def _execute_single_request(
+    client,
+    method: str,
+    path: str,
+    **kwargs
+) -> httpx.Response:
+    return await client.request(method, path, **kwargs)
 
 
 async def _execute_request_with_retry(
@@ -20,45 +41,29 @@ async def _execute_request_with_retry(
     get_client_fn,
     max_retries: int = 3,
 ) -> Tuple[httpx.Response, bool]:
-    """Execute a request with retry for consistency checking.
-
-    Args:
-        method: HTTP method
-        path: Request path
-        kwargs: Request kwargs (headers, body, cookies, etc.)
-        get_client_fn: Function to get HTTP client
-        max_retries: Maximum number of retries for consistency
-
-    Returns:
-        Tuple of (response, is_consistent)
-    """
     responses = []
     client = get_client_fn()
 
     for attempt in range(max_retries):
         try:
-            response = await client.request(method, path, **kwargs)
+            response = await _execute_single_request(client, method, path, **kwargs)
             responses.append(response)
 
-            # If this is the first attempt, continue to collect more samples
             if attempt < max_retries - 1:
-                await asyncio.sleep(0.1)  # Small delay between retries
+                await asyncio.sleep(0.1)
                 continue
 
-        except httpx.HTTPError as e:
+        except Exception:
             if attempt == max_retries - 1:
                 raise
             await asyncio.sleep(0.2)
             continue
 
-    # Check consistency if we have multiple responses
     if len(responses) > 1:
         from dast.validators import ConsistencyChecker
         is_consistent = ConsistencyChecker.are_consistent(responses)
-        # Return the first response (most representative)
         return responses[0], is_consistent
 
-    # Single response - assume consistent
     return responses[0], True if responses else None
 
 
@@ -71,27 +76,11 @@ async def execute_request(
     get_client_fn,
     response_cache: Dict[str, httpx.Response],
 ) -> Optional[Finding]:
-    """Execute a single HTTP request with concurrency control.
-
-    Args:
-        config: Request configuration
-        context: Execution context for variables and interpolation
-        template: Template being executed
-        target: TargetConfig
-        auth_context: AuthContext for authentication
-        get_client_fn: Function to get HTTP client
-        response_cache: Cache for boolean-blind baseline responses
-
-    Returns:
-        Finding if vulnerability detected, None otherwise
-    """
-    # Prepare request
     method = config.method
     path = context.interpolate(config.path)
     headers = prepare_headers(config, context)
     body = prepare_body(config, context)
 
-    # Build kwargs
     kwargs: Dict[str, Any] = {"headers": headers}
     if body:
         if config.json_body:
@@ -345,14 +334,25 @@ def create_finding(
         except ValueError:
             evidence_strength = EvidenceStrength.HEURISTIC
 
-    # Get OWASP category from template
     owasp_category = template.info.get_owasp_category()
+
+    sev = template.info.severity
+    if isinstance(sev, str):
+        sev_lower = sev.lower()
+        severity_map = {
+            "critical": SeverityLevel.CRITICAL,
+            "high": SeverityLevel.HIGH,
+            "medium": SeverityLevel.MEDIUM,
+            "low": SeverityLevel.LOW,
+            "info": SeverityLevel.INFO,
+        }
+        sev = severity_map.get(sev_lower, SeverityLevel.MEDIUM)
 
     return Finding(
         template_id=template.id,
         vulnerability_type=on_match.get("vulnerability") or template.id.replace("-", "_"),
-        severity=template.info.severity,  # Keep legacy severity for backward compatibility
-        owasp_category=owasp_category,  # Add OWASP category
+        severity=sev,
+        owasp_category=owasp_category,
         evidence_strength=evidence_strength,
         url=str(response.url),
         evidence={

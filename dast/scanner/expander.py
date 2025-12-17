@@ -1,8 +1,10 @@
 """Template expansion logic for DAST scanning."""
 
-import logging
-from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse, parse_qs, urlunparse
+from typing import Dict, List, Optional
+from urllib.parse import urlparse, parse_qs
+
+from jinja2 import Template as Jinja2Template
+from jinja2 import StrictUndefined
 
 from dast.config import (
     DetectionTier,
@@ -58,6 +60,52 @@ _PARAM_PATTERNS = {
 }
 
 
+def render_template(template_str: str, context: dict) -> str:
+    """Render a Jinja2 template string with the given context.
+
+    This function provides advanced templating capabilities for payload injection,
+    supporting:
+    - Variable interpolation: {{variable}}
+    - Conditionals: {% if condition %}...{% endif %}
+    - Loops: {% for item in items %}...{% endfor %}
+    - Filters: {{variable|upper}}
+
+    Args:
+        template_str: The template string to render (e.g., '{"comment": "{{payload}}"}')
+        context: Dictionary containing variables for template rendering
+
+    Returns:
+        Rendered string with all template variables replaced
+
+    Examples:
+        >>> render_template('{"id": "{{payload}}"}', {"payload": "1 OR 1=1"})
+        '{"id": "1 OR 1=1"}'
+
+        >>> render_template('{% if param %}{{param}}={{payload}}{% endif %}',
+        ...                {"param": "id", "payload": "test"})
+        'id=test'
+
+        >>> render_template('{{sqli | default("test")}}', {"sqli": "' OR 1=1 --"})
+        "' OR 1=1 --"
+    """
+    if not template_str:
+        return template_str
+
+    if not context:
+        context = {}
+
+    try:
+        # Use StrictUndefined to catch undefined variables in templates
+        # For security, auto_escape is disabled since we're working with payloads
+        # that may contain special characters intentionally
+        template = Jinja2Template(template_str, undefined=StrictUndefined)
+        return template.render(**context)
+    except Exception:
+        # Fallback: if Jinja2 rendering fails, return original string
+        # This maintains backward compatibility with existing templates
+        return template_str
+
+
 def extract_params_from_endpoints(endpoints: Dict[str, str]) -> Dict[str, List[Dict]]:
     """Extract injectable parameters from discovered endpoints.
 
@@ -97,22 +145,8 @@ def find_auto_mapped_endpoints(
     template_tags: set,
     endpoints: Dict[str, str],
 ) -> Optional[Dict[str, str]]:
-    """Find auto-mapped endpoints based on template type and discovered parameters.
-
-    When a template endpoint like {{sqli}} is not found in the config,
-    this function searches discovered endpoints for matching injectable parameters.
-
-    Args:
-        endpoint_key: The template endpoint variable (e.g., "sqli")
-        template_tags: Set of template tags
-        endpoints: All discovered endpoints
-
-    Returns:
-        Dict mapping endpoint URLs to parameter names, or None if no match
-    """
     import re
 
-    # Map endpoint keys to vulnerability types
     endpoint_to_vuln = {
         "sqli": "sqli",
         "sqli_post": "sqli",
@@ -122,7 +156,7 @@ def find_auto_mapped_endpoints(
         "path_traversal": "path_traversal",
         "ssrf": "ssrf",
         "idor": "idor",
-        "nosql_injection": "sqli",  # Reuse sqli patterns
+        "nosql_injection": "sqli",
         "generic_nosql_injection": "sqli",
     }
 
@@ -130,34 +164,28 @@ def find_auto_mapped_endpoints(
     if not vuln_type:
         return None
 
-    # Get patterns for this vulnerability type
     patterns = _PARAM_PATTERNS.get(vuln_type, [])
 
-    # Find endpoints with matching parameters
+    logger.debug(f"Auto-mapping {endpoint_key} (vuln_type={vuln_type}) against {len(endpoints)} endpoints")
+    logger.debug(f"Patterns for {vuln_type}: {patterns[:5]}...")
+
     mapped = {}
     for name, url in endpoints.items():
         parsed = urlparse(url)
-
-        # For API endpoints, include them even without query params
-        # They might accept JSON POST bodies
         is_api = '/api/' in url.lower() or '/rest/' in url.lower()
 
         if not parsed.query and not is_api:
             continue
 
         if not parsed.query:
-            # API endpoint without params - use first param name from template
-            # or a generic one
             if is_api:
-                mapped[url] = "input"  # Generic param name
+                mapped[url] = "input"
             continue
 
         params = parse_qs(parsed.query, keep_blank_values=True)
 
-        # Try to find best matching parameter
         best_param = None
         for param_name in params.keys():
-            # Check if parameter matches the vulnerability pattern
             for pattern in patterns:
                 if re.search(pattern, param_name, re.IGNORECASE):
                     best_param = param_name
@@ -165,31 +193,32 @@ def find_auto_mapped_endpoints(
             if best_param:
                 break
 
-        # If no pattern match but endpoint has params, use first param
         if not best_param and params:
             best_param = list(params.keys())[0]
 
         if best_param:
             mapped[url] = best_param
 
-    # Fallback: if nothing found but we have API endpoints, use one
+    if mapped:
+        logger.info(f"Auto-mapping '{endpoint_key}' to {len(mapped)} discovered endpoints")
+        return mapped
+
     if not mapped:
         for name, url in endpoints.items():
             if '/api/' in url.lower() or '/rest/' in url.lower():
-                # Use a common parameter for API endpoints
                 if '?' in url:
-                    # Has params, use it
                     mapped[url] = url.split('?')[1].split('=')[0].split('&')[0]
                 else:
-                    # No params, add generic input param
-                    if '?' in url:
-                        mapped[url] = "input"
-                    else:
-                        mapped[url + "?input="] = "input"
-                if len(mapped) >= 5:  # Limit fallback to 5 endpoints
+                    mapped[url + "?input="] = "input"
+                if len(mapped) >= 5:
                     break
 
-    return mapped if mapped else None
+    if mapped:
+        logger.info(f"Auto-mapping '{endpoint_key}' to {len(mapped)} discovered endpoints (fallback)")
+        return mapped
+
+    logger.debug(f"No auto-mapping found for {endpoint_key}")
+    return None
 
 
 def _expand_auto_mapped(
@@ -243,8 +272,13 @@ def _expand_auto_mapped(
                 headers["Content-Type"] = generic.content_type
 
                 if generic.body_template:
-                    body = generic.body_template.replace("{{payload}}", payload_cfg.value)
-                    body = body.replace("{{parameter}}", param_name)
+                    # Use Jinja2 for body templating
+                    context = {
+                        "payload": payload_cfg.value,
+                        "parameter": param_name,
+                        "sqli": payload_cfg.value,  # Backwards compatibility alias
+                    }
+                    body = render_template(generic.body_template, context)
                 else:
                     body = f"{param_name}={payload_cfg.value}"
 
@@ -506,7 +540,13 @@ def _expand_xml_endpoint(
         if hasattr(payload_cfg, "full_request") and payload_cfg.full_request:
             xml_body = payload_cfg.full_request
         else:
-            xml_body = generic.body_template.replace("{{payload}}", payload_cfg.value)
+            # Use Jinja2 for XML body templating
+            context = {
+                "payload": payload_cfg.value,
+                "parameter": "",
+                "sqli": payload_cfg.value,  # Backwards compatibility alias
+            }
+            xml_body = render_template(generic.body_template, context)
 
         headers = generic.headers.copy()
         headers["Content-Type"] = "application/xml"
@@ -1014,7 +1054,21 @@ def build_get_request(
     generic: GenericTemplate,
     payload: PayloadConfig,
 ) -> RequestConfig:
-    """Build a GET request from generic template config."""
+    """Build a GET request from generic template config.
+
+    Uses Jinja2 templating for URL construction, supporting:
+    - {{payload}}: The payload value
+    - {{parameter}}: The parameter name
+    - {% if ... %}: Conditional logic in URL paths
+    """
+    # Build context for Jinja2 rendering
+    context = {
+        "payload": payload.value,
+        "parameter": generic.parameter or "",
+    }
+    # Add alias {{sqli}} for backwards compatibility
+    context["sqli"] = payload.value
+
     # Build URL with parameter and payload
     if generic.parameter and not endpoint_path.endswith("="):
         # For URL parameter injection: /endpoint?param=payload
@@ -1030,11 +1084,19 @@ def build_get_request(
         else:
             path = f"{endpoint_path}{payload.value}"
 
+    # Render path with Jinja2 for advanced templating (e.g., conditional paths)
+    path = render_template(path, context)
+
+    # Render headers with Jinja2 (e.g., for dynamic header values)
+    rendered_headers = {}
+    for key, value in generic.headers.items():
+        rendered_headers[key] = render_template(str(value), context)
+
     return RequestConfig(
         name=payload.name,
         method="GET",
         path=path,
-        headers=generic.headers.copy(),
+        headers=rendered_headers,
         cookies={},
     )
 
@@ -1044,16 +1106,31 @@ def build_post_request(
     generic: GenericTemplate,
     payload: PayloadConfig,
 ) -> RequestConfig:
-    """Build a POST request from generic template config."""
-    headers = generic.headers.copy()
-    headers["Content-Type"] = generic.content_type
+    """Build a POST request from generic template config.
+
+    Uses Jinja2 templating for body_template and headers, supporting:
+    - {{payload}}: The payload value
+    - {{parameter}}: The parameter name
+    - {% if ... %}: Conditional logic
+    - Filters and other Jinja2 features
+    """
+    # Build context for Jinja2 rendering
+    context = {
+        "payload": payload.value,
+        "parameter": generic.parameter or "",
+    }
+    # Add alias {{sqli}} for backwards compatibility
+    context["sqli"] = payload.value
+
+    # Render headers with Jinja2 (e.g., for dynamic header values)
+    rendered_headers = {}
+    for key, value in generic.headers.items():
+        rendered_headers[key] = render_template(str(value), context)
+    rendered_headers["Content-Type"] = generic.content_type
 
     if generic.body_template:
-        # Use body template with {{payload}} placeholder
-        body = generic.body_template.replace("{{payload}}", payload.value)
-        # Also replace {{parameter}} if it exists
-        if generic.parameter:
-            body = body.replace("{{parameter}}", generic.parameter)
+        # Use Jinja2 rendering for body template
+        body = render_template(generic.body_template, context)
     elif generic.parameter:
         # Build form-encoded body
         body = f"{generic.parameter}={payload.value}"
@@ -1064,7 +1141,7 @@ def build_post_request(
         name=payload.name,
         method="POST",
         path=endpoint_path,
-        headers=headers,
+        headers=rendered_headers,
         body=body,
         cookies={},
     )
