@@ -846,17 +846,16 @@ def main():
         epilog="""
 Examples:
   # Crawl then scan (automatic discovery)
-  dast scan http://localhost:3000 --crawl --cookies '{"token": "..."}'
-  dast scan http://localhost:3000 --crawl -o results.json
+  dast scan http://localhost:3000 --crawl --cookies 'token=eyJ...'
 
-  # Quick scan with cookies
-  dast scan http://localhost:3000 --cookies 'token=eyJhbGci...'
+  # Quick scan with cookies (token= becomes Bearer)
+  dast scan http://localhost:3000 --cookies 'token=eyJ...'
 
   # Passive scan (fast, less intrusive)
   dast scan http://localhost:3000 --profile passive
 
   # Standalone crawl
-  dast crawl http://localhost:3000 --cookies '{"token": "..."}'
+  dast crawl http://localhost:3000 --cookies 'session=xyz'
 
   # List templates
   dast list -t templates/generic
