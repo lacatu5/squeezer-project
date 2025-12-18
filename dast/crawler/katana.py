@@ -1,6 +1,7 @@
 """Katana-based crawler for DAST.
 
-Uses Katana (ProjectDiscovery) for intelligent endpoint discovery.
+Uses Katana (ProjectDiscovery) for intelligent endpoint discovery
+with JavaScript crawling enabled by default.
 
 Installation:
     go install github.com/projectdiscovery/katana/cmd/katana@latest
@@ -15,7 +16,6 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import urljoin, urlparse
 
 import httpx
-from pydantic import BaseModel
 from selectolax.parser import HTMLParser
 
 from dast.crawler.models import KatanaEndpoint, KatanaStatistics
@@ -26,15 +26,15 @@ class KatanaCrawler:
     """
     Katana-based crawler for DAST.
 
-    Uses Katana (ProjectDiscovery) for intelligent endpoint discovery.
+    Uses Katana (ProjectDiscovery) for intelligent endpoint discovery
+    with JavaScript crawling enabled by default.
     """
 
     def __init__(
         self,
         base_url: str,
         max_depth: int = 3,
-        js_crawl: bool = False,
-        headless: bool = False,
+        js_crawl: bool = True,
         cookies: Optional[Dict[str, str]] = None,
         headers: Optional[Dict[str, str]] = None,
         katana_path: str = "katana",
@@ -47,8 +47,7 @@ class KatanaCrawler:
         Args:
             base_url: The base URL to crawl
             max_depth: Maximum crawl depth (default: 3)
-            js_crawl: Enable JavaScript crawling (default: False, requires Chrome)
-            headless: Use headless browser (default: False, requires Chrome)
+            js_crawl: Enable JavaScript crawling (default: True)
             cookies: Dictionary of cookies for authentication
             headers: Custom headers to send
             katana_path: Path to Katana binary (default: "katana")
@@ -60,7 +59,6 @@ class KatanaCrawler:
         self.base_domain = urlparse(base_url).netloc
         self.max_depth = max_depth
         self.js_crawl = js_crawl
-        self.headless = headless
         self.cookies = cookies or {}
         self.headers = headers or {}
         self.katana_path = katana_path
@@ -87,12 +85,10 @@ class KatanaCrawler:
             "-silent",
         ]
 
+        # JavaScript crawling (enabled by default)
         if self.js_crawl:
             cmd.extend(["-jc"])  # JavaScript crawling
             cmd.extend(["-js-crawl"])  # Crawl JS files
-
-        if self.headless:
-            cmd.extend(["-headless"])  # Internal headless mode
 
         # Add cookies as headers (Katana uses -H for cookies, not -c)
         if self.cookies:
@@ -399,8 +395,7 @@ class KatanaCrawler:
 async def crawl_with_katana(
     url: str,
     max_depth: int = 3,
-    js_crawl: bool = False,
-    headless: bool = False,
+    js_crawl: bool = True,
     cookies: Optional[Dict[str, str]] = None,
     headers: Optional[Dict[str, str]] = None,
     verify: bool = False,
@@ -414,8 +409,7 @@ async def crawl_with_katana(
     Args:
         url: The base URL to crawl
         max_depth: Maximum crawl depth
-        js_crawl: Enable JavaScript crawling
-        headless: Use headless browser
+        js_crawl: Enable JavaScript crawling (default: True)
         cookies: Cookies for authentication
         headers: Custom headers
         verify: Verify endpoints with HTTP requests
@@ -430,7 +424,6 @@ async def crawl_with_katana(
         base_url=url,
         max_depth=max_depth,
         js_crawl=js_crawl,
-        headless=headless,
         cookies=cookies,
         headers=headers,
         filter_static=filter_static,

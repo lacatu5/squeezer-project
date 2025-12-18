@@ -35,7 +35,7 @@ from dast.scanner import (
 from dast.auth import Authenticator, AuthContext
 
 # Analysis modules
-from dast.extractors import (
+from dast.core.extractors import (
     ExtractionResult,
     Extractor,
     RegexExtractor,
@@ -47,7 +47,7 @@ from dast.extractors import (
     extract_all,
 )
 
-from dast.matchers import (
+from dast.core.matchers import (
     MatchResult,
     Matcher,
     StatusMatcher,
@@ -109,7 +109,6 @@ __all__ = [
     "SemanticMatcher",
     "DiffMatcher",
     "TimeMatcher",
-    "DSLMatcher",
     "create_matcher",
     "evaluate_matchers",
     # JWT

@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 import httpx
 from tenacity import (
@@ -13,8 +13,8 @@ from tenacity import (
 )
 
 from dast.config import EvidenceStrength, Finding, RequestConfig, SeverityLevel, Template
-from dast.extractors import create_extractor
-from dast.matchers import MatchResult, create_matcher, evaluate_matchers
+from dast.core.extractors import create_extractor
+from dast.core.matchers import MatchResult, create_matcher, evaluate_matchers
 from dast.scanner.context import ExecutionContext
 from dast.utils import logger
 
@@ -60,7 +60,7 @@ async def _execute_request_with_retry(
             continue
 
     if len(responses) > 1:
-        from dast.validators import ConsistencyChecker
+        from dast.core.validators import ConsistencyChecker
         is_consistent = ConsistencyChecker.are_consistent(responses)
         return responses[0], is_consistent
 
@@ -156,7 +156,7 @@ async def execute_request(
         if on_match.get("compare_with"):
             cache_key = on_match["compare_with"]
             if cache_key in response_cache:
-                from dast.validators import compare_responses
+                from dast.core.validators import compare_responses
 
                 baseline_response = response_cache[cache_key]
 
@@ -206,7 +206,7 @@ async def execute_request(
 
             if result.matched:
                 # Calculate confidence from evidence strength and matcher count
-                from dast.validators import ConfidenceCalculator
+                from dast.core.validators import ConfidenceCalculator
                 confidence = ConfidenceCalculator.calculate(
                     result.evidence_strength,
                     len(matchers),

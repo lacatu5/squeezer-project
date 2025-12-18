@@ -6,7 +6,7 @@ This module implements professional-grade validation patterns inspired by:
 - Burp Suite (retry with consistency)
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List
 from httpx import Response
 
 from dast.config.common import EvidenceStrength

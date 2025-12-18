@@ -292,7 +292,7 @@ class ScanReport(BaseModel):
         self.findings.append(finding)
 
     def add_finding_from_dict(self, data: Dict[str, Any]) -> None:
-        from dast.validators import create_finding_from_dict
+        from dast.core.validators import create_finding_from_dict
         finding = create_finding_from_dict(data)
         self.findings.append(finding)
 

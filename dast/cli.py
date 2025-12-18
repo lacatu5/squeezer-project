@@ -1,11 +1,13 @@
-"""CLI interface for DAST MVP."""
+"""CLI interface for DAST MVP.
+
+This module provides the command-line interface for the DAST scanner.
+Business logic has been moved to dast.analyzer for cleaner separation.
+"""
 
 import asyncio
 import json
-import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import urlparse
 
 import typer
 from rich.console import Console
@@ -14,214 +16,35 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.text import Text
 
+from dast.analyzer import (
+    build_auto_target_config,
+    discover_and_add_json_endpoints,
+    extract_parameters_from_url,
+)
 from dast.crawler import KatanaCrawler, parse_cookies_string
 from dast.config import AuthType, EvidenceStrength, EndpointInfo, ScanProfile, ScanReport, TargetConfig
 from dast.scanner import load_templates, run_scan
-from dast.utils import setup_logging, logger
+from dast.utils import setup_logging
 
 console = Console()
 app = typer.Typer(rich_markup_mode="rich")
 
-INJECTABLE_PATTERNS = {
-    "sqli": [r"id", r"search", r"query", r"q", r"filter", r"find", r"item",
-             r"product", r"user", r"category", r"email", r"username", r"name"],
-    "xss": [r"name", r"comment", r"message", r"text", r"content", r"input",
-            r"desc", r"feedback", r"review", r"callback", r"redirect"],
-    "path_traversal": [r"file", r"path", r"folder", r"document", r"image",
-                       r"download", r"include", r"template", r"lang", r"filename"],
-    "ssrf": [r"url", r"link", r"redirect", r"next", r"dest", r"target",
-             r"callback", r"return", r"feed", r"site", r"uri", r"forward"],
-    "command": [r"host", r"hostname", r"ip", r"port", r"cmd", r"exec",
-                r"command", r"ping", r"traceroute"],
-}
 
+def _get_resources_path(*parts: str) -> Path:
+    """Get path to resources directory.
 
-def extract_parameters_from_url(url: str, method: str = "GET") -> List[Dict[str, Any]]:
-    parsed = urlparse(url)
-    params = []
-    if parsed.query:
-        for name, values in parse_qs(parsed.query).items():
-            params.append({
-                "name": name,
-                "value": values[0] if values else "",
-                "location": "query",
-            })
-    return params
-
-
-def classify_parameter(param_name: str) -> List[str]:
-    vuln_types = []
-    param_lower = param_name.lower()
-    for vuln_type, patterns in INJECTABLE_PATTERNS.items():
-        for pattern in patterns:
-            if pattern in param_lower:
-                vuln_types.append(vuln_type)
-                break
-    return vuln_types or ["generic"]
-
-
-def summarize_parameters(endpoint_infos: List[Any]) -> Dict[str, int]:
-    summary = {}
-    for ep in endpoint_infos:
-        for param in getattr(ep, 'query_params', []):
-            if isinstance(param, dict):
-                param_name = param.get('name', '')
-            else:
-                param_name = str(param)
-            vuln_types = classify_parameter(param_name)
-            for vuln_type in vuln_types:
-                summary[vuln_type] = summary.get(vuln_type, 0) + 1
-    return summary
-
-
-def get_injectable_parameters(endpoint_infos: List[Any]) -> Dict[str, List[Dict]]:
-    result = {}
-    for ep in endpoint_infos:
-        path = getattr(ep, 'path', urlparse(getattr(ep, 'url', '')).path)
-        params = getattr(ep, 'query_params', [])
-        injectable = []
-        for param in params:
-            if isinstance(param, dict):
-                param_name = param.get('name', '')
-            else:
-                param_name = str(param)
-            vuln_types = classify_parameter(param_name)
-            if vuln_types != ["generic"]:
-                injectable.append({
-                    "name": param_name,
-                    "vuln_types": vuln_types,
-                })
-        if injectable:
-            result[path] = injectable
-    return result
-
-
-def build_auto_target_config(
-    endpoints: List[Any],
-    templates: List[Any],
-    base_url: str,
-) -> Dict[str, str]:
-    auto_endpoints = {}
-    for ep in endpoints:
-        path = getattr(ep, 'path', urlparse(getattr(ep, 'url', '')).path)
-        method = getattr(ep, 'method', 'GET')
-        if "/rest/user/login" in path or "/api/user/login" in path:
-            auto_endpoints["login"] = f"{base_url}{path}"
-        elif "/rest/products/search" in path or "/api/products/search" in path:
-            auto_endpoints["search"] = f"{base_url}{path}"
-        elif "/rest/basket" in path or "/api/basket" in path:
-            auto_endpoints["basket"] = f"{base_url}{path}"
-        elif "/rest/feedback" in path or "/api/feedback" in path:
-            auto_endpoints["feedback"] = f"{base_url}{path}"
-    return auto_endpoints
+    Uses relative path from cli.py (works in development).
+    For pip install, importlib.resources would be used.
+    """
+    # Simple relative path from cli.py -> dast/resources/
+    base = Path(__file__).parent / "resources"
+    if parts:
+        return base / Path(*parts)
+    return base
 
 
 def print_banner():
     console.print("\n[bold cyan]DAST MVP[/bold cyan] - Template-based DAST Framework\n")
-
-
-def add_json_injection_endpoints(
-    target: TargetConfig,
-    endpoints: list,
-) -> None:
-    paths = set()
-    for ep in endpoints:
-        path = ep.get('url', '').strip('/')
-        if path:
-            paths.add(f"/{path}")
-
-    json_injection_points = {
-        "xss_json_post": ("/rest/feedback", "comment"),
-        "xss_json_search": ("/rest/products/search", "q"),
-        "xss_json_comment": ("/rest/comments", "comment"),
-        "command_search": ("/rest/products/search", "q"),
-        "sqli_basket": ("/rest/basket/", "quantity"),
-        "sqli_products": ("/rest/products/", "quantity"),
-    }
-
-    added_count = 0
-    for var_name, (path, field) in json_injection_points.items():
-        for discovered_path in paths:
-            if discovered_path.startswith(path.rstrip('/')) or path.startswith(discovered_path.rstrip('/')):
-                target._endpoints_custom[var_name] = f"{path}?{field}="
-                added_count += 1
-                break
-
-    if added_count > 0:
-        logger.info(f"Added {added_count} JSON injection endpoints for testing")
-
-
-async def discover_and_add_json_endpoints(
-    target: TargetConfig,
-    endpoints: list,
-    cookies: Optional[Dict[str, str]] = None,
-) -> None:
-    from dast.scanner.json_discovery import quick_discover
-
-    headers = {}
-    if cookies:
-        cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
-        headers["Cookie"] = cookie_str
-
-    endpoint_paths = list(set(ep.get('url', '') for ep in endpoints))
-    json_fields = await quick_discover(target.base_url, endpoint_paths, headers)
-
-    if not target.endpoints.custom:
-        target.endpoints.custom = {}
-
-    template_mappings = {
-        "xss_stored": [
-            ("/rest/feedback", "comment"),
-            ("/rest/feedbacks", "comment"),
-            ("/api/Feedback", "comment"),
-            ("/api/Feedbacks", "comment"),
-            ("/rest/comments", "comment"),
-            ("/api/Comments", "comment"),
-        ],
-        "xss_reflected": [("/rest/products/search", "q"), ("/api/Products/search", "q")],
-        "command_injection": [("/rest/products/search", "q"), ("/api/Products/search", "q")],
-        "sqli_post": [("/rest/basket/", "quantity"), ("/rest/products/", "quantity")],
-        "path_traversal": [("/rest/file/upload", "file")],
-        "ssrf": [("/rest/redirect", "url")],
-        "ssti": [("/rest", "input"), ("/api", "input"), ("/rest/", "name"), ("/api/", "name")],
-        "xxe": [("/rest", "data"), ("/api", "data"), ("/rest/upload", "file"), ("/api/upload", "file")],
-    }
-
-    count = 0
-    for path, fields in json_fields.items():
-        for field in fields:
-            for template_var, mappings in template_mappings.items():
-                for mapping_path, mapping_field in mappings:
-                    if path.startswith(mapping_path.rstrip('/')) or mapping_path.startswith(path.rstrip('/')):
-                        if field == mapping_field or mapping_field == "*":
-                            target.endpoints.custom[template_var] = f"JSON:{path}:{field}"
-                            count += 1
-                            break
-
-    if count > 0:
-        logger.info(f"Added {count} JSON injection endpoints for testing")
-        console.print(f"[dim]  → {count} JSON injection points discovered[/dim]")
-    else:
-        common_endpoints = {
-            "xss_stored": "JSON:/rest/feedback:comment",
-            "xss_reflected": "JSON:/rest/products/search:q",
-            "command_injection": "JSON:/rest/products/search:q",
-        }
-        for var, spec in common_endpoints.items():
-            path = spec.split(":")[1]
-            if any(path in ep.get('url', '') for ep in endpoints):
-                target.endpoints.custom[var] = spec
-                count += 1
-
-        if count > 0:
-            console.print(f"[dim]  → {count} JSON injection endpoints added (fallback)[/dim]")
-
-    has_api = any(ep.get('url', '').startswith('/api/') or ep.get('url', '').startswith('/rest/') for ep in endpoints)
-    if has_api:
-        target.endpoints.custom.setdefault("ssti", "JSON:/rest/products:input")
-        target.endpoints.custom.setdefault("xxe", "XML:/rest/data")
-        count += 2
-        console.print(f"[dim]  → Added SSTI and XXE endpoints for testing[/dim]")
 
 
 def _print_crawl_report(report) -> None:
@@ -568,9 +391,11 @@ def scan(
         if profile:
             console.print(f"[dim]Profile: {scan_profile.value}[/dim]")
 
-        template_path = Path(template_dir or "templates/generic")
-        if not template_path.exists():
-            template_path = Path(__file__).parent.parent / "templates" / "generic"
+        # Resolve template path: use provided dir, or default to resources/templates/generic
+        if template_dir:
+            template_path = Path(template_dir)
+        else:
+            template_path = _get_resources_path("templates", "generic")
 
         if not template_path.exists():
             console.print("[red]No templates found![/red]")
@@ -618,7 +443,6 @@ def scan(
         if dom_xss:
             console.print("[cyan]Phase 3: DOM XSS Validation[/cyan]\n")
             from dast.crawler import DOMXSSValidator
-            from urllib.parse import urlparse, parse_qs
 
             xss_findings = []
 
@@ -746,9 +570,12 @@ def list_templates(
 ):
     print_banner()
 
-    path = Path(template_dir)
-    if not path.exists():
-        path = Path(__file__).parent.parent / "templates"
+    # Resolve template path
+    if template_dir == "templates":
+        # Use default resources path
+        path = _get_resources_path("templates")
+    else:
+        path = Path(template_dir)
 
     if not path.exists():
         console.print("[red]No templates found![/red]")
@@ -764,10 +591,12 @@ def list_templates(
 
     for t in templates:
         tags_str = ", ".join(t.info.tags[:3]) if t.info.tags else ""
+        # Handle both SeverityLevel enum and string
+        severity_value = t.info.severity.value if hasattr(t.info.severity, 'value') else t.info.severity
         table.add_row(
             t.id,
             t.info.name[:40],
-            t.info.severity.value,
+            severity_value,
             tags_str,
         )
 
