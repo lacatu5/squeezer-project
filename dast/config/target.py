@@ -1,7 +1,7 @@
 """Target configuration models."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Optional, Union
 
 import yaml
 from pydantic import BaseModel, Field
@@ -9,32 +9,10 @@ from pydantic import BaseModel, Field
 from dast.config.common import AuthType
 
 
-class ExtractorConfig(BaseModel):
-    """Data extractor configuration."""
-
-    name: str
-    location: str = "body"  # body, header
-    selector: Optional[str] = None
-    regex: Optional[str] = None
-    group: int = 1
-
-
-class LoginConfig(BaseModel):
-    """Login configuration for form auth."""
-
-    url: str
-    method: str = "POST"
-    payload: Dict[str, Any] = Field(default_factory=dict)
-    headers: Dict[str, str] = Field(default_factory=dict)
-    extract: List[ExtractorConfig] = Field(default_factory=list)
-    apply: Dict[str, Any] = Field(default_factory=dict)
-
-
 class AuthConfig(BaseModel):
     """Authentication configuration."""
 
     type: AuthType = AuthType.NONE
-    login: Optional[LoginConfig] = None
     username: Optional[str] = None
     password: Optional[str] = None
     token: Optional[str] = None

@@ -16,14 +16,13 @@ from dast.config.common import (
 from dast.config.target import (
     AuthConfig,
     EndpointsConfig,
-    ExtractorConfig,
-    LoginConfig,
     TargetConfig,
 )
 
 # Template configuration
 from dast.config.template import (
     DetectionTierConfig,
+    ExtractorConfig,
     GenericTemplate,
     MatcherConfig,
     PayloadConfig,
@@ -52,11 +51,10 @@ __all__ = [
     # Target
     "AuthConfig",
     "EndpointsConfig",
-    "ExtractorConfig",
-    "LoginConfig",
     "TargetConfig",
     # Template
     "DetectionTierConfig",
+    "ExtractorConfig",
     "GenericTemplate",
     "MatcherConfig",
     "PayloadConfig",

@@ -7,7 +7,16 @@ import yaml
 from pydantic import BaseModel, Field
 
 from dast.config.common import DetectionTier, OWASPCategory, SeverityLevel
-from dast.config.target import ExtractorConfig
+
+
+class ExtractorConfig(BaseModel):
+    """Data extractor configuration for templates."""
+
+    name: str
+    location: str = "body"
+    selector: Optional[str] = None
+    regex: Optional[str] = None
+    group: int = 1
 
 
 class MatcherConfig(BaseModel):

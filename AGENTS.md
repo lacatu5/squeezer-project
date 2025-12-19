@@ -7,3 +7,4 @@ Strict rules:
 - Use async/await for all I/O operations
 - If you modify this file to add more things, don't make it too complex (i mean, more than needed)
 - If there are some values that are in python files but they should be in JSON files, do it
+- "El token de autenticación se obtiene manualmente mediante login en la aplicación, y se proporciona al escáner mediante el parámetro --bearer o archivo de configuración. Este enfoque evita la complejidad de automatizar el flujo de login en SPAs modernas donde la autenticación es asíncrona (XHR/Fetch).
