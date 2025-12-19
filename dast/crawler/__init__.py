@@ -2,7 +2,6 @@
 
 Supports:
 - Katana: Fast external binary crawler for endpoint discovery
-- DOMXSSValidator: Browser-based XSS validation
 """
 
 from dast.crawler.katana import (
@@ -11,11 +10,6 @@ from dast.crawler.katana import (
     parse_cookies_string,
 )
 from dast.crawler.models import KatanaEndpoint, KatanaStatistics
-from dast.crawler.playwright import (
-    DOMXSSFinding,
-    DOMXSSValidator,
-    validate_dom_xss,
-)
 from dast.crawler.report import SimpleCrawlerReport
 
 __all__ = [
@@ -25,7 +19,4 @@ __all__ = [
     "KatanaEndpoint",
     "KatanaStatistics",
     "SimpleCrawlerReport",
-    "DOMXSSValidator",
-    "DOMXSSFinding",
-    "validate_dom_xss",
 ]

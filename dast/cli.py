@@ -278,7 +278,6 @@ def scan(
     target: str = typer.Argument(..., help="Target URL (e.g., http://localhost:3000)"),
     bearer: str = typer.Option(None, "-b", "--bearer", help="Bearer token for authentication"),
     crawl: bool = typer.Option(False, "--crawl", help="Crawl target first to auto-discover endpoints"),
-    dom_xss: bool = typer.Option(False, "--dom-xss", help="Enable DOM XSS validation with Playwright"),
     template_dir: str = typer.Option("templates/generic", "-t", "--template-dir", help="Templates directory"),
     output: str = typer.Option(None, "-o", "--output", help="Output JSON file for results"),
     profile: str = typer.Option(None, "--profile", help="Scan profile: passive, standard, thorough, aggressive"),
@@ -439,56 +438,6 @@ def scan(
             scan_profile=scan_profile,
             checkpoint_file=checkpoint_file,
         )
-
-        if dom_xss:
-            console.print("[cyan]Phase 3: DOM XSS Validation[/cyan]\n")
-            from dast.crawler import DOMXSSValidator
-
-            xss_findings = []
-
-            with Progress(
-                SpinnerColumn(),
-                TextColumn("[progress.description]{task.description}"),
-                console=console,
-            ) as progress:
-                task = progress.add_task("[cyan]Testing DOM XSS...[/cyan]", total=None)
-
-                try:
-                    async with DOMXSSValidator(headless=True, timeout=10000) as validator:
-                        for ep in endpoint_infos[:20]:
-                            for param_info in ep.query_params[:5]:
-                                param_name = param_info.get("name", "") if isinstance(param_info, dict) else str(param_info)
-                                if param_name:
-                                    try:
-                                        findings = await validator.test_url_parameter(
-                                            url=ep.url,
-                                            param=param_name,
-                                        )
-                                        for f in findings:
-                                            report.add_finding_from_dict({
-                                                "vulnerability_type": "DOM XSS",
-                                                "url": f.url,
-                                                "message": f"XSS payload executed via {f.sink}",
-                                                "owasp_category": "A03:2025",
-                                                "severity": "High",
-                                                "evidence": {
-                                                    "payload": f.payload[:100],
-                                                    "sink": f.sink,
-                                                    "source": f.source,
-                                                },
-                                            })
-                                        xss_findings.extend(findings)
-                                    except Exception:
-                                        continue
-                    progress.update(task, completed=True)
-                except Exception as e:
-                    console.print(f"[yellow]DOM XSS validation skipped: {e}[/yellow]")
-                    console.print("[dim]Install: pip install playwright && playwright install chromium[/dim]")
-
-            if xss_findings:
-                console.print(f"[green]DOM XSS: {len(xss_findings)} confirmed[/green]")
-            else:
-                console.print("[dim]No DOM XSS vulnerabilities found[/dim]")
 
         _print_report(report)
 
