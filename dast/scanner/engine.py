@@ -273,25 +273,32 @@ class TemplateEngine:
             self._release_slot()
 
 
-def load_templates(template_dir: Path) -> List[Template]:
-    """Load all templates from directory or single file."""
+def load_templates(template_dirs) -> List[Template]:
+    """Load all templates from directory or list of directories."""
     templates = []
     skipped = 0
 
-    # Handle single file vs directory
-    if template_dir.is_file():
-        yaml_files = [template_dir]
+    # Handle single Path/string vs list
+    if isinstance(template_dirs, (Path, str)):
+        dirs_to_scan = [Path(template_dirs)]
     else:
-        yaml_files = list(template_dir.rglob("*.yaml"))
+        dirs_to_scan = [Path(d) for d in template_dirs]
 
-    for yaml_file in yaml_files:
-        try:
-            template = Template.from_yaml(yaml_file)
-            templates.append(template)
-            logger.debug(f"Loaded template: {template.id}")
-        except Exception as e:
-            skipped += 1
-            logger.warning(f"Skipping invalid template {yaml_file.name}: {e}")
+    for template_dir in dirs_to_scan:
+        # Handle single file vs directory
+        if template_dir.is_file():
+            yaml_files = [template_dir]
+        else:
+            yaml_files = list(template_dir.rglob("*.yaml"))
+
+        for yaml_file in yaml_files:
+            try:
+                template = Template.from_yaml(yaml_file)
+                templates.append(template)
+                logger.debug(f"Loaded template: {template.id}")
+            except Exception as e:
+                skipped += 1
+                logger.warning(f"Skipping invalid template {yaml_file.name}: {e}")
 
     logger.info(f"Loaded {len(templates)} templates ({skipped} skipped)")
     return templates

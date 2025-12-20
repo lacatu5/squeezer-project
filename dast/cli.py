@@ -30,19 +30,6 @@ console = Console()
 app = typer.Typer(rich_markup_mode="rich")
 
 
-def _get_resources_path(*parts: str) -> Path:
-    """Get path to resources directory.
-
-    Uses relative path from cli.py (works in development).
-    For pip install, importlib.resources would be used.
-    """
-    # Simple relative path from cli.py -> dast/resources/
-    base = Path(__file__).parent / "resources"
-    if parts:
-        return base / Path(*parts)
-    return base
-
-
 def print_banner():
     console.print("\n[bold cyan]DAST MVP[/bold cyan] - Template-based DAST Framework\n")
 
@@ -278,7 +265,9 @@ def scan(
     target: str = typer.Argument(..., help="Target URL (e.g., http://localhost:3000)"),
     bearer: str = typer.Option(None, "-b", "--bearer", help="Bearer token for authentication"),
     crawl: bool = typer.Option(False, "--crawl", help="Crawl target first to auto-discover endpoints"),
-    template_dir: str = typer.Option("templates/generic", "-t", "--template-dir", help="Templates directory"),
+    generic: bool = typer.Option(True, "--generic/--no-generic", help="Include generic templates"),
+    app: str = typer.Option(None, "--app", help="Add app-specific templates (juice-shop, ...)"),
+    template_dir: str = typer.Option(None, "-t", "--template-dir", help="Override templates directory"),
     output: str = typer.Option(None, "-o", "--output", help="Output JSON file for results"),
     profile: str = typer.Option(None, "--profile", help="Scan profile: passive, standard, thorough, aggressive"),
     checkpoint: str = typer.Option(None, "--checkpoint", help="Save scan progress to file"),
@@ -390,17 +379,29 @@ def scan(
         if profile:
             console.print(f"[dim]Profile: {scan_profile.value}[/dim]")
 
-        # Resolve template path: use provided dir, or default to resources/templates/generic
-        if template_dir:
-            template_path = Path(template_dir)
-        else:
-            template_path = _get_resources_path("templates", "generic")
+        # Get project root (cli.py is in dast/, so parent.parent is project root)
+        project_root = Path(__file__).parent.parent.resolve()
 
-        if not template_path.exists():
-            console.print("[red]No templates found![/red]")
+        # Build list of template directories
+        template_paths = []
+
+        if template_dir:
+            template_paths = [Path(template_dir).resolve()]
+        else:
+            if generic:
+                generic_path = project_root / "templates" / "generic"
+                if generic_path.exists():
+                    template_paths.append(generic_path)
+            if app:
+                app_path = project_root / "templates" / "apps" / app
+                if app_path.exists():
+                    template_paths.append(app_path)
+
+        if not template_paths:
+            console.print("[red]No templates found. Use --generic or --app[/red]")
             raise typer.Exit(1)
 
-        templates = load_templates(template_path)
+        templates = load_templates(template_paths)
         if not verbose:
             console.print(f"[dim]Loaded {len(templates)} templates[/dim]\n")
 
@@ -515,22 +516,35 @@ def crawl(
 
 @app.command()
 def list_templates(
-    template_dir: str = typer.Option("templates", "-t", "--template-dir", help="Templates directory"),
+    generic: bool = typer.Option(True, "--generic/--no-generic", help="Include generic templates"),
+    app: str = typer.Option(None, "--app", help="Add app-specific templates (juice-shop, ...)"),
+    template_dir: str = typer.Option(None, "-t", "--template-dir", help="Override templates directory"),
 ):
     print_banner()
 
-    # Resolve template path
-    if template_dir == "templates":
-        # Use default resources path
-        path = _get_resources_path("templates")
-    else:
-        path = Path(template_dir)
+    # Get project root
+    project_root = Path(__file__).parent.parent.resolve()
 
-    if not path.exists():
-        console.print("[red]No templates found![/red]")
+    # Build list of template directories
+    template_paths = []
+
+    if template_dir:
+        template_paths = [Path(template_dir).resolve()]
+    else:
+        if generic:
+            generic_path = project_root / "templates" / "generic"
+            if generic_path.exists():
+                template_paths.append(generic_path)
+        if app:
+            app_path = project_root / "templates" / "apps" / app
+            if app_path.exists():
+                template_paths.append(app_path)
+
+    if not template_paths:
+        console.print("[red]No templates found. Use --generic or --app[/red]")
         raise typer.Exit(1)
 
-    templates = load_templates(path)
+    templates = load_templates(template_paths)
 
     table = Table(title="Available Templates")
     table.add_column("ID", style="cyan")

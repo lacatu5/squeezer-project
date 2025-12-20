@@ -12,8 +12,8 @@ Or download binaries from: https://github.com/projectdiscovery/katana/releases
 import asyncio
 import json
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from urllib.parse import urljoin, urlparse
+from typing import Any, Dict, List, Optional, Set
+from urllib.parse import urljoin, urlparse, parse_qs
 
 import httpx
 from selectolax.parser import HTMLParser
@@ -71,6 +71,7 @@ class KatanaCrawler:
         self.forms: List[Dict[str, Any]] = []
         self.stats = KatanaStatistics()
         self.discovered_cookies: Dict[str, str] = {}
+        self.all_discovered_params: Dict[str, Set[str]] = {}  # path -> set of param names
 
     def _build_katana_command(
         self,
@@ -122,23 +123,32 @@ class KatanaCrawler:
                     request = data.get("request", {})
                     response = data.get("response", {})
 
+                    url = request.get("endpoint", "")
+                    # Extract query params from URL
+                    query_params = self._extract_query_params(url)
+
                     endpoint = KatanaEndpoint(
-                        url=request.get("endpoint", ""),
+                        url=url,
                         method=request.get("method", "GET"),
                         status_code=response.get("status_code"),
                         content_type=response.get("headers", {}).get("Content-Type"),
                         content_length=len(response.get("body", "")),
                         source="katana",
+                        query_params=query_params,
                     )
                 else:
                     # Fallback for other formats
+                    url = data.get("url", data.get("endpoint", ""))
+                    query_params = self._extract_query_params(url)
+
                     endpoint = KatanaEndpoint(
-                        url=data.get("url", data.get("endpoint", "")),
+                        url=url,
                         method=data.get("method", "GET"),
                         status_code=data.get("status_code"),
                         content_type=data.get("content_type"),
                         content_length=data.get("content_length", 0),
                         source=data.get("source", "unknown"),
+                        query_params=query_params,
                     )
                 endpoints.append(endpoint)
             except json.JSONDecodeError:
@@ -147,8 +157,23 @@ class KatanaCrawler:
 
         return endpoints
 
+    def _extract_query_params(self, url: str) -> Dict[str, str]:
+        """Extract query parameters from URL.
+
+        Returns a dict mapping param names to their example values.
+        """
+        if "?" not in url:
+            return {}
+        parsed = urlparse(url)
+        params = parse_qs(parsed.query)
+        # Flatten single values, keep lists for multiple values
+        return {k: v[0] if len(v) == 1 else v for k, v in params.items()}
+
     def _deduplicate_endpoints(self, endpoints: List[KatanaEndpoint]) -> List[KatanaEndpoint]:
-        """Deduplicate endpoints by URL and filter to same-origin only."""
+        """Deduplicate endpoints by URL and filter to same-origin only.
+
+        Also accumulates discovered query parameters for each path.
+        """
         seen = set()
         unique = []
 
@@ -185,6 +210,13 @@ class KatanaCrawler:
             url = ep.url.split("#")[0]
             # Remove query string for deduplication
             url_without_query = url.split("?")[0]
+            path = parsed_url.path
+
+            # Accumulate discovered parameters for this path
+            if ep.query_params:
+                if path not in self.all_discovered_params:
+                    self.all_discovered_params[path] = set()
+                self.all_discovered_params[path].update(ep.query_params.keys())
 
             if url_without_query not in seen:
                 seen.add(url_without_query)
@@ -390,6 +422,15 @@ class KatanaCrawler:
             endpoints=endpoints_simple,
             cookies=list(self.cookies.keys()) if self.cookies else [],
         )
+
+    def get_discovered_params(self) -> Dict[str, List[str]]:
+        """Get all discovered query parameters organized by path.
+
+        Returns:
+            Dict mapping path -> list of parameter names discovered for that path.
+            Example: {"/api/Products": ["q", "filter"], "/api/user": ["id"]}
+        """
+        return {path: sorted(params) for path, params in self.all_discovered_params.items()}
 
 
 async def crawl_with_katana(

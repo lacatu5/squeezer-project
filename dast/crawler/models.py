@@ -16,6 +16,7 @@ class KatanaEndpoint:
     content_length: int = 0
     source: str = "unknown"  # katana source field
     timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
+    query_params: Dict[str, str] = field(default_factory=dict)  # discovered query params
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -30,6 +31,7 @@ class KatanaEndpoint:
             "source": self.source,
             "timestamp": self.timestamp,
             "interesting": self._is_interesting(),
+            "query_params": self.query_params,
         }
 
     def _classify_type(self) -> str:
@@ -56,6 +58,16 @@ class KatanaEndpoint:
             "checkout", "payment", "order", "basket", "manage"
         ]
         return any(pattern in url_lower for pattern in interesting)
+
+    def _extract_query_params(self) -> Dict[str, str]:
+        """Extract query parameters from the URL."""
+        if "?" not in self.url:
+            return {}
+        from urllib.parse import urlparse, parse_qs
+        parsed = urlparse(self.url)
+        params = parse_qs(parsed.query)
+        # Flatten single values, keep lists for multiple values
+        return {k: v[0] if len(v) == 1 else v for k, v in params.items()}
 
 
 @dataclass
