@@ -51,7 +51,7 @@ class TemplateEngine:
     ):
         self.target = target
         self.scan_profile = scan_profile
-        self.authenticator = Authenticator(target.base_url, target.timeout)
+        self.authenticator = Authenticator()
         self._auth_context: Optional[AuthContext] = None
         self._client: Optional[httpx.AsyncClient] = None
         self._validate_target = validate_target
@@ -112,7 +112,6 @@ class TemplateEngine:
         """Close resources."""
         if self._client and not self._client.is_closed:
             await self._client.aclose()
-        await self.authenticator.close()
 
     def _get_client(self) -> httpx.AsyncClient:
         """Get or create HTTP client."""

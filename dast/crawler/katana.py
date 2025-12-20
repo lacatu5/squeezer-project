@@ -91,6 +91,14 @@ class KatanaCrawler:
             cmd.extend(["-jc"])  # JavaScript crawling
             cmd.extend(["-js-crawl"])  # Crawl JS files
 
+        # XHR extraction - extract API calls from JavaScript
+        # This helps discover REST endpoints and their parameters
+        cmd.extend(["-xhr"])
+
+        # Form extraction and filling - discover input parameters
+        cmd.extend(["-fx"])  # Extract forms to JSONL output
+        cmd.extend(["-aff"])  # Automatic form filling (experimental)
+
         # Add cookies as headers (Katana uses -H for cookies, not -c)
         if self.cookies:
             cookie_str = "; ".join(f"{k}={v}" for k, v in self.cookies.items())
