@@ -32,10 +32,28 @@ class ExecutionContext:
     _named_responses: Dict[str, httpx.Response] = field(default_factory=dict)
 
     def interpolate(self, text: str) -> str:
-        """Replace variable placeholders in text."""
+        """Replace variable placeholders in text.
+
+        Handles nested variables by performing multiple passes until
+        no more replacements are possible (up to 10 iterations).
+        """
         if not isinstance(text, str):
             return str(text)
 
+        result = text
+        max_iterations = 10  # Prevent infinite loops
+        prev_result = None
+
+        for _ in range(max_iterations):
+            prev_result = result
+            result = self._interpolate_once(result)
+            if result == prev_result:
+                break  # No more changes, we're done
+
+        return result
+
+    def _interpolate_once(self, text: str) -> str:
+        """Single pass of variable replacement."""
         result = text
 
         # Handle built-in functions
@@ -49,6 +67,16 @@ class ExecutionContext:
         # Handle endpoints
         for name, value in self.endpoints.items():
             result = result.replace(f"{{{{endpoints.{name}}}}}", value)
+
+        # Handle variables with default values: {{VAR|default}}
+        # This must be done before normal variable interpolation
+        def replace_with_default(match):
+            var_name = match.group(1)
+            default_value = match.group(2)
+            return str(self.variables.get(var_name, default_value))
+
+        # Match {{VAR|default}} or {{ VAR|default }} patterns
+        result = re.sub(r'\{\{\s*(\w+)\s*\|\s*([^}]+)\s*\}\}', replace_with_default, result)
 
         # Handle variables (process longer keys first to avoid partial replacements)
         for name in sorted(self.variables.keys(), key=len, reverse=True):

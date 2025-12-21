@@ -429,6 +429,7 @@ class KatanaCrawler:
             },
             endpoints=endpoints_simple,
             cookies=list(self.cookies.keys()) if self.cookies else [],
+            discovered_params=self.get_discovered_params(),
         )
 
     def get_discovered_params(self) -> Dict[str, List[str]]:

@@ -1,7 +1,7 @@
 """Target configuration models."""
 
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import yaml
 from pydantic import BaseModel, Field
@@ -38,6 +38,7 @@ class TargetConfig(BaseModel):
     authentication: AuthConfig = Field(default_factory=AuthConfig)
     endpoints: EndpointsConfig = Field(default_factory=EndpointsConfig)
     variables: Optional[Dict[str, Any]] = None
+    discovered_params: Optional[Dict[str, List[str]]] = None  # path -> list of param names
 
     # Scanner settings
     timeout: float = 30.0
@@ -53,6 +54,10 @@ class TargetConfig(BaseModel):
     def get_endpoints(self) -> Dict[str, str]:
         """Get endpoints dict, defaulting to empty dict."""
         return self.endpoints.get_custom()
+
+    def get_discovered_params(self) -> Dict[str, List[str]]:
+        """Get discovered params dict, defaulting to empty dict."""
+        return self.discovered_params or {}
 
     @classmethod
     def from_yaml(cls, path: Union[str, Path]) -> "TargetConfig":

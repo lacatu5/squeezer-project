@@ -19,13 +19,9 @@ from dast.config import (
 from dast.scanner.context import ExecutionContext
 from dast.scanner.executor import execute_request
 from dast.scanner.expander import (
-    build_boolean_blind_requests,
-    build_error_based_requests,
     build_get_request,
     build_post_request,
-    build_time_blind_requests,
     expand_broadcast_template,
-    expand_generic_template,
     expand_template,
     expand_with_tiers,
 )
@@ -134,6 +130,11 @@ class TemplateEngine:
         # Include endpoints in variables for direct interpolation {{endpoint_name}}
         variables = self.target.get_variables().copy()
         variables.update(self.target.get_endpoints())
+
+        # Add discovered_params for template use
+        discovered_params = self.target.get_discovered_params()
+        if discovered_params:
+            variables["discovered_params"] = discovered_params
 
         context = ExecutionContext(
             variables=variables,

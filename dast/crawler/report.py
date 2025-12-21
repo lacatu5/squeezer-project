@@ -13,7 +13,6 @@ from dast.config import (
     EndpointsConfig,
     TargetConfig,
 )
-from dast.crawler.models import KatanaEndpoint, KatanaStatistics
 
 
 class SimpleCrawlerReport(BaseModel):
@@ -27,6 +26,7 @@ class SimpleCrawlerReport(BaseModel):
     summary: Dict[str, int]
     endpoints: List[Dict[str, Any]] = PDField(default_factory=list)
     cookies: List[str] = PDField(default_factory=list)
+    discovered_params: Dict[str, List[str]] = PDField(default_factory=dict)  # path -> param names
 
     # Static file extensions to blacklist
     _STATIC_EXTENSIONS: Set[str] = {
@@ -201,6 +201,7 @@ class SimpleCrawlerReport(BaseModel):
                 base="",
                 custom=custom_endpoints,
             ),
+            discovered_params=self.discovered_params,
         )
 
     def save_yaml(self, path: str) -> None:
@@ -215,6 +216,8 @@ class SimpleCrawlerReport(BaseModel):
         }
         if self.cookies:
             data["cookies"] = self.cookies
+        if self.discovered_params:
+            data["discovered_params"] = self.discovered_params
 
         Path(path).write_text(yaml.dump(data, sort_keys=False, default_flow_style=False))
 
@@ -226,4 +229,5 @@ class SimpleCrawlerReport(BaseModel):
             "summary": self.summary,
             "endpoints": self.endpoints,
             "cookies": self.cookies,
+            "discovered_params": self.discovered_params,
         }
