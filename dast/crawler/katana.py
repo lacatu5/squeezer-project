@@ -40,7 +40,6 @@ class KatanaCrawler:
         katana_path: str = "katana",
         timeout: int = 300,
         filter_static: bool = True,
-        interesting_only: bool = False,
     ):
         """Initialize the Katana crawler.
 
@@ -53,7 +52,6 @@ class KatanaCrawler:
             katana_path: Path to Katana binary (default: "katana")
             timeout: Maximum time for crawl in seconds (default: 300)
             filter_static: Filter out static files (.js, .css, images, etc.) (default: True)
-            interesting_only: Only keep interesting endpoints (api, auth, admin, etc.) (default: False)
         """
         self.base_url = base_url
         self.base_domain = urlparse(base_url).netloc
@@ -64,7 +62,6 @@ class KatanaCrawler:
         self.katana_path = katana_path
         self.timeout = timeout
         self.filter_static = filter_static
-        self.interesting_only = interesting_only
 
         # State
         self.endpoints: List[KatanaEndpoint] = []
@@ -206,12 +203,6 @@ class KatanaCrawler:
                     continue
                 # Also filter common static paths
                 if any(x in url_lower for x in ['/assets/', '/static/', '/images/', '/fonts/', '/media/', '/_next/static/', '/__webpack__/']):
-                    continue
-
-            # Interesting only filter
-            if self.interesting_only:
-                ep_type = ep._classify_type()
-                if ep_type not in ('api', 'auth', 'admin') and not ep._is_interesting():
                     continue
 
             # Normalize URL (remove fragments, sort query params)
@@ -451,7 +442,6 @@ async def crawl_with_katana(
     verify: bool = False,
     output_file: Optional[str] = None,
     filter_static: bool = True,
-    interesting_only: bool = False,
 ) -> SimpleCrawlerReport:
     """
     Convenience function to run the Katana crawler.
@@ -465,7 +455,6 @@ async def crawl_with_katana(
         verify: Verify endpoints with HTTP requests
         output_file: Optional file to save the report
         filter_static: Filter out static files
-        interesting_only: Only keep interesting endpoints
 
     Returns:
         SimpleCrawlerReport with discovered data
@@ -477,7 +466,6 @@ async def crawl_with_katana(
         cookies=cookies,
         headers=headers,
         filter_static=filter_static,
-        interesting_only=interesting_only,
     )
 
     report = await crawler.crawl(verify=verify)

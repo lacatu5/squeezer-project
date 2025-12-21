@@ -10,6 +10,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import typer
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -274,8 +275,19 @@ def scan(
     resume: str = typer.Option(None, "--resume", help="Resume scan from checkpoint file"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
     no_validate: bool = typer.Option(False, "--no-validate", help="Skip target connectivity validation"),
+    coverage: bool = typer.Option(False, "--coverage", help="Enable code coverage tracking (requires: pip install coverage)"),
 ):
     async def _scan():
+        cov = None
+        if coverage:
+            if not HAS_COVERAGE:
+                console.print("[red]Error: coverage module not installed[/red]")
+                console.print("[dim]Install it: pip install coverage[/dim]")
+                raise typer.Exit(1)
+            cov = coverage_module.Coverage(source=["dast"], omit=["*/tests/*", "*/test_*.py"])
+            cov.start()
+            console.print("[cyan]Coverage tracking enabled[/cyan]\n")
+
         setup_logging(verbose=verbose)
 
         if not verbose:
@@ -302,7 +314,7 @@ def scan(
 
         if crawl:
             console.print(f"[cyan]Phase 1: Crawling {target}[/cyan]")
-            console.print("[dim]JS Crawl: enabled | Interesting-only: enabled | Max Depth: 3[/dim]\n")
+            console.print("[dim]JS Crawl: enabled | Max Depth: 3[/dim]\n")
 
             crawl_cookies = {}
             if bearer:
@@ -314,7 +326,6 @@ def scan(
                 js_crawl=True,
                 cookies=crawl_cookies,
                 filter_static=True,
-                interesting_only=True,
             )
 
             with Progress(
@@ -445,6 +456,14 @@ def scan(
         if output and report.findings:
             _save_results(report, output)
 
+        # Stop coverage and show report
+        if cov is not None:
+            cov.stop()
+            console.print("\n[bold]Code Coverage Report[/bold]\n")
+            cov.report(file=open(1, 'w'), show_missing=True)  # Print to stdout
+            console.print("\n[dim]Generate HTML report: coverage html[/dim]")
+            console.print("[dim]View report: open htmlcov/index.html[/dim]")
+
         raise typer.Exit(0 if report.findings else 1)
 
     asyncio.run(_scan())
@@ -457,7 +476,6 @@ def crawl(
     max_depth: int = typer.Option(3, "--max-depth", help="Maximum crawl depth"),
     js_crawl: bool = typer.Option(False, "--js-crawl", help="Enable JavaScript crawling"),
     cookies: str = typer.Option(None, "--cookies", help="Authentication cookies"),
-    interesting_only: bool = typer.Option(False, "--interesting-only", help="Only keep interesting endpoints"),
     no_filter_static: bool = typer.Option(False, "--no-filter-static", help="Don't filter static files"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
 ):
@@ -469,8 +487,6 @@ def crawl(
 
         console.print(f"[dim]Target: {target}[/dim]")
         console.print(f"[dim]Max Depth: {max_depth} | JS Crawl: {js_crawl}[/dim]")
-        if interesting_only:
-            console.print("[dim]Filter: interesting only (api, auth, admin)[/dim]")
         if no_filter_static:
             console.print("[dim]Filter: none (keeping all files)[/dim]")
 
@@ -487,7 +503,6 @@ def crawl(
             js_crawl=js_crawl,
             cookies=parsed_cookies,
             filter_static=not no_filter_static,
-            interesting_only=interesting_only,
         )
 
         with Progress(

@@ -106,40 +106,6 @@ def render_template(template_str: str, context: dict) -> str:
         return template_str
 
 
-def extract_params_from_endpoints(endpoints: Dict[str, str]) -> Dict[str, List[Dict]]:
-    """Extract injectable parameters from discovered endpoints.
-
-    Returns a dict mapping endpoint URLs to their injectable parameters.
-    """
-    import re
-    from collections import defaultdict
-
-    injectable = defaultdict(list)
-
-    for name, url in endpoints.items():
-        parsed = urlparse(url)
-
-        if not parsed.query:
-            continue
-
-        # Parse query string, keeping empty values
-        params = parse_qs(parsed.query, keep_blank_values=True)
-
-        for param_name in params.keys():
-            # Check if parameter matches any vulnerability pattern
-            for vuln_type, patterns in _PARAM_PATTERNS.items():
-                for pattern in patterns:
-                    if re.search(pattern, param_name, re.IGNORECASE):
-                        injectable[url].append({
-                            "name": param_name,
-                            "vuln_type": vuln_type,
-                            "confidence": 90 if re.match(f"^{pattern}$", param_name, re.IGNORECASE) else 70,
-                        })
-                        break
-
-    return dict(injectable)
-
-
 def find_auto_mapped_endpoints(
     endpoint_key: str,
     template_tags: set,

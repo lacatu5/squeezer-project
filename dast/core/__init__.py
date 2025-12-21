@@ -4,7 +4,6 @@ This module contains fundamental building blocks used across the scanner:
 - Matchers: Response pattern matching for vulnerability detection
 - Extractors: Dynamic data extraction from HTTP responses
 - Validators: Response consistency and confidence scoring
-- Merger: Configuration merging utilities
 """
 
 from dast.core.extractors import (
@@ -30,7 +29,6 @@ from dast.core.matchers import (
     create_matcher,
     evaluate_matchers,
 )
-from dast.core.merger import merge_configs
 from dast.core.validators import (
     ConsistencyChecker,
     ConfidenceCalculator,
@@ -65,6 +63,4 @@ __all__ = [
     "ConfidenceCalculator",
     "compare_responses",
     "create_finding_from_dict",
-    # Merger
-    "merge_configs",
 ]
