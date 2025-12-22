@@ -1,6 +1,5 @@
 """Authentication handler for DAST scans."""
 
-import base64
 from dataclasses import dataclass, field
 from typing import Dict, Optional
 
@@ -21,7 +20,7 @@ class AuthContext:
 class Authenticator:
     """Handles authentication for target applications.
 
-    Supports Bearer token and Basic auth.
+    Supports Bearer token authentication.
     Token must be obtained externally (manual login -> copy token).
     """
 
@@ -32,28 +31,10 @@ class Authenticator:
         if auth_type == AuthType.NONE:
             return AuthContext(authenticated=True)
 
-        if auth_type == AuthType.BASIC:
-            return self._auth_basic(config)
-
         if auth_type == AuthType.BEARER:
             return self._auth_bearer(config)
 
         return AuthContext(authenticated=False, error=f"Unknown auth type: {auth_type}")
-
-    def _auth_basic(self, config: AuthConfig) -> AuthContext:
-        """HTTP Basic Authentication."""
-        username = config.username or ""
-        password = config.password or ""
-
-        if not username or not password:
-            return AuthContext(authenticated=False, error="Username and password required for Basic auth")
-
-        credentials = base64.b64encode(f"{username}:{password}".encode()).decode()
-
-        return AuthContext(
-            authenticated=True,
-            headers={"Authorization": f"Basic {credentials}"},
-        )
 
     def _auth_bearer(self, config: AuthConfig) -> AuthContext:
         """Bearer token authentication."""

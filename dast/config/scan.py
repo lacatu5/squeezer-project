@@ -218,74 +218,96 @@ class ScanReport(BaseModel):
     checkpoint_file: Optional[str] = None
     completed_templates: List[str] = Field(default_factory=list)
 
+    def _count_by_severity(self, severity: SeverityLevel) -> int:
+        return sum(1 for f in self.findings if f.severity == severity)
+
     @property
     def critical_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == SeverityLevel.CRITICAL)
+        return self._count_by_severity(SeverityLevel.CRITICAL)
 
     @property
     def high_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == SeverityLevel.HIGH)
+        return self._count_by_severity(SeverityLevel.HIGH)
 
     @property
     def medium_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == SeverityLevel.MEDIUM)
+        return self._count_by_severity(SeverityLevel.MEDIUM)
 
     @property
     def low_count(self) -> int:
-        return sum(1 for f in self.findings if f.severity == SeverityLevel.LOW)
+        return self._count_by_severity(SeverityLevel.LOW)
+
+    def _count_by_owasp(self, category: OWASPCategory) -> int:
+        return sum(1 for f in self.findings if f.owasp_category == category)
 
     @property
     def a01_broken_access_control_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A01_BROKEN_ACCESS_CONTROL)
+        return self._count_by_owasp(OWASPCategory.A01_BROKEN_ACCESS_CONTROL)
 
     @property
     def a02_security_misconfiguration_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A02_SECURITY_MISCONFIGURATION)
+        return self._count_by_owasp(OWASPCategory.A02_SECURITY_MISCONFIGURATION)
 
     @property
     def a03_software_supply_chain_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A03_SOFTWARE_SUPPLY_CHAIN)
+        return self._count_by_owasp(OWASPCategory.A03_SOFTWARE_SUPPLY_CHAIN)
 
     @property
     def a04_cryptographic_failures_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A04_CRYPTOGRAPHIC_FAILURES)
+        return self._count_by_owasp(OWASPCategory.A04_CRYPTOGRAPHIC_FAILURES)
 
     @property
     def a05_injection_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A05_INJECTION)
+        return self._count_by_owasp(OWASPCategory.A05_INJECTION)
 
     @property
     def a06_insecure_design_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A06_INSECURE_DESIGN)
+        return self._count_by_owasp(OWASPCategory.A06_INSECURE_DESIGN)
 
     @property
     def a07_authentication_failures_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A07_AUTHENTICATION_FAILURES)
+        return self._count_by_owasp(OWASPCategory.A07_AUTHENTICATION_FAILURES)
 
     @property
     def a08_integrity_failures_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A08_INTEGRITY_FAILURES)
+        return self._count_by_owasp(OWASPCategory.A08_INTEGRITY_FAILURES)
 
     @property
     def a09_logging_failures_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A09_LOGGING_FAILURES)
+        return self._count_by_owasp(OWASPCategory.A09_LOGGING_FAILURES)
 
     @property
     def a10_exception_conditions_count(self) -> int:
-        return sum(1 for f in self.findings if f.owasp_category == OWASPCategory.A10_EXCEPTION_CONDITIONS)
+        return self._count_by_owasp(OWASPCategory.A10_EXCEPTION_CONDITIONS)
 
     def get_owasp_summary(self) -> Dict[str, int]:
+        labels = {
+            "A01": "Broken Access Control",
+            "A02": "Security Misconfiguration",
+            "A03": "Software Supply Chain Failures",
+            "A04": "Cryptographic Failures",
+            "A05": "Injection",
+            "A06": "Insecure Design",
+            "A07": "Authentication Failures",
+            "A08": "Software or Data Integrity Failures",
+            "A09": "Security Logging and Alerting Failures",
+            "A10": "Mishandling of Exceptional Conditions",
+        }
+        categories = {
+            "A01": OWASPCategory.A01_BROKEN_ACCESS_CONTROL,
+            "A02": OWASPCategory.A02_SECURITY_MISCONFIGURATION,
+            "A03": OWASPCategory.A03_SOFTWARE_SUPPLY_CHAIN,
+            "A04": OWASPCategory.A04_CRYPTOGRAPHIC_FAILURES,
+            "A05": OWASPCategory.A05_INJECTION,
+            "A06": OWASPCategory.A06_INSECURE_DESIGN,
+            "A07": OWASPCategory.A07_AUTHENTICATION_FAILURES,
+            "A08": OWASPCategory.A08_INTEGRITY_FAILURES,
+            "A09": OWASPCategory.A09_LOGGING_FAILURES,
+            "A10": OWASPCategory.A10_EXCEPTION_CONDITIONS,
+        }
         return {
-            "A01:2025 - Broken Access Control": self.a01_broken_access_control_count,
-            "A02:2025 - Security Misconfiguration": self.a02_security_misconfiguration_count,
-            "A03:2025 - Software Supply Chain Failures": self.a03_software_supply_chain_count,
-            "A04:2025 - Cryptographic Failures": self.a04_cryptographic_failures_count,
-            "A05:2025 - Injection": self.a05_injection_count,
-            "A06:2025 - Insecure Design": self.a06_insecure_design_count,
-            "A07:2025 - Authentication Failures": self.a07_authentication_failures_count,
-            "A08:2025 - Software or Data Integrity Failures": self.a08_integrity_failures_count,
-            "A09:2025 - Security Logging and Alerting Failures": self.a09_logging_failures_count,
-            "A10:2025 - Mishandling of Exceptional Conditions": self.a10_exception_conditions_count,
+            f"{k}:2025 - {labels[k]}": self._count_by_owasp(v)
+            for k, v in categories.items()
         }
 
     def add_finding(self, finding: Finding) -> None:

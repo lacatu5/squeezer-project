@@ -14,21 +14,12 @@ from dast.analyzer.target_builder import (
     build_auto_target_config,
     discover_and_add_json_endpoints,
 )
-from dast.analyzer.parameter_analyzer import (
-    get_injectable_parameters,
-    summarize_parameters,
-)
 
 __all__ = [
-    # classifier
     "INJECTABLE_PATTERNS",
     "classify_parameter",
     "extract_parameters_from_url",
-    # target_builder
     "add_json_injection_endpoints",
     "build_auto_target_config",
     "discover_and_add_json_endpoints",
-    # parameter_analyzer
-    "get_injectable_parameters",
-    "summarize_parameters",
 ]

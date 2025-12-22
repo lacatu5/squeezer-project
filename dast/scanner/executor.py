@@ -19,6 +19,12 @@ from dast.scanner.context import ExecutionContext
 from dast.utils import logger
 
 
+DEFAULT_MAX_RETRIES = 3
+DEFAULT_RETRY_DELAY = 0.1
+DEFAULT_RETRY_DELAY_BACKUP = 0.2
+DEFAULT_TIMEOUT = 10.0
+
+
 @retry(
     stop=stop_after_attempt(3),
     wait=wait_exponential(multiplier=1, min=4, max=10),
@@ -39,7 +45,9 @@ async def _execute_request_with_retry(
     path: str,
     kwargs: Dict[str, Any],
     get_client_fn,
-    max_retries: int = 3,
+    max_retries: int = DEFAULT_MAX_RETRIES,
+    retry_delay: float = DEFAULT_RETRY_DELAY,
+    retry_delay_backup: float = DEFAULT_RETRY_DELAY_BACKUP,
 ) -> Tuple[httpx.Response, bool]:
     responses = []
     client = get_client_fn()
@@ -50,13 +58,13 @@ async def _execute_request_with_retry(
             responses.append(response)
 
             if attempt < max_retries - 1:
-                await asyncio.sleep(0.1)
+                await asyncio.sleep(retry_delay)
                 continue
 
         except Exception:
             if attempt == max_retries - 1:
                 raise
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(retry_delay_backup)
             continue
 
     if len(responses) > 1:
@@ -75,6 +83,7 @@ async def execute_request(
     auth_context,
     get_client_fn,
     response_cache: Dict[str, httpx.Response],
+    max_retries: int = DEFAULT_MAX_RETRIES,
 ) -> Optional[Finding]:
     method = config.method
     path = context.interpolate(config.path)
@@ -88,7 +97,6 @@ async def execute_request(
         else:
             kwargs["content"] = body
 
-    # Add auth headers and cookies
     if auth_context:
         kwargs["headers"].update(auth_context.headers)
         if auth_context.cookies:
@@ -100,16 +108,14 @@ async def execute_request(
         kwargs["cookies"].update(config.cookies)
 
     try:
-        # Execute request with retry for consistency checking
-        # Check if retry is enabled in config (default: True for high-severity templates)
         use_retry = (
             template.info.severity in ("critical", "high") and
-            not config.on_match  # No retry for baseline/cache requests
+            not config.on_match
         )
 
         if use_retry:
             response, is_consistent = await _execute_request_with_retry(
-                method, path, kwargs, get_client_fn, max_retries=3
+                method, path, kwargs, get_client_fn, max_retries=max_retries
             )
         else:
             client = get_client_fn()
@@ -119,9 +125,7 @@ async def execute_request(
         context.responses.append(response)
         context.request_count += 1
 
-        # Extract data using the new extractors module
         if config.extractors:
-            # Convert ExtractorConfig to dict for the extractor factory
             for extractor_config in config.extractors:
                 extractor_dict = {
                     "type": "json" if extractor_config.selector else "regex",
@@ -137,37 +141,28 @@ async def execute_request(
                     if result and result.success:
                         context.set(result.name, result.value)
                 except Exception:
-                    # Continue on extraction errors
                     pass
 
-        # Save response if named (for IDOR/diff matching)
         if config.name:
             context.save_response(config.name, response)
 
-        # Cache response for boolean-blind comparison
         on_match = config.on_match or {}
         if on_match.get("cache_key"):
             response_cache[on_match["cache_key"]] = response
-            # Baseline requests don't trigger findings
             if on_match.get("is_baseline"):
                 return None
 
-        # Handle boolean-blind detection (compare with baseline)
         if on_match.get("compare_with"):
             cache_key = on_match["compare_with"]
             if cache_key in response_cache:
                 from dast.core.validators import compare_responses
 
                 baseline_response = response_cache[cache_key]
-
-                # Get false response if available (for proper boolean-blind comparison)
                 false_response = response_cache.get(f"{cache_key}_false", baseline_response)
 
-                # Use professional comparison from validators module
                 comparison = compare_responses(baseline_response, response, false_response)
 
                 if comparison["is_vulnerable"]:
-                    # For boolean-blind, check negative matchers to exclude false positives
                     negative_matchers = [m for m in config.matchers if getattr(m, 'negative', False)]
                     if negative_matchers:
                         matchers = [create_matcher(m) for m in negative_matchers]
@@ -182,15 +177,12 @@ async def execute_request(
                         evidence_strength=EvidenceStrength.INFERENCE,
                     )
                     return create_finding(config, template, response, result, comparison["confidence"])
-            return None  # No baseline to compare
+            return None
 
-        # Check matchers (standard detection)
         if config.matchers:
-            # Check if we need to use diff matcher (requires base response)
             matchers = []
             for matcher_config in config.matchers:
                 if matcher_config.type == "diff":
-                    # Look for base response name in config
                     base_response_name = getattr(matcher_config, 'base_response', None)
                     base_response = None
                     if base_response_name:
@@ -199,25 +191,22 @@ async def execute_request(
                 else:
                     matchers.append(create_matcher(matcher_config))
 
-            # Use global matchers_condition if available, otherwise fall back to first matcher's condition
             condition = config.matchers_condition if hasattr(config, 'matchers_condition') else (config.matchers[0].condition if config.matchers else "and")
 
             result = evaluate_matchers(matchers, response, condition)
 
             if result.matched:
-                # Calculate confidence from evidence strength and matcher count
                 from dast.core.validators import ConfidenceCalculator
                 confidence = ConfidenceCalculator.calculate(
                     result.evidence_strength,
                     len(matchers),
                     sum(1 for m in matchers if m.matches(response).matched),
-                    is_consistent=is_consistent,  # Use actual consistency from retry
+                    is_consistent=is_consistent,
                 )
                 return create_finding(config, template, response, result, confidence)
 
     except httpx.HTTPError as e:
         logger.debug(f"HTTP error during request: {e}")
-
     except Exception as e:
         logger.debug(f"Unexpected error during request: {type(e).__name__}: {e}")
 
@@ -229,60 +218,41 @@ def responses_differ(
     response2: httpx.Response,
     target,
 ) -> bool:
-    """Check if two responses differ significantly for boolean-blind detection.
-
-    Uses the configured boolean_diff_threshold from target config.
-
-    Returns True if responses have different:
-    - Status codes
-    - Content length (more than threshold difference)
-    - JSON structure (for JSON responses)
-    """
-    # Different status codes = differ
+    """Check if two responses differ significantly for boolean-blind detection."""
     if response1.status_code != response2.status_code:
         return True
 
-    # Check content length difference
     len1 = len(response1.text)
     len2 = len(response2.text)
 
-    # If both are empty, they're the same
     if len1 == 0 and len2 == 0:
         return False
 
-    # If one is empty and other isn't, they differ
     if len1 == 0 or len2 == 0:
         return True
 
-    # Check for significant length difference (using configured threshold)
     threshold = target.boolean_diff_threshold
     length_diff = abs(len1 - len2)
     if length_diff > max(len1, len2) * threshold:
         return True
 
-    # For JSON responses, check structure
     try:
         json1 = response1.json()
         json2 = response2.json()
 
-        # For arrays, check count
         if isinstance(json1, dict) and isinstance(json2, dict):
-            # Check for data array length
             data1 = json1.get("data", [])
             data2 = json2.get("data", [])
             if isinstance(data1, list) and isinstance(data2, list):
                 if len(data1) != len(data2):
                     return True
     except Exception:
-        # Not JSON or parsing failed, use text comparison
         pass
 
-    # Responses are essentially the same
     return False
 
 
 def prepare_headers(config: RequestConfig, context: ExecutionContext) -> Dict[str, str]:
-    """Prepare request headers with interpolation."""
     headers = {}
     for key, value in config.headers.items():
         headers[key] = context.interpolate(value)
@@ -290,9 +260,7 @@ def prepare_headers(config: RequestConfig, context: ExecutionContext) -> Dict[st
 
 
 def prepare_body(config: RequestConfig, context: ExecutionContext) -> Any:
-    """Prepare request body with interpolation."""
     if config.json_body:
-        # Interpolate JSON body
         json_str = json.dumps(config.json_body)
         json_str = context.interpolate(json_str)
         try:
@@ -313,21 +281,10 @@ def create_finding(
     match_result: MatchResult,
     confidence: str = "medium",
 ) -> Finding:
-    """Create a finding from a successful match.
-
-    Args:
-        config: Request configuration
-        template: Template being executed
-        response: HTTP response
-        match_result: Matcher evaluation result
-        confidence: Confidence level (high/medium/low)
-    """
     on_match = config.on_match or {}
 
-    # Use evidence_strength from match result, default to HEURISTIC
     evidence_strength = match_result.evidence_strength
     if on_match.get("evidence_strength"):
-        # Allow template to override, but validate
         strength_str = on_match["evidence_strength"]
         try:
             evidence_strength = EvidenceStrength(strength_str)

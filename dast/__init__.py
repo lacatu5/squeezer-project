@@ -3,7 +3,6 @@
 A modular vulnerability scanning framework with support for:
 - Multi-request workflows with state propagation
 - Semantic validation for business logic flaws
-- JWT manipulation testing
 """
 
 __version__ = "0.2.0"
@@ -60,9 +59,6 @@ from dast.core.matchers import (
     evaluate_matchers,
 )
 
-# Specialized modules
-from dast.auth import JWTForge
-
 __all__ = [
     # Version
     "__version__",
@@ -109,6 +105,4 @@ __all__ = [
     "TimeMatcher",
     "create_matcher",
     "evaluate_matchers",
-    # JWT
-    "JWTForge",
 ]
