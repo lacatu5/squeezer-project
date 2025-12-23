@@ -1,9 +1,3 @@
-"""CLI interface for DAST MVP.
-
-This module provides the command-line interface for the DAST scanner.
-Business logic has been moved to dast.analyzer for cleaner separation.
-"""
-
 import asyncio
 import json
 from pathlib import Path
@@ -263,7 +257,7 @@ def _save_results(report: ScanReport, output: str) -> None:
 
 @app.command()
 def scan(
-    target: str = typer.Argument(..., help="Target URL (e.g., http://localhost:3000)"),
+    target: str = typer.Argument(..., help="Target URL to scan"),
     bearer: str = typer.Option(None, "-b", "--bearer", help="Bearer token for authentication"),
     crawl: bool = typer.Option(False, "--crawl", help="Crawl target first to auto-discover endpoints"),
     generic: bool = typer.Option(True, "--generic/--no-generic", help="Include generic templates"),
@@ -314,7 +308,7 @@ def scan(
 
         if crawl:
             console.print(f"[cyan]Phase 1: Crawling {target}[/cyan]")
-            console.print("[dim]JS Crawl: enabled | Max Depth: 3[/dim]\n")
+            console.print("[dim]JS Crawl: enabled[/dim]\n")
 
             crawl_cookies = {}
             if bearer:

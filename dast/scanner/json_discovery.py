@@ -1,5 +1,3 @@
-"""JSON body parameter discovery for API endpoints."""
-
 import asyncio
 import json
 import re
@@ -12,7 +10,6 @@ from dast.utils import logger
 
 
 def load_field_patterns(config_path: Optional[str] = None) -> Dict[str, Dict]:
-    """Load field classification patterns from config or return defaults."""
     if config_path:
         try:
             import yaml
@@ -52,7 +49,6 @@ def load_field_patterns(config_path: Optional[str] = None) -> Dict[str, Dict]:
 
 
 def load_discovery_payloads(config_path: Optional[str] = None) -> Dict:
-    """Load discovery payloads from config or return defaults."""
     if config_path:
         try:
             import yaml
@@ -64,26 +60,26 @@ def load_discovery_payloads(config_path: Optional[str] = None) -> Dict:
     return {
         "rest_api": {
             "id": "1",
-            "name": "test",
-            "email": "test@example.com",
-            "username": "testuser",
-            "password": "Test123!",
-            "comment": "test comment",
-            "message": "test message",
-            "content": "test content",
-            "query": "test",
-            "search": "test",
-            "q": "test",
-            "filter": "test",
-            "url": "http://example.com",
+            "name": "value",
+            "email": "user@domain.test",
+            "username": "user",
+            "password": "Password123!",
+            "comment": "text",
+            "message": "text",
+            "content": "text",
+            "query": "search",
+            "search": "keyword",
+            "q": "term",
+            "filter": "criteria",
+            "url": "https://target.test",
             "file": "/etc/passwd",
-            "path": "/tmp/test",
-            "filename": "test.txt",
-            "ip": "127.0.0.1",
-            "host": "localhost",
-            "port": "8080",
+            "path": "/tmp/path",
+            "filename": "file.txt",
+            "ip": "192.168.1.1",
+            "host": "target.test",
+            "port": "8000",
             "quantity": 1,
-            "price": 9.99,
+            "price": 10.0,
         },
         "graphql": {
             "query": "query { __typename }",
@@ -102,7 +98,6 @@ async def probe_endpoint_for_json_fields(
     headers: Optional[Dict[str, str]] = None,
     timeout: float = 10.0,
 ) -> Set[str]:
-    """Probe an endpoint to discover JSON field names from error responses."""
     fields = set()
 
     if method.upper() not in ("POST", "PUT", "PATCH"):
@@ -130,7 +125,6 @@ async def probe_endpoint_for_json_fields(
 
 
 def _try_parse_json(text: str) -> Optional[Dict]:
-    """Safely attempt to parse JSON."""
     try:
         return json.loads(text)
     except (json.JSONDecodeError, ValueError):
@@ -138,7 +132,6 @@ def _try_parse_json(text: str) -> Optional[Dict]:
 
 
 def _extract_fields_from_json(resp_json: Dict) -> Set[str]:
-    """Extract field names from various JSON error response formats."""
     fields = set()
 
     if "errors" in resp_json and isinstance(resp_json["errors"], list):
@@ -174,7 +167,6 @@ async def discover_json_fields_from_responses(
     timeout: float = 10.0,
     sample_size: int = 3,
 ) -> Set[str]:
-    """Discover JSON fields by analyzing GET response structure."""
     fields = set()
 
     try:
@@ -204,7 +196,6 @@ async def discover_json_fields_from_responses(
 
 
 def classify_json_field(field_name: str, patterns: Optional[Dict] = None) -> Dict[str, int]:
-    """Classify a JSON field name by vulnerability type."""
     patterns = patterns or JSON_FIELD_PATTERNS
     field_lower = field_name.lower()
     scores = {}
@@ -231,7 +222,6 @@ async def discover_json_parameters(
     timeout: float = 10.0,
     api_path_hint: str = "/api/",
 ) -> Dict[str, List[Dict]]:
-    """Discover JSON body parameters from API endpoints."""
     import random
 
     results = {}
