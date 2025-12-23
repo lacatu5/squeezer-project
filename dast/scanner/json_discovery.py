@@ -17,35 +17,7 @@ def load_field_patterns(config_path: Optional[str] = None) -> Dict[str, Dict]:
                 return yaml.safe_load(f).get("field_patterns", {})
         except Exception:
             pass
-
-    return {
-        "sqli": {
-            "patterns": [r"id", r"search", r"query", r"q", r"filter", r"find",
-                        r"lookup", r"item", r"product", r"user", r"category",
-                        r"sort", r"order", r"email", r"username", r"name",
-                        r"keyword", r"value"],
-        },
-        "xss": {
-            "patterns": [r"name", r"comment", r"message", r"text", r"content",
-                        r"input", r"desc", r"description", r"feedback", r"review",
-                        r"bio", r"note"],
-        },
-        "command": {
-            "patterns": [r"host", r"hostname", r"ip", r"port", r"url", r"dest",
-                        r"target", r"file", r"path", r"filename", r"cmd", r"exec",
-                        r"command"],
-        },
-        "path_traversal": {
-            "patterns": [r"file", r"path", r"folder", r"directory", r"document",
-                        r"image", r"download", r"include", r"template", r"lang",
-                        r"filename"],
-        },
-        "ssrf": {
-            "patterns": [r"url", r"link", r"redirect", r"next", r"dest", r"target",
-                        r"to", r"callback", r"return", r"feed", r"site", r"uri",
-                        r"forward", r"link"],
-        },
-    }
+    return {}
 
 
 def load_discovery_payloads(config_path: Optional[str] = None) -> Dict:
@@ -56,35 +28,7 @@ def load_discovery_payloads(config_path: Optional[str] = None) -> Dict:
                 return yaml.safe_load(f).get("discovery_payloads", {})
         except Exception:
             pass
-
-    return {
-        "rest_api": {
-            "id": "1",
-            "name": "value",
-            "email": "user@domain.test",
-            "username": "user",
-            "password": "Password123!",
-            "comment": "text",
-            "message": "text",
-            "content": "text",
-            "query": "search",
-            "search": "keyword",
-            "q": "term",
-            "filter": "criteria",
-            "url": "https://target.test",
-            "file": "/etc/passwd",
-            "path": "/tmp/path",
-            "filename": "file.txt",
-            "ip": "192.168.1.1",
-            "host": "target.test",
-            "port": "8000",
-            "quantity": 1,
-            "price": 10.0,
-        },
-        "graphql": {
-            "query": "query { __typename }",
-        },
-    }
+    return {}
 
 
 JSON_FIELD_PATTERNS = load_field_patterns()
@@ -108,6 +52,8 @@ async def probe_endpoint_for_json_fields(
         req_headers.update(headers)
 
     payload = DISCOVERY_PAYLOADS.get("rest_api", {})
+    if not payload:
+        return fields
 
     try:
         response = await client.post(url, json=payload, headers=req_headers, timeout=timeout)
