@@ -82,7 +82,6 @@ async def execute_request(
     target,
     auth_context,
     get_client_fn,
-    response_cache: Dict[str, httpx.Response],
     max_retries: int = DEFAULT_MAX_RETRIES,
 ) -> Optional[Finding]:
     method = config.method
@@ -146,39 +145,6 @@ async def execute_request(
         if config.name:
             context.save_response(config.name, response)
 
-        on_match = config.on_match or {}
-        if on_match.get("cache_key"):
-            response_cache[on_match["cache_key"]] = response
-            if on_match.get("is_baseline"):
-                return None
-
-        if on_match.get("compare_with"):
-            cache_key = on_match["compare_with"]
-            if cache_key in response_cache:
-                from dast.core.validators import compare_responses
-
-                baseline_response = response_cache[cache_key]
-                false_response = response_cache.get(f"{cache_key}_false", baseline_response)
-
-                comparison = compare_responses(baseline_response, response, false_response)
-
-                if comparison["is_vulnerable"]:
-                    negative_matchers = [m for m in config.matchers if getattr(m, 'negative', False)]
-                    if negative_matchers:
-                        matchers = [create_matcher(m) for m in negative_matchers]
-                        result = evaluate_matchers(matchers, response, "and")
-                        if not result.matched:
-                            return None
-
-                    result = MatchResult(
-                        matched=True,
-                        evidence=comparison["evidence"],
-                        message=f"Boolean-blind SQLi detected (confidence: {comparison['confidence']})",
-                        evidence_strength=EvidenceStrength.INFERENCE,
-                    )
-                    return create_finding(config, template, response, result, comparison["confidence"])
-            return None
-
         if config.matchers:
             matchers = []
             for matcher_config in config.matchers:
@@ -211,45 +177,6 @@ async def execute_request(
         logger.debug(f"Unexpected error during request: {type(e).__name__}: {e}")
 
     return None
-
-
-def responses_differ(
-    response1: httpx.Response,
-    response2: httpx.Response,
-    target,
-) -> bool:
-    """Check if two responses differ significantly for boolean-blind detection."""
-    if response1.status_code != response2.status_code:
-        return True
-
-    len1 = len(response1.text)
-    len2 = len(response2.text)
-
-    if len1 == 0 and len2 == 0:
-        return False
-
-    if len1 == 0 or len2 == 0:
-        return True
-
-    threshold = target.boolean_diff_threshold
-    length_diff = abs(len1 - len2)
-    if length_diff > max(len1, len2) * threshold:
-        return True
-
-    try:
-        json1 = response1.json()
-        json2 = response2.json()
-
-        if isinstance(json1, dict) and isinstance(json2, dict):
-            data1 = json1.get("data", [])
-            data2 = json2.get("data", [])
-            if isinstance(data1, list) and isinstance(data2, list):
-                if len(data1) != len(data2):
-                    return True
-    except Exception:
-        pass
-
-    return False
 
 
 def prepare_headers(config: RequestConfig, context: ExecutionContext) -> Dict[str, str]:

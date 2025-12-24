@@ -34,7 +34,6 @@ class TargetConfig(BaseModel):
     timeout: float = 30.0
     parallel: int = 5
     request_delay: float = 0.0
-    boolean_diff_threshold: float = 0.1
     time_samples: int = 1
 
     def get_variables(self) -> Dict[str, Any]:

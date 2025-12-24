@@ -52,7 +52,6 @@ class TemplateEngine:
         self._client: Optional[httpx.AsyncClient] = None
         self._validate_target = validate_target
         self._connectivity_check: Optional[Dict[str, Any]] = None
-        self._response_cache: Dict[str, httpx.Response] = {}
         self._semaphore = asyncio.Semaphore(max(1, target.parallel))
         self._request_delay = target.request_delay
 
@@ -141,9 +140,6 @@ class TemplateEngine:
             endpoints=self.target.get_endpoints(),
         )
         context.variables.update(template.variables)
-
-        # Reset response cache for this template
-        self._response_cache = {}
 
         # Execute each request
         for i, request_config in enumerate(requests_to_execute, 1):
@@ -267,7 +263,6 @@ class TemplateEngine:
                 target=self.target,
                 auth_context=self._auth_context,
                 get_client_fn=self._get_client,
-                response_cache=self._response_cache,
             )
         finally:
             self._release_slot()

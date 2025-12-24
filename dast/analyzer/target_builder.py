@@ -1,9 +1,3 @@
-"""Target configuration building for DAST scans.
-
-Automatically builds target configurations based on discovered endpoints,
-adding JSON injection points and smart endpoint mappings.
-"""
-
 from typing import Any, Dict, List, Optional
 from urllib.parse import urlparse
 
@@ -16,62 +10,7 @@ async def discover_and_add_json_endpoints(
     endpoints: list,
     cookies: Optional[Dict[str, str]] = None,
 ) -> None:
-    """Discover JSON endpoints and add injection points for testing.
-
-    Analyzes discovered endpoints to find JSON APIs and automatically
-    configures injection points for vulnerability testing.
-
-    Args:
-        target: TargetConfig to modify
-        endpoints: List of discovered endpoint dictionaries
-        cookies: Optional cookies for authenticated requests
-    """
-    from dast.scanner.json_discovery import quick_discover
-
-    headers = {}
-    if cookies:
-        cookie_str = "; ".join(f"{k}={v}" for k, v in cookies.items())
-        headers["Cookie"] = cookie_str
-
-    endpoint_paths = list(set(ep.get("url", "") for ep in endpoints))
-    json_fields = await quick_discover(target.base_url, endpoint_paths, headers)
-
-    if not target.endpoints.custom:
-        target.endpoints.custom = {}
-
-    template_mappings = {
-        "xss_stored": [
-            ("/rest/feedback", "comment"),
-            ("/rest/feedbacks", "comment"),
-            ("/api/Feedback", "comment"),
-            ("/api/Feedbacks", "comment"),
-            ("/rest/comments", "comment"),
-            ("/api/Comments", "comment"),
-        ],
-        "xss_reflected": [("/rest/products/search", "q"), ("/api/Products/search", "q")],
-        "command_injection": [("/rest/products/search", "q"), ("/api/Products/search", "q")],
-        "sqli_post": [("/rest/basket/", "quantity"), ("/rest/products/", "quantity")],
-        "path_traversal": [("/rest/file/upload", "file")],
-        "ssrf": [("/rest/redirect", "url")],
-        "ssti": [("/rest", "input"), ("/api", "input"), ("/rest/", "name"), ("/api/", "name")],
-        "xxe": [("/rest", "data"), ("/api", "data"), ("/rest/upload", "file"), ("/api/upload", "file")],
-    }
-
-    count = 0
-    for path, fields in json_fields.items():
-        for field in fields:
-            for template_var, mappings in template_mappings.items():
-                for mapping_path, mapping_field in mappings:
-                    if path.startswith(mapping_path.rstrip("/")) or mapping_path.startswith(path.rstrip("/")):
-                        if field == mapping_field or mapping_field == "*":
-                            target.endpoints.custom[template_var] = f"JSON:{path}:{field}"
-                            count += 1
-                            break
-
-    if count > 0:
-        logger.info(f"Added {count} JSON injection endpoints for testing")
-    else:
-        _add_fallback_endpoints(target, endpoints)
+    _add_fallback_endpoints(target, endpoints)
 
 
 def _add_fallback_endpoints(target: TargetConfig, endpoints: list) -> None:

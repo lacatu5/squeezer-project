@@ -32,7 +32,6 @@ from dast.core.matchers import (
 from dast.core.validators import (
     ConsistencyChecker,
     ConfidenceCalculator,
-    compare_responses,
     create_finding_from_dict,
 )
 
@@ -61,6 +60,5 @@ __all__ = [
     # Validators
     "ConsistencyChecker",
     "ConfidenceCalculator",
-    "compare_responses",
     "create_finding_from_dict",
 ]

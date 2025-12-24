@@ -6,10 +6,13 @@ This module implements professional-grade validation patterns inspired by:
 - Burp Suite (retry with consistency)
 """
 
-from typing import Any, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List
 from httpx import Response
 
 from dast.config.common import EvidenceStrength
+
+if TYPE_CHECKING:
+    from dast.config.scan import Finding
 
 
 class ConsistencyChecker:
@@ -141,62 +144,9 @@ class ConfidenceCalculator:
         return "low"
 
 
-def compare_responses(
-    baseline: Response,
-    response_true: Response,
-    response_false: Response,
-    threshold: float = 0.1,
-) -> Dict[str, Any]:
-    """Compare responses for boolean-blind detection (SQLMap pattern).
-
-    For boolean-blind SQL injection:
-    - TRUE condition payload should differ from baseline
-    - FALSE condition payload should also differ (differently)
-
-    Args:
-        baseline: Baseline response (normal input)
-        response_true: Response with TRUE condition payload (e.g., ' AND '1'='1)
-        response_false: Response with FALSE condition payload (e.g., ' AND '1'='2)
-        threshold: Difference threshold (default 10%)
-
-    Returns:
-        Dict with comparison results including is_vulnerable flag
-    """
-    checker = ConsistencyChecker()
-
-    # Calculate similarity scores
-    true_sim = checker.get_similarity_score(baseline, response_true)
-    false_sim = checker.get_similarity_score(baseline, response_false)
-    true_false_sim = checker.get_similarity_score(response_true, response_false)
-
-    # Boolean-blind conditions:
-    # 1. TRUE response differs from baseline (true_sim < 0.9)
-    # 2. FALSE response differs from TRUE response (true_false_sim < 0.9)
-    # This indicates the application is responding differently to conditions
-
-    is_vulnerable = (
-        true_sim < (1.0 - threshold) and  # TRUE differs from baseline
-        true_false_sim < (1.0 - threshold)  # FALSE differs from TRUE
-    )
-
-    return {
-        "is_vulnerable": is_vulnerable,
-        "baseline_true_similarity": round(true_sim, 3),
-        "baseline_false_similarity": round(false_sim, 3),
-        "true_false_similarity": round(true_false_sim, 3),
-        "detection_type": "boolean_blind",
-        "evidence": {
-            "baseline_length": len(baseline.text),
-            "true_length": len(response_true.text),
-            "false_length": len(response_false.text),
-        },
-        "confidence": "high" if is_vulnerable else "low",
-    }
-
-
 def create_finding_from_dict(data: Dict[str, Any]) -> "Finding":
+    from dast.config.common import OWASPCategory, SeverityLevel
     from dast.config.scan import Finding
-    from dast.config.common import OWASPCategory, SeverityLevel, EvidenceStrength
 
     owasp_str = data.get("owasp_category", "A02:2025")
     if isinstance(owasp_str, str):
