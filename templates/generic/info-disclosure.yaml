@@ -1,0 +1,91 @@
+id: generic-info-disclosure
+info:
+  name: Information Disclosure
+  description: Detects sensitive information disclosure in headers and error messages
+  owasp_category: A02:2025
+  severity: low
+  tags:
+    - info-disclosure
+    - misconfig
+    - generic
+
+requests:
+  - name: Server Version Disclosure
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        words:
+          - "Server:"
+          - "X-Powered-By:"
+          - "X-AspNet-Version:"
+          - "X-AspNetMvc-Version:"
+        part: header
+        condition: or
+    on_match:
+      vulnerability: INFO_DISCLOSURE_HEADERS
+      message: Server version disclosed via HTTP headers
+      remediation: Remove unnecessary headers and use generic server tokens
+
+  - name: Stack Trace Disclosure
+    method: GET
+    path: /nonexistent-page-404
+    matchers:
+      - type: regex
+        condition: or
+        regex:
+          - "at\\s+\\w+\\("
+          - "Stack trace"
+          - "javax\\.servlet\\."
+          - "System\\.Web\\."
+          - "TypeError:"
+          - "ReferenceError:"
+          - "PHP (Fatal error|Warning|Notice)"
+        part: body
+    on_match:
+      vulnerability: STACK_TRACE_DISCLOSURE
+      message: Stack trace or detailed error messages exposed
+      remediation: Use generic error messages in production
+
+  - name: Debug Mode Exposure
+    method: GET
+    path: /debug
+    matchers:
+      - type: status
+        status: [200, 403]
+    on_match:
+      vulnerability: DEBUG_ENDPOINT_EXPOSED
+      message: Debug endpoint exposed
+      remediation: Disable debug endpoints in production
+
+  - name: Backup File Exposure
+    method: GET
+    path: /backup.zip
+    matchers:
+      - type: word
+        words:
+          - "application/zip"
+          - "PK\x03\x04"
+        part: header
+        condition: or
+    on_match:
+      vulnerability: BACKUP_FILE_EXPOSED
+      message: Backup file exposed
+      remediation: Remove backup files from web root
+
+  - name: ENV File Exposure
+    method: GET
+    path: /.env
+    matchers:
+      - type: regex
+        condition: or
+        regex:
+          - "DB_PASSWORD="
+          - "SECRET_KEY="
+          - "API_KEY="
+          - "DATABASE_URL="
+          - "AWS_"
+    on_match:
+      vulnerability: ENV_FILE_EXPOSED
+      message: Environment file exposed - credentials may be leaked
+      remediation: Never store .env files in web-accessible directories

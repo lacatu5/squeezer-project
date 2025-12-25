@@ -1,0 +1,112 @@
+id: generic-debug-endpoints
+info:
+  name: Debug Endpoints Exposure
+  description: Detects exposed debug endpoints and development tools
+  owasp_category: A05:2025
+  severity: medium
+  tags:
+    - debug
+    - misconfiguration
+    - generic
+
+requests:
+  - name: "debug_endpoint_actuator"
+    method: GET
+    path: "/actuator"
+    matchers:
+      - type: status
+        status: [200, 403]
+    on_match:
+      vulnerability: "DEBUG_ACTUATOR"
+      message: "Spring Boot Actuator endpoint exposed"
+
+  - name: "debug_endpoint_health"
+    method: GET
+    path: "/actuator/health"
+    matchers:
+      - type: json
+        selector: "$.status"
+      - type: word
+        words: ["UP", "DOWN", "status"]
+        part: body
+    matchers_condition: or
+    on_match:
+      vulnerability: "DEBUG_HEALTH_ENDPOINT"
+      message: "Health check endpoint exposed"
+
+  - name: "debug_endpoint_env"
+    method: GET
+    path: "/actuator/env"
+    matchers:
+      - type: status
+        status: [200, 403]
+    on_match:
+      vulnerability: "DEBUG_ENV_ENDPOINT"
+      message: "Environment variables endpoint exposed"
+
+  - name: "debug_endpoint_info"
+    method: GET
+    path: "/actuator/info"
+    matchers:
+      - type: status
+        status: [200]
+    on_match:
+      vulnerability: "DEBUG_INFO_ENDPOINT"
+      message: "Application info endpoint exposed"
+
+  - name: "debug_endpoint_admin"
+    method: GET
+    path: "/admin/debug"
+    matchers:
+      - type: status
+        status: [200, 403]
+    on_match:
+      vulnerability: "DEBUG_ADMIN_ENDPOINT"
+      message: "Debug admin endpoint accessible"
+
+  - name: "debug_endpoint_console"
+    method: GET
+    path: "/console"
+    matchers:
+      - type: word
+        words:
+          - "console"
+          - "Erlang"
+          - "Node.js"
+          - "REPL"
+          - "<title>Console"
+        part: body
+        condition: or
+    on_match:
+      vulnerability: "DEBUG_CONSOLE"
+      message: "Debug console endpoint exposed"
+
+  - name: "debug_endpoint_trace"
+    method: GET
+    path: "/actuator/httptrace"
+    matchers:
+      - type: status
+        status: [200, 403]
+    on_match:
+      vulnerability: "DEBUG_TRACE_ENDPOINT"
+      message: "HTTP trace endpoint exposed"
+
+  - name: "debug_endpoint_threaddump"
+    method: GET
+    path: "/actuator/threaddump"
+    matchers:
+      - type: status
+        status: [200, 403]
+    on_match:
+      vulnerability: "DEBUG_THREADDUMP_ENDPOINT"
+      message: "Thread dump endpoint exposed"
+
+  - name: "debug_endpoint_heapdump"
+    method: GET
+    path: "/actuator/heapdump"
+    matchers:
+      - type: status
+        status: [200, 403]
+    on_match:
+      vulnerability: "DEBUG_HEAPDUMP_ENDPOINT"
+      message: "Heap dump endpoint exposed"

@@ -1,0 +1,50 @@
+id: generic-jwt-misconfig
+info:
+  name: JWT Misconfiguration
+  description: Detects weak JWT algorithms and configuration issues
+  owasp_category: A02:2025
+  severity: high
+  tags:
+    - jwt
+    - authentication
+    - misconfig
+    - generic
+
+requests:
+  - name: JWT None Algorithm
+    method: POST
+    path: /api/auth/login
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJ1c2VyIjoiYWRtaW4ifQ."
+    matchers:
+      - type: word
+        words:
+          - "admin"
+          - "success"
+          - "token"
+        part: body
+        condition: or
+    on_match:
+      vulnerability: JWT_NONE_ALGORITHM
+      message: JWT accepts 'none' algorithm - authentication bypass possible
+      remediation: Reject tokens with 'none' algorithm
+
+  - name: JWT Weak Algorithm
+    method: POST
+    path: /api/auth/login
+    headers:
+      Content-Type: application/json
+      Authorization: "Bearer eyJhbGciOiJhbGcyMCIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoiYWRtaW4ifQ.xxx"
+    matchers:
+      - type: word
+        words:
+          - "admin"
+          - "success"
+          - "token"
+        part: body
+        condition: or
+    on_match:
+      vulnerability: JWT_WEAK_ALGORITHM
+      message: JWT accepts weak HMAC algorithm - may be vulnerable to key brute-force
+      remediation: Use strong algorithms (RS256, ES256) instead of HS256

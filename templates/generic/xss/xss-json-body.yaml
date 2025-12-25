@@ -1,0 +1,31 @@
+id: generic-xss-json-body
+info:
+  name: XSS in JSON Body
+  description: Detects XSS in JSON request bodies
+  owasp_category: A03:2025
+  tags:
+    - xss
+    - injection
+    - generic
+    - json
+
+generic:
+  endpoint: "{{xss_json}}"
+  method: POST
+  content_type: application/json
+  body_template: '{"name": "{{payload}}", "description": "test"}'
+
+  payloads:
+    - "<script>alert(1)</script>"
+    - "</script><script>alert(1)</script>"
+    - "<img src=x onerror=alert(1)>"
+    - "<svg/onload=alert(1)>"
+    - "{{'<'}}script{{'>'}}alert(1){{'<'}}/script{{'>'}}"
+
+  matchers:
+    - type: regex
+      condition: or
+      regex:
+        - "<script[^>]*alert\\("
+        - "<img[^>]*onerror"
+        - "<svg[^>]*onload"

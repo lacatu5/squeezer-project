@@ -1,0 +1,27 @@
+id: generic-command-injection
+info:
+  name: Command Injection
+  description: OS command injection detection
+  tags:
+    - rce
+    - command-injection
+    - generic
+
+generic:
+  endpoint: "{{command_injection}}"
+  method: GET
+  parameter: "q"
+
+  payloads:
+    - ";id"
+    - "|id"
+    - "`id`"
+    - "$(id)"
+
+  matchers:
+    - type: regex
+      condition: or
+      regex:
+        - "uid=\\d+.*gid=\\d+"
+        - "root:x:0:0"
+        - "www-data|apache|nobody"

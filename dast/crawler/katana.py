@@ -56,7 +56,6 @@ class KatanaCrawler:
             cmd.extend(["-js-crawl"])
 
         cmd.extend(["-xhr"])
-
         cmd.extend(["-fx"])
         cmd.extend(["-aff"])
 
@@ -128,11 +127,11 @@ class KatanaCrawler:
         seen = set()
         unique = []
 
+        static_paths = ['/assets/', '/static/', '/images/', '/fonts/', '/media/', '/_next/static/', '/__webpack__/']
         static_extensions = {
-            '.js', '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
-            '.woff', '.woff2', '.ttf', '.eot', '.mp4', '.mp3', '.wav', '.avi',
-            '.mov', '.wmv', '.flv', '.mkv', '.webp', '.bmp', '.tiff', '.tif',
-            '.map', '.txt', '.xml', 'robots.txt', 'favicon.ico', '.swf'
+            'js', 'css', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot',
+            'mp4', 'mp3', 'wav', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webp', 'bmp', 'tiff', 'tif',
+            'map', 'txt', 'xml', 'swf', 'webm', 'otf'
         }
 
         for ep in endpoints:
@@ -142,9 +141,10 @@ class KatanaCrawler:
 
             if self.filter_static:
                 url_lower = ep.url.lower()
-                if any(url_lower.endswith(ext) for ext in static_extensions):
+                if any(x in url_lower for x in static_paths):
                     continue
-                if any(x in url_lower for x in ['/assets/', '/static/', '/images/', '/fonts/', '/media/', '/_next/static/', '/__webpack__/']):
+                path = parsed_url.path.lower()
+                if any(path.endswith(f'.{ext}') for ext in static_extensions):
                     continue
 
             url = ep.url.split("#")[0]

@@ -1,0 +1,65 @@
+id: generic-csrf
+info:
+  name: CSRF Token Missing
+  description: Detects missing CSRF tokens in state-changing requests
+  owasp_category: A01:2025
+  severity: medium
+  tags:
+    - csrf
+    - authentication
+    - generic
+
+requests:
+  - name: Check Login Form CSRF
+    method: GET
+    path: /login
+    matchers:
+      - type: word
+        words:
+          - "password"
+          - "username"
+          - "email"
+        part: body
+        condition: and
+
+      - type: word
+        words:
+          - "csrf"
+          - "_token"
+          - "authenticity_token"
+          - "_csrf"
+        part: body
+        negative: true
+        condition: or
+    matchers_condition: and
+    on_match:
+      vulnerability: CSRF_TOKEN_MISSING
+      message: Login form missing CSRF token
+      remediation: Add CSRF tokens to all state-changing forms
+
+  - name: Check Registration Form CSRF
+    method: GET
+    path: /register
+    matchers:
+      - type: word
+        words:
+          - "password"
+          - "confirm"
+          - "email"
+        part: body
+        condition: or
+
+      - type: word
+        words:
+          - "csrf"
+          - "_token"
+          - "authenticity_token"
+          - "_csrf"
+        part: body
+        negative: true
+        condition: or
+    matchers_condition: and
+    on_match:
+      vulnerability: CSRF_TOKEN_MISSING
+      message: Registration form missing CSRF token
+      remediation: Add CSRF tokens to all state-changing forms

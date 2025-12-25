@@ -1,0 +1,23 @@
+id: zero-star-rating
+info:
+  name: Zero Star Rating Business Logic Flaw
+  description: Detects if server accepts zero as a valid rating value
+  tags:
+    - business-logic
+    - input-validation
+
+requests:
+  - name: Submit zero star rating
+    method: POST
+    path: /api/Reviews/
+    headers:
+      Content-Type: application/json
+    body: '{"message": "Test review {{rand_int()}}", "author": "tester", "rating": 0, "ProductId": 1}'
+    matchers:
+      - type: semantic
+        selector: "$.data.rating"
+        condition: zero
+    on_match:
+      vulnerability: ZERO_STAR_RATING
+      message: Server accepted zero star rating
+      remediation: Require minimum rating value of 1 star

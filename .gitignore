@@ -78,14 +78,7 @@ storage/
 .pytest_cache/
 .mypy_cache/
 
-# Scanned/crawled target configs with real URLs
-*.crawled.yaml
-*-crawled.yaml
-*-private.yaml
-
-# Scan results and findings (may contain sensitive data)
-*_results.yaml
-*_results.json
+# Scanned/crawled target co
 findings/
 scan-results/
 
@@ -97,4 +90,3 @@ baseline/
 traffic/
 *.traffic.log
 *.har
-*.yaml

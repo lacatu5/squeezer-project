@@ -1,0 +1,40 @@
+id: generic-cors-misconfig
+info:
+  name: CORS Misconfiguration
+  description: Detects overly permissive CORS configuration
+  owasp_category: A02:2025
+  severity: medium
+  tags:
+    - cors
+    - misconfig
+    - generic
+
+generic:
+  endpoint: "{{cors}}"
+  method: GET
+  parameter: "origin"
+
+  payloads:
+    - "https://evil.com"
+    - "http://evil.com"
+    - "null"
+    - "https://attacker.com"
+
+  matchers:
+    - type: word
+      part: header
+      words:
+        - "access-control-allow-origin: evil.com"
+        - "access-control-allow-origin: null"
+        - "access-control-allow-origin: *"
+      condition: or
+      case_sensitive: false
+
+    - type: word
+      part: header
+      words:
+        - "access-control-allow-credentials: true"
+      condition: or
+      case_sensitive: false
+
+  matchers_condition: or

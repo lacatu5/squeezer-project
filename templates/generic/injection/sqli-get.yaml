@@ -1,0 +1,57 @@
+id: generic-sqli-get
+info:
+  name: SQL Injection (GET)
+  description: Detects SQL injection in GET parameters via error messages or boolean blind
+  owasp_category: A05:2025
+  tags:
+    - sqli
+    - injection
+    - generic
+
+generic:
+  endpoint: "{{sqli}}"
+  method: GET
+  parameter: "q"
+
+  payloads:
+    # Error-based payloads - trigger database errors
+    - "'"
+    - '"'
+    - "')"
+    - '")'
+
+  matchers_condition: and
+  matchers:
+    # Positive: SQL error messages in response (REQUIRED)
+    - type: regex
+      condition: or
+      regex:
+        - "SQL syntax.*?near"
+        - "mysql_fetch.*?error"
+        - "ORA-\\d{5}"
+        - "PostgreSQL.*?ERROR"
+        - "SQLSTATE\\["
+        - "SQLITE_ERROR"
+        - "sqlite3\\.OperationalError"
+        - "Microsoft OLE DB.*?SQL"
+        - "ODBC.*?SQL"
+        - "native code"
+        - "unclosed quotation"
+        - "incorrect syntax"
+        - "unexpected token"
+        - "Unterminated string"
+        - "syntax error.*?MySQL"
+        - "PostgreSQL.*?ERROR"
+        - "ORA-[0-9]{5}"
+
+    # Positive: Valid HTTP status (not 404)
+    - type: status
+      status: [200, 400, 500]
+
+    # Negative: NOT a successful empty response
+    - type: word
+      words:
+        - '"data":[]'
+        - '{"status":"success","data":[]}'
+      negative: true
+      part: body

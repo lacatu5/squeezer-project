@@ -45,6 +45,12 @@ _PARAM_PATTERNS = {
                        r"download", r"include", r"require", r"template", r"lang",
                        r"filename", r"filepath", r"foldername", r"file_url",
                        r"image", r"img", r"src", r"document_url", r"attachment"],
+    "ssti": [r"name", r"title", r"template", r"view", r"render", r"display",
+             r"content", r"body", r"text", r"message", r"description",
+             r"subject", r"header", r"footer", r"format", r"output",
+             r"page", r"layout", r"skin", r"theme", r"style"],
+    "xxe": [r"xml", r"data", r"config", r"file", r"document", r"content",
+            r"upload", r"import", r"export", r"payload", r"request"],
 }
 
 
@@ -85,6 +91,10 @@ def find_auto_mapped_endpoints(
         "idor": "idor",
         "nosql_injection": "sqli",
         "generic_nosql_injection": "sqli",
+        "ssti": "ssti",
+        "xxe": "xxe",
+        "cors": "ssrf",
+        "redirect": "ssrf",
     }
 
     vuln_type = endpoint_to_vuln.get(endpoint_key)
