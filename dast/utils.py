@@ -1,21 +1,20 @@
-"""Utility functions for DAST scanning."""
 
-import asyncio
 import logging
 import time
-from typing import Any, Callable, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 import httpx
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+)
 
 
 # Configure logging
 def setup_logging(verbose: bool = False) -> None:
-    """Configure logging for DAST scanner.
-
-    Args:
-        verbose: Enable debug logging
-    """
     level = logging.DEBUG if verbose else logging.INFO
 
     # Configure our logger
@@ -36,18 +35,12 @@ logger = logging.getLogger("dast")
 
 
 class TargetValidator:
-    """Validate target accessibility before scanning."""
 
     @staticmethod
     async def check_connectivity(
         url: str,
         timeout: float = 10.0
     ) -> dict[str, Any]:
-        """Check if target is accessible.
-
-        Returns:
-            Dict with keys: accessible, status_code, server, error
-        """
         result = {
             "accessible": False,
             "status_code": None,
@@ -81,11 +74,6 @@ class TargetValidator:
 
     @staticmethod
     def validate_url(url: str) -> tuple[bool, str]:
-        """Validate URL format.
-
-        Returns:
-            (is_valid, error_message)
-        """
         try:
             parsed = urlparse(url)
             if not all([parsed.scheme, parsed.netloc]):
@@ -97,50 +85,22 @@ class TargetValidator:
             return False, f"Invalid URL: {e}"
 
 
-async def retry_async(
-    func: Callable,
-    max_retries: int = 3,
-    delay: float = 1.0,
-    backoff: float = 2.0,
-    on_retry: Optional[Callable] = None,
-) -> Any:
-    """Retry an async function with exponential backoff.
-
-    Args:
-        func: Async function to retry
-        max_retries: Maximum number of retry attempts
-        delay: Initial delay between retries
-        backoff: Multiplier for delay after each retry
-        on_retry: Optional callback called before each retry
-
-    Returns:
-        Result of the function call
-
-    Raises:
-        Last exception if all retries fail
-    """
-    last_error = None
-    current_delay = delay
-
-    for attempt in range(max_retries):
-        try:
-            return await func()
-        except Exception as e:
-            last_error = e
-            if attempt < max_retries - 1:
-                logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {current_delay}s...")
-                if on_retry:
-                    await on_retry(attempt + 1, e)
-                await asyncio.sleep(current_delay)
-                current_delay *= backoff
-            else:
-                logger.error(f"All {max_retries} attempts failed: {e}")
-
-    raise last_error
+@retry(
+    stop=stop_after_attempt(3),
+    wait=wait_exponential(multiplier=1, min=0.5, max=10),
+    retry=retry_if_exception_type((httpx.NetworkError, httpx.TimeoutException, OSError)),
+    reraise=True,
+)
+async def retry_request(
+    client,
+    method: str,
+    url: str,
+    **kwargs
+) -> httpx.Response:
+    return await client.request(method, url, **kwargs)
 
 
 def sanitize_url(url: str) -> str:
-    """Sanitize URL for logging (remove credentials)."""
     try:
         parsed = urlparse(url)
         if parsed.password:

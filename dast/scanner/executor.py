@@ -1,5 +1,3 @@
-"""Request execution logic for DAST scanning."""
-
 import asyncio
 import json
 from typing import Any, Dict, Optional, Tuple
@@ -21,8 +19,6 @@ from dast.utils import logger
 
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_DELAY = 0.1
-DEFAULT_RETRY_DELAY_BACKUP = 0.2
-DEFAULT_TIMEOUT = 10.0
 
 
 @retry(
@@ -47,25 +43,15 @@ async def _execute_request_with_retry(
     get_client_fn,
     max_retries: int = DEFAULT_MAX_RETRIES,
     retry_delay: float = DEFAULT_RETRY_DELAY,
-    retry_delay_backup: float = DEFAULT_RETRY_DELAY_BACKUP,
 ) -> Tuple[httpx.Response, bool]:
     responses = []
     client = get_client_fn()
 
-    for attempt in range(max_retries):
-        try:
-            response = await _execute_single_request(client, method, path, **kwargs)
-            responses.append(response)
-
-            if attempt < max_retries - 1:
-                await asyncio.sleep(retry_delay)
-                continue
-
-        except Exception:
-            if attempt == max_retries - 1:
-                raise
-            await asyncio.sleep(retry_delay_backup)
-            continue
+    for _ in range(max_retries):
+        response = await _execute_single_request(client, method, path, **kwargs)
+        responses.append(response)
+        if len(responses) < max_retries:
+            await asyncio.sleep(retry_delay)
 
     if len(responses) > 1:
         from dast.core.validators import ConsistencyChecker
