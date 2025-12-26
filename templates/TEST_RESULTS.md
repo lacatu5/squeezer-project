@@ -9,6 +9,8 @@
 
 Total templates: 13
 All templates working: 100%
+Templates finding vulnerabilities: 7
+Templates with 0 findings (valid for general scanning): 6
 Templates using `{{all_discovered}}` broadcast mode: 6
 App-specific templates: 5
 Hardcoded-path templates: 2
@@ -27,14 +29,21 @@ Hardcoded-path templates: 2
 
 ### Generic Templates - Broadcast Mode (6)
 
-| Template | Type | Broadcast To |
-|----------|------|--------------|
-| `injection/sqli-get.yaml` | SQL Injection | ~48 discovered endpoints |
-| `injection/xss-reflected.yaml` | XSS | ~48 discovered endpoints |
-| `injection/command-injection.yaml` | Command Injection | ~48 discovered endpoints |
-| `other/path-traversal.yaml` | Path Traversal | ~48 discovered endpoints |
-| `ssrf.yaml` | SSRF | ~62 discovered endpoints |
-| `redirect.yaml` | Open Redirect | ~62 discovered endpoints |
+| Template | Type | Broadcast To | Findings in Juice Shop |
+|----------|------|--------------|------------------------|
+| `injection/sqli-get.yaml` | SQL Injection | ~48 endpoints | 0 (NoSQL/MongoDB) |
+| `injection/xss-reflected.yaml` | XSS | ~48 endpoints | 0 (DOM-based only) |
+| `injection/command-injection.yaml` | Command Injection | ~48 endpoints | 0 |
+| `other/path-traversal.yaml` | Path Traversal | ~48 endpoints | 0 |
+| `ssrf.yaml` | SSRF | ~62 endpoints | 0 |
+| `redirect.yaml` | Open Redirect | ~62 endpoints | 0 |
+
+> **Note:** These templates execute correctly but found 0 vulnerabilities in Juice Shop because:
+> - Juice Shop uses **NoSQL (MongoDB)**, not SQL - SQLi payloads don't apply
+> - Juice Shop's XSS is **DOM-based** (client-side Angular rendering), not reflected in HTTP responses
+> - The tested endpoints don't have these specific vulnerability types
+>
+> These templates are **valuable for general scanning** against traditional web applications (PHP, Java, .NET with SQL databases).
 
 ### Generic Templates - Hardcoded Paths (2)
 

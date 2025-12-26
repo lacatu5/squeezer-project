@@ -25,13 +25,22 @@ generic:
     - "; sleep 5"
 
   matchers:
+    - type: status
+      condition: in
+      status:
+        - 200
     - type: regex
       condition: or
       regex:
-        - "root:x:\\d+:\\d+:"
-        - "uid=\\d+\\("
-        - "total \\d+"
-        - "PING "
-        - "PING \\("
+        - 'root:x:[0-9]+:[0-9]+:'
+        - 'uid=[0-9]+\(\w+\)'
+        - 'gid=[0-9]+\(\w+\)'
+        - 'total [0-9]+'
+        - 'drwx'
+        - '-rw-'
+        - 'PING.*bytes of data'
+        - '[0-9]+ packets transmitted'
+        - '/bin/bash'
+        - 'sh-[0-9.]+'
 
-  matchers_condition: or
+  matchers_condition: and

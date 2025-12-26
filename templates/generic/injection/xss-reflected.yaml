@@ -18,8 +18,9 @@ generic:
     - "<script>alert(1)</script>"
     - "<img src=x onerror=alert(1)>"
     - "<svg/onload=alert(1)>"
-    - "-><script>alert(1)</script>"
-    - "'><script>alert(1)</script>"
+    - "\"'><script>alert(1)</script>"
+    - "javascript:alert(1)"
+    - "<iframe src=javascript:alert(1)>"
 
   matchers:
     - type: regex
@@ -28,5 +29,19 @@ generic:
         - "<script[^>]*>alert\\("
         - "<img[^>]*onerror"
         - "<svg[^>]*onload"
+        - "javascript:alert\\("
+        - "<iframe[^>]*src.*javascript"
+        - "<script[^>]*>"
+        - "onerror\\s*="
+        - "onload\\s*="
+    - type: word
+      condition: or
+      words:
+        - "<script>"
+        - "<img src"
+        - "<svg"
+        - "onerror"
+        - "onload"
+      case_sensitive: false
 
   matchers_condition: or

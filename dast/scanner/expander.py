@@ -526,7 +526,7 @@ def expand_broadcast_template(
     build_post_fn,
     expand_tiers_fn,
 ) -> List[RequestConfig]:
-    from urllib.parse import urlparse
+    from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
     requests = []
     vuln_name = template.id.replace("-", "_").upper()
@@ -570,30 +570,100 @@ def expand_broadcast_template(
         payloads_to_use.extend(file_payloads)
 
     for endpoint_name, endpoint_path in filtered_endpoints.items():
-        for payload in payloads_to_use:
-            if isinstance(payload, str):
-                payload_cfg = PayloadConfig(name=payload[:30], value=payload)
-            else:
-                payload_cfg = payload
+        parsed = urlparse(endpoint_path)
+        params = parse_qs(parsed.query, keep_blank_values=True)
+        
+        if params and is_injection_template:
+            for param_name in params.keys():
+                for payload in payloads_to_use:
+                    if isinstance(payload, str):
+                        payload_cfg = PayloadConfig(name=payload[:30], value=payload)
+                    else:
+                        payload_cfg = payload
 
-            if generic.method.upper() == "GET":
-                request = build_get_fn(endpoint_path, generic, payload_cfg)
-            elif generic.method.upper() == "POST":
-                request = build_post_fn(endpoint_path, generic, payload_cfg)
-            else:
-                continue
+                    modified_params = params.copy()
+                    modified_params[param_name] = [payload_cfg.value]
+                    
+                    new_query = urlencode(modified_params, doseq=True)
+                    new_url = urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
+                    new_path = new_url.replace(f"{parsed.scheme}://{parsed.netloc}", "") if parsed.scheme else parsed.path + "?" + new_query
 
-            original_name = request.name or ""
-            request.name = f"{endpoint_name}:{original_name}" if original_name else endpoint_name
+                    request = RequestConfig(
+                        name=f"{endpoint_name}:{param_name}:{payload_cfg.name}",
+                        method="GET",
+                        path=new_path,
+                        headers=generic.headers.copy(),
+                        cookies={},
+                    )
 
-            request.matchers = generic.matchers
-            request.on_match = {
-                "vulnerability": vuln_name,
-                "message": f"{template.info.name}: {payload_cfg.name} on {endpoint_name}",
-                "endpoint_name": endpoint_name,
-            }
+                    request.matchers = generic.matchers
+                    request.on_match = {
+                        "vulnerability": vuln_name,
+                        "message": f"{template.info.name}: {payload_cfg.name} in parameter '{param_name}' on {endpoint_name}",
+                        "endpoint_name": endpoint_name,
+                    }
 
-            requests.append(request)
+                    requests.append(request)
+        
+        if is_injection_template:
+            import re
+            path_segments = parsed.path.split('/')
+            for i, segment in enumerate(path_segments):
+                if segment and (segment.isdigit() or re.match(r'^[0-9a-f-]+$', segment)):
+                    for payload in payloads_to_use:
+                        if isinstance(payload, str):
+                            payload_cfg = PayloadConfig(name=payload[:30], value=payload)
+                        else:
+                            payload_cfg = payload
+
+                        new_segments = path_segments.copy()
+                        new_segments[i] = segment + payload_cfg.value
+                        new_path = '/'.join(new_segments)
+                        if parsed.query:
+                            new_path += '?' + parsed.query
+
+                        request = RequestConfig(
+                            name=f"{endpoint_name}:path[{i}]:{payload_cfg.name}",
+                            method="GET",
+                            path=new_path,
+                            headers=generic.headers.copy(),
+                            cookies={},
+                        )
+
+                        request.matchers = generic.matchers
+                        request.on_match = {
+                            "vulnerability": vuln_name,
+                            "message": f"{template.info.name}: {payload_cfg.name} in path segment '{segment}' on {endpoint_name}",
+                            "endpoint_name": endpoint_name,
+                        }
+
+                        requests.append(request)
+        
+        if not is_injection_template or (not params and is_injection_template):
+            for payload in payloads_to_use:
+                if isinstance(payload, str):
+                    payload_cfg = PayloadConfig(name=payload[:30], value=payload)
+                else:
+                    payload_cfg = payload
+
+                if generic.method.upper() == "GET":
+                    request = build_get_fn(endpoint_path, generic, payload_cfg)
+                elif generic.method.upper() == "POST":
+                    request = build_post_fn(endpoint_path, generic, payload_cfg)
+                else:
+                    continue
+
+                original_name = request.name or ""
+                request.name = f"{endpoint_name}:{original_name}" if original_name else endpoint_name
+
+                request.matchers = generic.matchers
+                request.on_match = {
+                    "vulnerability": vuln_name,
+                    "message": f"{template.info.name}: {payload_cfg.name} on {endpoint_name}",
+                    "endpoint_name": endpoint_name,
+                }
+
+                requests.append(request)
 
     return requests
 

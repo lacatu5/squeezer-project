@@ -18,7 +18,6 @@ from dast.config.target import AuthConfig, EndpointsConfig, TargetConfig
 
 
 class Finding(BaseModel):
-    """Vulnerability finding."""
 
     template_id: str
     vulnerability_type: str
@@ -31,6 +30,8 @@ class Finding(BaseModel):
     remediation: str = ""
     request_details: Optional[str] = None
     response_details: Optional[str] = None
+    payload_count: int = 1
+    endpoint_count: int = 1
 
 
 class ParameterInfo(BaseModel):
@@ -280,7 +281,7 @@ class ScanReport(BaseModel):
     def a10_exception_conditions_count(self) -> int:
         return self._count_by_owasp(OWASPCategory.A10_EXCEPTION_CONDITIONS)
 
-    def get_owasp_summary(self) -> Dict[str, int]:
+    def get_owasp_summary(self) -> Dict[str, tuple[int, int]]:
         labels = {
             "A01": "Broken Access Control",
             "A02": "Security Misconfiguration",
@@ -305,10 +306,13 @@ class ScanReport(BaseModel):
             "A09": OWASPCategory.A09_LOGGING_FAILURES,
             "A10": OWASPCategory.A10_EXCEPTION_CONDITIONS,
         }
-        return {
-            f"{k}:2025 - {labels[k]}": self._count_by_owasp(v)
-            for k, v in categories.items()
-        }
+        result = {}
+        for k, v in categories.items():
+            findings = [f for f in self.findings if f.owasp_category == v]
+            template_count = len(set(f.template_id for f in findings))
+            vuln_count = len(findings)
+            result[f"{k}:2025 - {labels[k]}"] = (template_count, vuln_count)
+        return result
 
     def add_finding(self, finding: Finding) -> None:
         self.findings.append(finding)
@@ -317,6 +321,64 @@ class ScanReport(BaseModel):
         from dast.core.validators import create_finding_from_dict
         finding = create_finding_from_dict(data)
         self.findings.append(finding)
+
+    def group_similar_findings(self) -> List[Finding]:
+        from urllib.parse import urlparse
+        
+        grouped = {}
+        for finding in self.findings:
+            parsed = urlparse(finding.url)
+            base_path = parsed.path.split('?')[0]
+            key = (finding.vulnerability_type, finding.template_id, base_path, finding.evidence_strength)
+            
+            if key not in grouped:
+                grouped[key] = finding
+            else:
+                grouped[key].payload_count += 1
+        
+        first_pass = list(grouped.values())
+        
+        consolidated = {}
+        endpoint_data = {}
+        
+        for finding in first_pass:
+            vuln_type = finding.vulnerability_type
+            
+            if vuln_type.startswith('DEBUG_') or vuln_type.startswith('GENERIC_NOSQLI') or vuln_type == 'GENERIC_SSRF' or vuln_type == 'INSECURE_DIRECT_OBJECT_REFERENCE':
+                if vuln_type.startswith('DEBUG_'):
+                    group_key = 'DEBUG_ENDPOINTS'
+                elif vuln_type == 'GENERIC_NOSQLI':
+                    group_key = 'GENERIC_NOSQLI'
+                elif vuln_type == 'GENERIC_SSRF':
+                    group_key = 'GENERIC_SSRF'
+                else:
+                    group_key = 'INSECURE_DIRECT_OBJECT_REFERENCE'
+                    
+                key = (group_key, finding.template_id, finding.evidence_strength)
+                
+                if key not in consolidated:
+                    consolidated[key] = finding
+                    if group_key == 'DEBUG_ENDPOINTS':
+                        consolidated[key].vulnerability_type = 'DEBUG_ENDPOINTS'
+                        consolidated[key].message = 'Debug/Actuator endpoints exposed'
+                    endpoint_data[key] = {
+                        'paths': [urlparse(finding.url).path],
+                        'payloads': finding.payload_count
+                    }
+                else:
+                    endpoint_data[key]['paths'].append(urlparse(finding.url).path)
+                    endpoint_data[key]['payloads'] += finding.payload_count
+            else:
+                unique_key = (finding.vulnerability_type, finding.template_id, urlparse(finding.url).path, finding.evidence_strength)
+                consolidated[unique_key] = finding
+        
+        for key in endpoint_data:
+            if key in consolidated:
+                data = endpoint_data[key]
+                consolidated[key].endpoint_count = len(data['paths'])
+                consolidated[key].payload_count = data['payloads']
+        
+        return list(consolidated.values())
 
     def add_error(self, error: str) -> None:
         self.errors.append(error)

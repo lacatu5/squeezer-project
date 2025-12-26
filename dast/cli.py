@@ -134,12 +134,20 @@ def _print_report(report: ScanReport) -> None:
         console.print("[green]No vulnerabilities found![/green]")
         return
 
-    direct = [f for f in report.findings if f.evidence_strength == EvidenceStrength.DIRECT]
-    inference = [f for f in report.findings if f.evidence_strength == EvidenceStrength.INFERENCE]
-    heuristic = [f for f in report.findings if f.evidence_strength == EvidenceStrength.HEURISTIC]
+    grouped_findings = report.group_similar_findings()
+    
+    direct = [f for f in grouped_findings if f.evidence_strength == EvidenceStrength.DIRECT]
+    inference = [f for f in grouped_findings if f.evidence_strength == EvidenceStrength.INFERENCE]
+    heuristic = [f for f in grouped_findings if f.evidence_strength == EvidenceStrength.HEURISTIC]
+
+    total_findings = len(report.findings)
+    unique_findings = len(grouped_findings)
+    
+    if total_findings != unique_findings:
+        console.print(f"[dim]Grouped {total_findings} findings into {unique_findings} unique vulnerabilities[/dim]\n")
 
     if direct:
-        console.print("\n[bold green]Direct Observation[/bold green] [dim](we saw it happen)[/dim]")
+        console.print("[bold green]Direct Observation[/bold green] [dim](we saw it happen)[/dim]")
         _print_findings_table(direct)
 
     if inference:
@@ -151,19 +159,19 @@ def _print_report(report: ScanReport) -> None:
         _print_findings_table(heuristic)
 
     console.print("\n[bold]Detailed Findings:[/bold]\n")
-    _print_detailed_findings(report.findings)
+    _print_detailed_findings(grouped_findings)
 
     console.print("\n[bold]Summary (by OWASP Top 10 2025):[/bold]")
     owasp_summary = report.get_owasp_summary()
-    for category, count in owasp_summary.items():
-        if count > 0:
+    for category, (template_count, vuln_count) in owasp_summary.items():
+        if vuln_count > 0:
             if any(x in category for x in ["A01", "A05", "A07"]):
                 color = "red"
             elif any(x in category for x in ["A02", "A03", "A04", "A06"]):
                 color = "yellow"
             else:
                 color = "green"
-            console.print(f"  {category}: [{color}]{count}[/{color}]")
+            console.print(f"  {category}: [{color}]{template_count}:{vuln_count}[/{color}]")
     console.print(f"\n[dim]Duration: {report.duration_seconds:.1f}s | Templates: {report.templates_executed}[/dim]")
 
 
@@ -190,7 +198,12 @@ def _print_detailed_findings(findings: list) -> None:
             details_text.append(f"{finding.request_details}\n", style="yellow")
 
         details_text.append("Message: ", style="dim")
-        details_text.append(f"{finding.message}\n")
+        details_text.append(f"{finding.message}")
+        if finding.endpoint_count > 1:
+            details_text.append(f" [dim]({finding.endpoint_count} endpoints)[/dim]", style="yellow")
+        elif finding.payload_count > 1:
+            details_text.append(f" [dim]({finding.payload_count} payloads)[/dim]", style="yellow")
+        details_text.append("\n")
 
         if finding.remediation:
             details_text.append("Remediation: ", style="dim")
@@ -359,6 +372,9 @@ def scan(
                     prioritize=True,
                     exclude_static=True,
                 )
+                if bearer:
+                    target_config.authentication.type = AuthType.BEARER
+                    target_config.authentication.token = bearer
             except Exception as e:
                 console.print(f"[red]Failed to generate target config: {e}[/red]")
                 raise typer.Exit(1)

@@ -15,23 +15,36 @@ generic:
   parameter: "input"
 
   payloads:
+    - "'"
+    - "')"
+    - "')))"
     - "' OR '1'='1"
     - "' OR 1=1--"
-    - "1' OR '1'='1'"
+    - "' AND '1'='2"
+    - "' AND 1=0--"
     - "admin'--"
+    - "1' OR '1'='1'"
     - "' UNION SELECT NULL--"
-    - "1; DROP TABLE users--"
 
   matchers:
     - type: regex
       condition: or
       regex:
-        - "SQL syntax.*MySQL"
-        - "Warning.*mysql_"
-        - "PostgreSQL.*ERROR"
-        - "ORA-01756"
-        - "Microsoft OLE DB Provider for SQL Server"
-        - "Unclosed quotation mark"
-        - "quoted string not properly terminated"
+        - 'SQL syntax.*MySQL'
+        - 'Warning.*mysql_'
+        - 'PostgreSQL.*ERROR'
+        - 'ORA-[0-9]{5}'
+        - 'Microsoft OLE DB Provider'
+        - 'Unclosed quotation mark'
+        - 'quoted string not properly terminated'
+        - 'sqlite3\.OperationalError'
+        - 'SQLITE_ERROR'
+        - 'SQL logic error'
+        - 'syntax error at or near'
+        - 'pg_query\(\)'
+        - 'mysql_fetch'
+        - 'SQLite.*exception'
+        - 'SqlException'
+        - 'System\.Data\.SqlClient'
 
   matchers_condition: or

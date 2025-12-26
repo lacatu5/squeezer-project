@@ -1,0 +1,56 @@
+id: generic-cors-misconfiguration
+info:
+  name: CORS Misconfiguration
+  description: Detects overly permissive CORS policies
+  owasp_category: A05:2025
+  severity: medium
+  tags:
+    - cors
+    - misconfiguration
+    - generic
+
+targets:
+  - id: CORS_WILDCARD
+    description: CORS allows any origin
+    endpoints:
+      - path: "{{endpoint}}"
+        method: GET
+    requests:
+      - method: GET
+        headers:
+          Origin: "https://evil.com"
+    matchers:
+      - type: regex
+        part: header
+        regex:
+          - 'access-control-allow-origin:.*\*'
+          - 'access-control-allow-origin:.*evil\.com'
+        condition: or
+        case_sensitive: false
+    evidence_strength: direct
+    message: "CORS policy allows requests from untrusted origins"
+
+  - id: CORS_CREDENTIALS_WILDCARD
+    description: CORS allows credentials with wildcard origin
+    endpoints:
+      - path: "{{endpoint}}"
+        method: GET
+    requests:
+      - method: GET
+        headers:
+          Origin: "https://evil.com"
+    matchers:
+      - type: regex
+        part: header
+        regex:
+          - 'access-control-allow-origin:.*\*'
+        condition: and
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-credentials: true"
+        condition: and
+        case_sensitive: false
+    evidence_strength: direct
+    message: "Critical: CORS allows credentials with wildcard origin"

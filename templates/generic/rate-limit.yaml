@@ -1,0 +1,49 @@
+id: generic-api-rate-limit
+info:
+  name: API Rate Limiting Missing
+  description: Detects endpoints without rate limiting that could lead to DoS or abuse
+  owasp_category: A04:2025
+  severity: medium
+  tags:
+    - rate-limit
+    - dos
+    - abuse
+    - generic
+
+targets:
+  - id: NO_RATE_LIMIT
+    description: Endpoint accepts excessive requests without rate limiting
+    endpoints:
+      - path: "{{endpoint}}"
+        method: POST
+    requests:
+      - method: POST
+        repeat: 50
+    matchers:
+      - type: status
+        condition: not_in
+        status:
+          - 429
+          - 503
+    evidence_strength: heuristic
+    message: "No rate limiting detected - endpoint accepts 50+ requests without throttling"
+
+  - id: NO_RATE_LIMIT_HEADERS
+    description: Missing rate limit headers
+    endpoints:
+      - path: "{{endpoint}}"
+        method: GET
+    requests:
+      - method: GET
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "x-rate-limit"
+          - "x-ratelimit"
+          - "ratelimit-"
+        condition: or
+        case_sensitive: false
+        negative: true
+    evidence_strength: heuristic
+    message: "No rate limit headers present - potential DoS vulnerability"

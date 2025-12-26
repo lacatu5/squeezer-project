@@ -23,11 +23,18 @@ generic:
     - "....\\/....\\/....\\/etc/passwd"
 
   matchers:
+    - type: status
+      condition: in
+      status:
+        - 200
     - type: regex
       condition: or
       regex:
-        - "root:x:\\d+:\\d+:"
-        - "\\[drivers\\]"
-        - "for 16-bit app support"
+        - 'root:x:[0-9]+:[0-9]+:'
+        - '\[drivers\]'
+        - 'for 16-bit app support'
+        - '/bin/bash'
+        - '/bin/sh'
+        - 'daemon:'
 
-  matchers_condition: or
+  matchers_condition: and

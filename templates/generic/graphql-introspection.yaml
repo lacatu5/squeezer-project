@@ -1,0 +1,74 @@
+id: generic-graphql-introspection
+info:
+  name: GraphQL Introspection Enabled
+  description: Detects exposed GraphQL schema via introspection
+  owasp_category: A05:2025
+  severity: low
+  tags:
+    - graphql
+    - introspection
+    - disclosure
+    - generic
+
+targets:
+  - id: GRAPHQL_INTROSPECTION
+    description: GraphQL introspection query reveals schema
+    endpoints:
+      - path: /graphql
+        method: POST
+      - path: /api/graphql
+        method: POST
+      - path: /v1/graphql
+        method: POST
+    requests:
+      - method: POST
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {"query": "{ __schema { types { name } } }"}
+    matchers:
+      - type: word
+        words:
+          - "__schema"
+          - "types"
+          - "Query"
+          - "Mutation"
+        condition: and
+        case_sensitive: false
+      - type: status
+        condition: in
+        status:
+          - 200
+    matchers_condition: and
+    evidence_strength: direct
+    message: "GraphQL introspection enabled - schema exposed"
+
+  - id: GRAPHQL_DEBUG_MODE
+    description: GraphQL debug mode enabled
+    endpoints:
+      - path: /graphql
+        method: POST
+      - path: /api/graphql
+        method: POST
+    requests:
+      - method: POST
+        headers:
+          Content-Type: "application/json"
+        body: |
+          {"query": "{ invalid_field }"}
+    matchers:
+      - type: regex
+        regex:
+          - 'stack.*trace'
+          - 'file.*line'
+          - 'graphql.*error'
+        condition: or
+        case_sensitive: false
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 400
+    matchers_condition: and
+    evidence_strength: direct
+    message: "GraphQL debug mode enabled - verbose errors exposed"

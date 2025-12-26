@@ -1,44 +1,15 @@
 id: feedback-idor
 info:
   name: Feedback IDOR Vulnerability
-  description: Detects IDOR on feedback endpoints
+  description: Detects IDOR on feedback endpoints by accessing other users feedback
   tags:
     - idor
     - access-control
 
-variables:
-  attacker_email: "{{ATTACKER_EMAIL}}"
-  attacker_password: "{{ATTACKER_PASSWORD}}"
-  victim_email: "{{VICTIM_EMAIL}}"
-  victim_password: "{{VICTIM_PASSWORD}}"
-
 requests:
-  - name: Attacker login
-    method: POST
-    path: /rest/user/login
-    headers:
-      Content-Type: application/json
-    body: '{"email": "{{attacker_email}}", "password": "{{attacker_password}}"}'
-    extractors:
-      - type: json
-        name: attacker_token
-        selector: "$.authentication.token"
-
-  - name: Get feedback list
+  - name: Try to access feedback from user 1
     method: GET
-    path: /api/Feedbacks/
-    headers:
-      Authorization: "Bearer {{attacker_token}}"
-    extractors:
-      - type: json
-        name: feedback_id
-        selector: "$.data.0.id"
-
-  - name: Access feedback by ID
-    method: GET
-    path: /api/Feedbacks/{{feedback_id}}
-    headers:
-      Authorization: "Bearer {{attacker_token}}"
+    path: /api/Feedbacks/1
     matchers:
       - type: status
         values: [200]
@@ -47,5 +18,5 @@ requests:
         condition: exists
     on_match:
       vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
-      message: Can access other users feedback by sequential ID
+      message: Can access feedback from other users by sequential ID
       remediation: Verify ownership before allowing access to user-generated content

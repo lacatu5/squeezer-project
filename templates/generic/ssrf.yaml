@@ -22,14 +22,21 @@ generic:
     - "http://[::1]/"
 
   matchers:
+    - type: status
+      condition: in
+      status:
+        - 200
+        - 201
     - type: regex
       condition: or
       regex:
-        - '"Code"'
-        - '"AccessKeyId"'
-        - '"SecretAccessKey"'
-        - '"ami-"'
-        - "root:x:\\d+:\\d+:"
-        - "OpenSSH"
+        - 'Code.*:.*[A-Z0-9]{4}'
+        - 'AccessKeyId'
+        - 'SecretAccessKey'
+        - 'ami-[a-f0-9]{8}'
+        - 'root:x:[0-9]+:[0-9]+:'
+        - 'OpenSSH'
+        - 'localhost'
+        - '127\.0\.0\.1'
 
-  matchers_condition: or
+  matchers_condition: and

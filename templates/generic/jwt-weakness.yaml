@@ -1,0 +1,49 @@
+id: generic-jwt-weakness
+info:
+  name: JWT Token Weaknesses
+  description: Detects weak JWT implementations including none algorithm and weak secrets
+  owasp_category: A08:2025
+  severity: high
+  tags:
+    - jwt
+    - token
+    - integrity
+    - generic
+
+targets:
+  - id: JWT_NONE_ALGORITHM
+    description: JWT accepts none algorithm
+    endpoints:
+      - path: /api/Users/login
+        method: POST
+    requests:
+      - method: POST
+        headers:
+          Authorization: "Bearer eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSIsInJvbGUiOiJhZG1pbiJ9."
+        body: ""
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+    evidence_strength: direct
+    message: "JWT with 'none' algorithm accepted - critical security flaw"
+
+  - id: JWT_WEAK_SECRET
+    description: JWT uses predictable secret
+    endpoints:
+      - path: /api/auth/verify
+        method: GET
+    requests:
+      - method: GET
+        headers:
+          Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJhZG1pbkBleGFtcGxlLmNvbSJ9.YRQYnW0UlVjvlJY6VFfPKG0LlJjJKGRnWjJjJJYVLjg"
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+    evidence_strength: inference
+    message: "JWT may use weak secret - token accepted with common secret"

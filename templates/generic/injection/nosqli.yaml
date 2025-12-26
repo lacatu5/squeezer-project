@@ -1,0 +1,41 @@
+id: generic-nosqli
+info:
+  name: NoSQL Injection
+  description: Detects NoSQL injection in MongoDB and other NoSQL databases
+  owasp_category: A03:2025
+  severity: high
+  tags:
+    - nosql
+    - injection
+    - mongodb
+    - generic
+
+generic:
+  endpoint: "{{all_discovered}}"
+  method: POST
+  parameter: "email"
+
+  payloads:
+    - '{"$ne": null}'
+    - '{"$gt": ""}'
+    - '{"$regex": ".*"}'
+    - '{"$where": "1==1"}'
+    - '{"$ne": 1}'
+
+  matchers:
+    - type: status
+      condition: in
+      status:
+        - 200
+        - 201
+    - type: regex
+      regex:
+        - 'authenticated.*true'
+        - 'success.*true'
+        - 'token'
+        - '"id":\s*[0-9]+'
+        - 'user.*found'
+      condition: or
+      case_sensitive: false
+
+  matchers_condition: and

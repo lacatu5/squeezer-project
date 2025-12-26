@@ -1,0 +1,45 @@
+id: generic-auth-bypass
+info:
+  name: Authentication Bypass via Common Credentials
+  description: Tests for default/weak credentials and authentication bypass
+  owasp_category: A07:2025
+  severity: critical
+  tags:
+    - auth
+    - credentials
+    - bypass
+    - generic
+
+generic:
+  endpoint: "{{all_discovered}}"
+  method: POST
+  parameter: "password"
+
+  payloads:
+    - "admin"
+    - "password"
+    - "123456"
+    - "admin123"
+    - ""
+    - "null"
+    - "undefined"
+
+  matchers:
+    - type: status
+      condition: in
+      status:
+        - 200
+        - 201
+        - 302
+    - type: regex
+      condition: or
+      regex:
+        - 'token.*:.*[A-Za-z0-9]{20,}'
+        - 'authenticated.*true'
+        - 'success.*login'
+        - 'session.*id'
+        - 'jwt'
+        - 'bearer'
+      case_sensitive: false
+
+  matchers_condition: and

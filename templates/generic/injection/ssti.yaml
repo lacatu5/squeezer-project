@@ -1,0 +1,44 @@
+id: generic-ssti
+info:
+  name: Server-Side Template Injection (SSTI)
+  description: Detects SSTI vulnerabilities in template engines
+  owasp_category: A03:2025
+  severity: critical
+  tags:
+    - ssti
+    - template
+    - rce
+    - generic
+
+generic:
+  endpoint: "{{all_discovered}}"
+  method: GET
+  parameter: "input"
+
+  payloads:
+    - "{{7*7}}"
+    - "${7*7}"
+    - "#{7*7}"
+    - "<%= 7*7 %>"
+    - "${{7*7}}"
+    - "{{config}}"
+    - "{{self}}"
+    - "${config}"
+    - "{{request}}"
+    - "{{''.class.mro()[1].subclasses()}}"
+
+  matchers:
+    - type: word
+      words:
+        - "49"
+        - "config object"
+        - "application"
+        - "<class 'object'>"
+      condition: or
+    - type: status
+      condition: in
+      status:
+        - 200
+        - 500
+
+  matchers_condition: and

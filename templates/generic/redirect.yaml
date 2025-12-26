@@ -22,11 +22,20 @@ generic:
     - "http://example.com@evil.com"
 
   matchers:
-    - type: word
+    - type: status
+      condition: in
+      status:
+        - 301
+        - 302
+        - 303
+        - 307
+        - 308
+    - type: regex
       part: header
-      words:
-        - "location: https://evil.com"
-        - "location: http://evil.com"
-        - "location: //evil.com"
+      regex:
+        - "location:.*evil\.com"
+        - "location:.*//evil"
       condition: or
       case_sensitive: false
+
+  matchers_condition: and

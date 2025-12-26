@@ -1,45 +1,35 @@
 id: user-idor
 info:
   name: User Profile IDOR Vulnerability
-  description: Detects IDOR on user profile endpoints
+  description: Detects IDOR on user profile endpoints by accessing other user IDs
   tags:
     - idor
     - access-control
 
 requests:
-  - name: Create attacker user
-    method: POST
-    path: /api/Users/
-    headers:
-      Content-Type: application/json
-    body: '{"email": "attacker_{{rand_int()}}@test.com", "password": "TestPass123!", "passwordRepeat": "TestPass123!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}}'
-    extractors:
-      - type: json
-        name: attacker_token
-        selector: "$.authentication.token"
-      - type: json
-        name: attacker_user_id
-        selector: "$.data.id"
-
-  - name: Create victim user
-    method: POST
-    path: /api/Users/
-    headers:
-      Content-Type: application/json
-    body: '{"email": "victim_{{rand_int()}}@test.com", "password": "TestPass123!", "passwordRepeat": "TestPass123!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}}'
-    extractors:
-      - type: json
-        name: victim_user_id
-        selector: "$.data.id"
-
-  - name: Try to access victim user profile
+  - name: Try to access admin profile
     method: GET
-    path: /api/Users/{{victim_user_id}}
-    headers:
-      Authorization: "Bearer {{attacker_token}}"
+    path: /api/Users/1
     matchers:
       - type: status
         values: [200]
+      - type: json
+        selector: "$.data.role"
+        words: ["admin"]
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Can access admin user profile (ID=1) with current user token
+      remediation: Enforce strict authorization checks on user data access
+
+  - name: Try to access another user profile
+    method: GET
+    path: /api/Users/2
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data"
+        condition: exists
     on_match:
       vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
       message: Can access other user profiles by ID
