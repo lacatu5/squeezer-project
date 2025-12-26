@@ -2,34 +2,31 @@ id: generic-open-redirect
 info:
   name: Open Redirect
   description: Detects open redirect vulnerabilities via URL parameter manipulation
-  owasp_category: A08:2025
+  owasp_category: A03:2025
   severity: medium
   tags:
     - redirect
-    - open-redirect
+    - oauth
     - generic
 
 generic:
-  endpoint: "{{redirect}}"
+  endpoint: "{{all_discovered}}"
   method: GET
   parameter: "url"
 
   payloads:
-    - "//evil.com"
     - "https://evil.com"
-    - "http://evil.com"
-    - "//evil.com%2F%2F.."
+    - "//evil.com"
     - "///evil.com"
-    - "/\\/evil.com"
-    - "//evilexamplecom%252f.."
+    - "https://evil.com%2F%2Fexample.com"
+    - "http://example.com@evil.com"
 
   matchers:
     - type: word
       part: header
-      condition: or
       words:
-        - "evil.com"
-        - "Location: //evil"
-        - "location: //evil"
-
-  matchers_condition: or
+        - "location: https://evil.com"
+        - "location: http://evil.com"
+        - "location: //evil.com"
+      condition: or
+      case_sensitive: false

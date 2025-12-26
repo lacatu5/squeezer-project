@@ -1,0 +1,32 @@
+id: generic-xss-reflected
+info:
+  name: Reflected XSS (GET)
+  description: Detects reflected XSS in GET parameters across discovered endpoints
+  owasp_category: A03:2025
+  severity: medium
+  tags:
+    - xss
+    - injection
+    - generic
+
+generic:
+  endpoint: "{{all_discovered}}"
+  method: GET
+  parameter: "input"
+
+  payloads:
+    - "<script>alert(1)</script>"
+    - "<img src=x onerror=alert(1)>"
+    - "<svg/onload=alert(1)>"
+    - "-><script>alert(1)</script>"
+    - "'><script>alert(1)</script>"
+
+  matchers:
+    - type: regex
+      condition: or
+      regex:
+        - "<script[^>]*>alert\\("
+        - "<img[^>]*onerror"
+        - "<svg[^>]*onload"
+
+  matchers_condition: or

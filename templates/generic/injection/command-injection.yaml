@@ -1,27 +1,37 @@
 id: generic-command-injection
 info:
   name: Command Injection
-  description: OS command injection detection
+  description: Detects OS command injection in discovered endpoints
+  owasp_category: A03:2025
+  severity: critical
   tags:
+    - command
     - rce
-    - command-injection
+    - injection
     - generic
 
 generic:
-  endpoint: "{{command_injection}}"
+  endpoint: "{{all_discovered}}"
   method: GET
-  parameter: "q"
+  parameter: "cmd"
 
   payloads:
-    - ";id"
-    - "|id"
+    - "; ls -la"
+    - "| cat /etc/passwd"
+    - "& whoami"
     - "`id`"
-    - "$(id)"
+    - "$(whoami)"
+    - "' && ping -c 1 localhost && echo '"
+    - "; sleep 5"
 
   matchers:
     - type: regex
       condition: or
       regex:
-        - "uid=\\d+.*gid=\\d+"
-        - "root:x:0:0"
-        - "www-data|apache|nobody"
+        - "root:x:\\d+:\\d+:"
+        - "uid=\\d+\\("
+        - "total \\d+"
+        - "PING "
+        - "PING \\("
+
+  matchers_condition: or

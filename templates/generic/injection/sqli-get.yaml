@@ -1,57 +1,37 @@
 id: generic-sqli-get
 info:
   name: SQL Injection (GET)
-  description: Detects SQL injection in GET parameters via error messages or boolean blind
-  owasp_category: A05:2025
+  description: Detects SQL injection in GET parameters across discovered endpoints
+  owasp_category: A03:2025
+  severity: high
   tags:
     - sqli
     - injection
     - generic
 
 generic:
-  endpoint: "{{sqli}}"
+  endpoint: "{{all_discovered}}"
   method: GET
-  parameter: "q"
+  parameter: "input"
 
   payloads:
-    # Error-based payloads - trigger database errors
-    - "'"
-    - '"'
-    - "')"
-    - '")'
+    - "' OR '1'='1"
+    - "' OR 1=1--"
+    - "1' OR '1'='1'"
+    - "admin'--"
+    - "' UNION SELECT NULL--"
+    - "1; DROP TABLE users--"
 
-  matchers_condition: and
   matchers:
-    # Positive: SQL error messages in response (REQUIRED)
     - type: regex
       condition: or
       regex:
-        - "SQL syntax.*?near"
-        - "mysql_fetch.*?error"
-        - "ORA-\\d{5}"
-        - "PostgreSQL.*?ERROR"
-        - "SQLSTATE\\["
-        - "SQLITE_ERROR"
-        - "sqlite3\\.OperationalError"
-        - "Microsoft OLE DB.*?SQL"
-        - "ODBC.*?SQL"
-        - "native code"
-        - "unclosed quotation"
-        - "incorrect syntax"
-        - "unexpected token"
-        - "Unterminated string"
-        - "syntax error.*?MySQL"
-        - "PostgreSQL.*?ERROR"
-        - "ORA-[0-9]{5}"
+        - "SQL syntax.*MySQL"
+        - "Warning.*mysql_"
+        - "PostgreSQL.*ERROR"
+        - "ORA-01756"
+        - "Microsoft OLE DB Provider for SQL Server"
+        - "Unclosed quotation mark"
+        - "quoted string not properly terminated"
 
-    # Positive: Valid HTTP status (not 404)
-    - type: status
-      status: [200, 400, 500]
-
-    # Negative: NOT a successful empty response
-    - type: word
-      words:
-        - '"data":[]'
-        - '{"status":"success","data":[]}'
-      negative: true
-      part: body
+  matchers_condition: or

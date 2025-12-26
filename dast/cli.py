@@ -262,6 +262,7 @@ def scan(
     crawl: bool = typer.Option(False, "--crawl", help="Crawl target first to auto-discover endpoints"),
     generic: bool = typer.Option(True, "--generic/--no-generic", help="Include generic templates"),
     app: str = typer.Option(None, "--app", help="Add app-specific templates (juice-shop, ...)"),
+    template: str = typer.Option(None, "-T", "--template", help="Test specific template file"),
     template_dir: str = typer.Option(None, "-t", "--template-dir", help="Override templates directory"),
     output: str = typer.Option(None, "-o", "--output", help="Output JSON file for results"),
     profile: str = typer.Option(None, "--profile", help="Scan profile: passive, standard, thorough, aggressive"),
@@ -390,7 +391,14 @@ def scan(
         # Build list of template directories
         template_paths = []
 
-        if template_dir:
+        if template:
+            template_path = Path(template).resolve()
+            if not template_path.exists():
+                console.print(f"[red]Template file not found: {template}[/red]")
+                raise typer.Exit(1)
+            template_paths = [template_path]
+            console.print(f"[cyan]Testing single template: {template_path.name}[/cyan]\n")
+        elif template_dir:
             template_paths = [Path(template_dir).resolve()]
         else:
             if generic:

