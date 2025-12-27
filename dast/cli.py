@@ -16,7 +16,7 @@ from dast.analyzer import (
     discover_and_add_json_endpoints,
     extract_parameters_from_url,
 )
-from dast.crawler import KatanaCrawler, parse_cookies_string
+from dast.crawler import KatanaCrawler
 from dast.config import AuthType, EvidenceStrength, EndpointInfo, ScanProfile, ScanReport, TargetConfig
 from dast.scanner import load_templates, run_scan
 from dast.utils import setup_logging
@@ -27,104 +27,6 @@ app = typer.Typer(rich_markup_mode="rich")
 
 def print_banner():
     console.print("\n[bold cyan]DAST MVP[/bold cyan] - Template-based DAST Framework\n")
-
-
-def _print_crawl_report(report) -> None:
-    console.print("\n[bold]Crawl Results[/bold]\n")
-
-    if hasattr(report, 'summary'):
-        summary = report.summary
-        console.print(f"[cyan]Total URLs:[/cyan] {summary.get('total', 0)}")
-        console.print(f"[cyan]API Endpoints:[/cyan] {summary.get('api', 0)}")
-        console.print(f"[cyan]Auth Endpoints:[/cyan] {summary.get('auth', 0)}")
-        console.print(f"[cyan]Admin Endpoints:[/cyan] {summary.get('admin', 0)}")
-        console.print(f"[cyan]Page Endpoints:[/cyan] {summary.get('page', 0)}")
-
-        if report.cookies:
-            console.print(f"\n[dim]Cookies: {', '.join(report.cookies)}[/dim]")
-
-        if report.endpoints:
-            console.print("\n[bold]Sample Endpoints:[/bold]")
-            for ep in report.endpoints[:10]:
-                url = ep.get("url", "")
-                method = ep.get("method", "GET")
-                ep_type = ep.get("type", "unknown")
-                if ep_type == "api":
-                    console.print(f"  [cyan]{method}[/cyan] [{ep_type}] {url}")
-                elif ep_type == "auth":
-                    console.print(f"  [yellow]{method}[/yellow] [{ep_type}] {url}")
-                elif ep_type == "admin":
-                    console.print(f"  [red]{method}[/red] [{ep_type}] {url}")
-                else:
-                    console.print(f"  [green]{method}[/green] [{ep_type}] {url}")
-            if len(report.endpoints) > 10:
-                console.print(f"  ... and {len(report.endpoints) - 10} more")
-        return
-
-    stats = report.statistics
-    if isinstance(stats, dict):
-        total_requests = stats.get("total_requests", 0)
-        unique_urls = stats.get("unique_urls", 0)
-        api_endpoints = stats.get("api_endpoints", 0)
-        forms_discovered = stats.get("forms_discovered", 0)
-        js_endpoints = stats.get("javascript_files", 0)
-        interesting = stats.get("interesting_endpoints", 0)
-        successful = stats.get("successful_requests", 0)
-        failed = stats.get("failed_requests", 0)
-    else:
-        total_requests = stats.total_requests
-        unique_urls = stats.unique_urls
-        api_endpoints = stats.api_endpoints
-        forms_discovered = stats.forms_discovered
-        js_endpoints = getattr(stats, "javascript_files", 0)
-        interesting = 0
-        successful = getattr(stats, "successful_requests", 0)
-        failed = getattr(stats, "failed_requests", 0)
-
-    console.print(f"[cyan]Total Requests:[/cyan] {total_requests}")
-    console.print(f"[cyan]Unique URLs:[/cyan] {unique_urls}")
-    if successful > 0 or failed > 0:
-        console.print(f"[cyan]  Success:[/cyan] {successful} | [cyan]Failed:[/cyan] {failed}")
-    console.print(f"[cyan]API Endpoints:[/cyan] {api_endpoints}")
-    console.print(f"[cyan]Forms Discovered:[/cyan] {forms_discovered}")
-    console.print(f"[cyan]JS Files:[/cyan] {js_endpoints}")
-    if interesting > 0:
-        console.print(f"[yellow]Interesting Endpoints:[/yellow] {interesting} 🎯")
-
-    if report.auth_data:
-        console.print("\n[bold]Authentication:[/bold]")
-        auth_type = report.auth_data.get("type", "unknown")
-        console.print(f"  Type: {auth_type}")
-        if report.auth_data.get("jwt_token"):
-            console.print(f"  JWT: [dim]{report.auth_data['jwt_token'][:30]}...[/dim]")
-
-    interesting_endpoints = [
-        e for e in report.endpoints
-        if isinstance(e, dict) and e.get("interesting")
-    ]
-    if interesting_endpoints:
-        console.print("\n[bold yellow]Interesting Endpoints:[/bold yellow]")
-        for ep in interesting_endpoints[:10]:
-            url = ep.get("url", "")
-            method = ep.get("method", "GET")
-            hints = ep.get("vulnerability_hints", [])
-            hints_str = f" | [red]{', '.join(hints)}[/red]" if hints else ""
-            console.print(f"  [{method}] {url}{hints_str}")
-        if len(interesting_endpoints) > 10:
-            console.print(f"  ... and {len(interesting_endpoints) - 10} more")
-
-    if report.forms:
-        console.print(f"\n[bold]Forms ({len(report.forms)}):[/bold]")
-        for form in report.forms[:5]:
-            action = form.get("action", "unknown")
-            method = form.get("method", "GET")
-            fields = form.get("fields", form.get("form_fields", []))
-            console.print(f"  [{method}] {action}")
-            if fields:
-                field_names = [f.get("name", "?") for f in fields[:3]]
-                console.print(f"    Fields: {', '.join(field_names)}")
-        if len(report.forms) > 5:
-            console.print(f"  ... and {len(report.forms) - 5} more")
 
 
 def _print_report(report: ScanReport) -> None:
@@ -276,25 +178,11 @@ def scan(
     generic: bool = typer.Option(True, "--generic/--no-generic", help="Include generic templates"),
     app: str = typer.Option(None, "--app", help="Add app-specific templates (juice-shop, ...)"),
     template: str = typer.Option(None, "-T", "--template", help="Test specific template file"),
-    template_dir: str = typer.Option(None, "-t", "--template-dir", help="Override templates directory"),
     output: str = typer.Option(None, "-o", "--output", help="Output JSON file for results"),
     profile: str = typer.Option(None, "--profile", help="Scan profile: passive, standard, thorough, aggressive"),
-    checkpoint: str = typer.Option(None, "--checkpoint", help="Save scan progress to file"),
-    resume: str = typer.Option(None, "--resume", help="Resume scan from checkpoint file"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
-    no_validate: bool = typer.Option(False, "--no-validate", help="Skip target connectivity validation"),
-    coverage: bool = typer.Option(False, "--coverage", help="Enable code coverage tracking (requires: pip install coverage)"),
 ):
     async def _scan():
-        cov = None
-        if coverage:
-            if not HAS_COVERAGE:
-                console.print("[red]Error: coverage module not installed[/red]")
-                console.print("[dim]Install it: pip install coverage[/dim]")
-                raise typer.Exit(1)
-            cov = coverage_module.Coverage(source=["dast"], omit=["*/tests/*", "*/test_*.py"])
-            cov.start()
-            console.print("[cyan]Coverage tracking enabled[/cyan]\n")
 
         setup_logging(verbose=verbose)
 
@@ -414,8 +302,6 @@ def scan(
                 raise typer.Exit(1)
             template_paths = [template_path]
             console.print(f"[cyan]Testing single template: {template_path.name}[/cyan]\n")
-        elif template_dir:
-            template_paths = [Path(template_dir).resolve()]
         else:
             if generic:
                 generic_path = project_root / "templates" / "generic"
@@ -457,16 +343,16 @@ def scan(
         elif not verbose:
             console.print("[yellow]Scanning...[/yellow]\n")
 
-        checkpoint_file = resume or checkpoint
-        if resume:
-            console.print(f"[dim]Resuming from checkpoint: {resume}[/dim]\n")
+        if crawl:
+            console.print("[cyan]Phase 2: Scanning for vulnerabilities[/cyan]\n")
+        elif not verbose:
+            console.print("[yellow]Scanning...[/yellow]\n")
 
         report = await run_scan(
             target_config,
             templates,
-            validate_target=not no_validate,
+            validate_target=True,
             scan_profile=scan_profile,
-            checkpoint_file=checkpoint_file,
         )
 
         _print_report(report)
@@ -474,77 +360,9 @@ def scan(
         if output and report.findings:
             _save_results(report, output)
 
-        # Stop coverage and show report
-        if cov is not None:
-            cov.stop()
-            console.print("\n[bold]Code Coverage Report[/bold]\n")
-            cov.report(file=open(1, 'w'), show_missing=True)  # Print to stdout
-            console.print("\n[dim]Generate HTML report: coverage html[/dim]")
-            console.print("[dim]View report: open htmlcov/index.html[/dim]")
-
         raise typer.Exit(0 if report.findings else 1)
 
     asyncio.run(_scan())
-
-
-@app.command()
-def crawl(
-    target: str = typer.Argument(..., help="Target URL"),
-    output: str = typer.Option(None, "-o", "--output", help="Output YAML file for the crawler report"),
-    max_depth: int = typer.Option(3, "--max-depth", help="Maximum crawl depth"),
-    js_crawl: bool = typer.Option(False, "--js-crawl", help="Enable JavaScript crawling"),
-    cookies: str = typer.Option(None, "--cookies", help="Authentication cookies"),
-    no_filter_static: bool = typer.Option(False, "--no-filter-static", help="Don't filter static files"),
-    verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
-):
-    async def _crawl():
-        setup_logging(verbose=verbose)
-
-        if not verbose:
-            print_banner()
-
-        console.print(f"[dim]Target: {target}[/dim]")
-        console.print(f"[dim]Max Depth: {max_depth} | JS Crawl: {js_crawl}[/dim]")
-        if no_filter_static:
-            console.print("[dim]Filter: none (keeping all files)[/dim]")
-
-        parsed_cookies = {}
-        if cookies:
-            parsed_cookies = parse_cookies_string(cookies)
-            console.print(f"[dim]Cookies: {cookies[:50]}...[/dim]")
-
-        console.print()
-
-        crawler = KatanaCrawler(
-            base_url=target,
-            max_depth=max_depth,
-            js_crawl=js_crawl,
-            cookies=parsed_cookies,
-            filter_static=not no_filter_static,
-        )
-
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
-            task = progress.add_task("[cyan]Crawling with Katana...[/cyan]", total=None)
-
-            try:
-                report = await crawler.crawl()
-                progress.update(task, completed=True)
-            except Exception as e:
-                console.print(f"[red]Error during crawling: {e}[/red]")
-                console.print("[dim]Install Katana: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
-                raise typer.Exit(1)
-
-        _print_crawl_report(report)
-
-        if output:
-            report.save_yaml(output)
-            console.print(f"\n[green]Report saved to: {output}[/green]")
-
-    asyncio.run(_crawl())
 
 
 @app.command()
