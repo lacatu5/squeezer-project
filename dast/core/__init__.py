@@ -2,20 +2,9 @@
 
 This module contains fundamental building blocks used across the scanner:
 - Matchers: Response pattern matching for vulnerability detection
-- Extractors: Dynamic data extraction from HTTP responses
 - Validators: Response consistency and confidence scoring
 """
 
-from dast.core.extractors import (
-    ExtractionResult,
-    Extractor,
-    RegexExtractor,
-    JsonExtractor,
-    HeaderExtractor,
-    CookieExtractor,
-    KataExtractor,
-    create_extractor,
-)
 from dast.core.matchers import (
     MatchResult,
     Matcher,
@@ -29,23 +18,8 @@ from dast.core.matchers import (
     create_matcher,
     evaluate_matchers,
 )
-from dast.core.validators import (
-    ConsistencyChecker,
-    ConfidenceCalculator,
-    create_finding_from_dict,
-)
 
 __all__ = [
-    # Extractors
-    "ExtractionResult",
-    "Extractor",
-    "RegexExtractor",
-    "JsonExtractor",
-    "HeaderExtractor",
-    "CookieExtractor",
-    "KataExtractor",
-    "create_extractor",
-    # Matchers
     "MatchResult",
     "Matcher",
     "StatusMatcher",
@@ -57,8 +31,4 @@ __all__ = [
     "TimeMatcher",
     "create_matcher",
     "evaluate_matchers",
-    # Validators
-    "ConsistencyChecker",
-    "ConfidenceCalculator",
-    "create_finding_from_dict",
 ]

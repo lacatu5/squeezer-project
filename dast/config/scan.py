@@ -1,6 +1,3 @@
-"""Scan result and crawler data models."""
-
-import json
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
@@ -208,16 +205,13 @@ class CrawlerReport(BaseModel):
 
 
 class ScanReport(BaseModel):
-    """Complete scan report with checkpoint support for resume capability."""
+    """Complete scan report."""
 
     target: str
     templates_executed: int
     findings: List[Finding] = Field(default_factory=list)
     errors: List[str] = Field(default_factory=list)
     duration_seconds: float = 0.0
-
-    checkpoint_file: Optional[str] = None
-    completed_templates: List[str] = Field(default_factory=list)
 
     def _count_by_severity(self, severity: SeverityLevel) -> int:
         return sum(1 for f in self.findings if f.severity == severity)
@@ -382,55 +376,3 @@ class ScanReport(BaseModel):
 
     def add_error(self, error: str) -> None:
         self.errors.append(error)
-
-    def mark_template_completed(self, template_id: str) -> None:
-        """Mark a template as completed and save checkpoint if configured."""
-        if template_id not in self.completed_templates:
-            self.completed_templates.append(template_id)
-        self.save_checkpoint()
-
-    def is_template_completed(self, template_id: str) -> bool:
-        """Check if a template has already been completed."""
-        return template_id in self.completed_templates
-
-    def save_checkpoint(self) -> None:
-        """Save current state to checkpoint file if configured."""
-        if not self.checkpoint_file:
-            return
-
-        try:
-            Path(self.checkpoint_file).parent.mkdir(parents=True, exist_ok=True)
-            with open(self.checkpoint_file, "w") as f:
-                json.dump({
-                    "target": self.target,
-                    "templates_executed": self.templates_executed,
-                    "findings": [f.model_dump() for f in self.findings],
-                    "errors": self.errors,
-                    "duration_seconds": self.duration_seconds,
-                    "completed_templates": self.completed_templates,
-                }, f, indent=2)
-        except Exception:
-            pass
-
-    @classmethod
-    def load_checkpoint(cls, checkpoint_file: str) -> Optional["ScanReport"]:
-        """Load scan state from checkpoint file."""
-        path = Path(checkpoint_file)
-        if not path.exists():
-            return None
-
-        try:
-            with open(path) as f:
-                data = json.load(f)
-
-            return cls(
-                target=data.get("target", ""),
-                templates_executed=data.get("templates_executed", 0),
-                findings=[Finding(**f) for f in data.get("findings", [])],
-                errors=data.get("errors", []),
-                duration_seconds=data.get("duration_seconds", 0.0),
-                checkpoint_file=checkpoint_file,
-                completed_templates=data.get("completed_templates", []),
-            )
-        except Exception:
-            return None

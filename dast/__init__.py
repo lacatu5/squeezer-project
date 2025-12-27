@@ -32,19 +32,6 @@ from dast.scanner import (
 
 from dast.auth import Authenticator, AuthContext
 
-# Analysis modules
-from dast.core.extractors import (
-    ExtractionResult,
-    Extractor,
-    RegexExtractor,
-    JsonExtractor,
-    HeaderExtractor,
-    CookieExtractor,
-    KataExtractor,
-    create_extractor,
-    extract_all,
-)
-
 from dast.core.matchers import (
     MatchResult,
     Matcher,
@@ -85,15 +72,6 @@ __all__ = [
     "AuthContext",
     # Extractors
     "ExtractionResult",
-    "Extractor",
-    "RegexExtractor",
-    "JsonExtractor",
-    "HeaderExtractor",
-    "CookieExtractor",
-    "KataExtractor",
-    "create_extractor",
-    "extract_all",
-    # Matchers
     "MatchResult",
     "Matcher",
     "StatusMatcher",

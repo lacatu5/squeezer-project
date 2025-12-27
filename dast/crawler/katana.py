@@ -369,23 +369,3 @@ async def crawl_with_katana(
         report.save_yaml(output_file)
 
     return report
-
-
-def parse_cookies_string(cookies_str: str) -> Dict[str, str]:
-    cookies_str = cookies_str.strip()
-
-    if cookies_str.startswith("{"):
-        try:
-            import json
-            return json.loads(cookies_str)
-        except json.JSONDecodeError:
-            pass
-
-    result = {}
-    for part in cookies_str.split(";"):
-        part = part.strip()
-        if "=" in part:
-            key, value = part.split("=", 1)
-            result[key.strip()] = value.strip()
-
-    return result

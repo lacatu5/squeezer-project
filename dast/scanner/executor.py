@@ -11,7 +11,6 @@ from tenacity import (
 )
 
 from dast.config import EvidenceStrength, Finding, RequestConfig, SeverityLevel, Template
-from dast.core.extractors import create_extractor
 from dast.core.matchers import MatchResult, create_matcher, evaluate_matchers
 from dast.scanner.context import ExecutionContext
 from dast.utils import logger
@@ -109,24 +108,6 @@ async def execute_request(
 
         context.responses.append(response)
         context.request_count += 1
-
-        if config.extractors:
-            for extractor_config in config.extractors:
-                extractor_dict = {
-                    "type": "json" if extractor_config.selector else "regex",
-                    "name": extractor_config.name,
-                    "selector": extractor_config.selector,
-                    "regex": extractor_config.regex,
-                    "group": extractor_config.group,
-                    "part": extractor_config.location,
-                }
-                try:
-                    extractor = create_extractor(extractor_dict)
-                    result = extractor.extract(response)
-                    if result and result.success:
-                        context.set(result.name, result.value)
-                except Exception:
-                    pass
 
         if config.name:
             context.save_response(config.name, response)
