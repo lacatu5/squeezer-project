@@ -30,13 +30,13 @@ _env.filters['truncate'] = _truncate_filter
 
 def _severity_chart(severity):
     max_val = max((v for v in severity.values() if v > 0), default=1)
-    colors = {"critical": "#dc2626", "high": "#ea580c", "medium": "#ca8a04", "low": "#16a34a"}
+    colors = {"critical": "#ff4444", "high": "#ff8800", "medium": "#ffcc00", "low": "#00cc66"}
 
     bars = []
     for key, label in [("critical", "Crit"), ("high", "High"), ("medium", "Med"), ("low", "Low")]:
         value = severity.get(key, 0)
         height = max(20, (value / max_val) * 160) if value else 4
-        color = colors.get(key, "#64748b")
+        color = colors.get(key, "#666")
         bars.append(f'''
             <div class="bar">
                 <div class="bar-value" style="color: {color}">{value}</div>
@@ -48,7 +48,7 @@ def _severity_chart(severity):
 
 def _owasp_chart(owasp_data):
     if not owasp_data:
-        return '<div style="color: #64748b; text-align: center; padding: 40px;">No OWASP findings</div>'
+        return '<div style="color: #555; text-align: center; padding: 40px;">No OWASP findings</div>'
 
     max_val = max((d["count"] for d in owasp_data), default=1)
 
@@ -57,7 +57,7 @@ def _owasp_chart(owasp_data):
         code = item["code"]
         value = item["count"]
         height = max(20, (value / max_val) * 160)
-        color = "#dc2626" if code in ["A01", "A05", "A07"] else "#ea580c" if code in ["A02", "A03", "A04", "A06"] else "#ca8a04"
+        color = "#ff4444" if code in ["A01", "A05", "A07"] else "#ff8800" if code in ["A02", "A03", "A04", "A06"] else "#ffcc00"
         bars.append(f'''
             <div class="bar">
                 <div class="bar-value" style="color: {color}">{value}</div>
@@ -69,13 +69,13 @@ def _owasp_chart(owasp_data):
 
 def _evidence_chart(evidence_data):
     total = sum(evidence_data.values()) or 1
-    colors = {"direct": "#059669", "inference": "#d97706", "heuristic": "#0891b2"}
+    colors = {"direct": "#00cc66", "inference": "#ff8800", "heuristic": "#00aaff"}
 
     bars = []
     for key, label in [("direct", "Direct"), ("inference", "Inf"), ("heuristic", "Heur")]:
         value = evidence_data.get(key, 0)
         height = max(20, (value / total) * 160) if value else 4
-        color = colors.get(key, "#64748b")
+        color = colors.get(key, "#666")
         bars.append(f'''
             <div class="bar">
                 <div class="bar-value" style="color: {color}">{value}</div>
@@ -114,6 +114,20 @@ def generate_html_report(report: ScanReport, output_path: str) -> None:
         "heuristic": sum(1 for f in grouped if f.evidence_strength == EvidenceStrength.HEURISTIC),
     }
 
+    all_tags = set()
+    app_count = 0
+    generic_count = 0
+    for f in grouped:
+        all_tags.update(f.tags)
+        if "generic" in f.tags or f.template_id.startswith("generic-"):
+            generic_count += 1
+        else:
+            app_count += 1
+
+    tag_list = sorted(all_tags)
+
+    owasp_codes = sorted(set(f.owasp_category.value.split(":")[0] for f in grouped))
+
     template = _env.get_template("report.html")
     html = template.render(
         target=report.target,
@@ -127,6 +141,10 @@ def generate_html_report(report: ScanReport, output_path: str) -> None:
         findings=grouped,
         errors=report.errors,
         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        tags=tag_list,
+        owasp_codes=owasp_codes,
+        app_count=app_count,
+        generic_count=generic_count,
     )
 
     output_file = Path(output_path)

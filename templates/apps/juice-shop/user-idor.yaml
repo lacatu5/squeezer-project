@@ -1,15 +1,20 @@
 id: user-idor
 info:
-  name: User Profile IDOR Vulnerability
-  description: Detects IDOR on user profile endpoints by accessing other user IDs
+  name: User Profile IDOR
+  description: Access control violation - users can view other users' profiles by enumerating IDs
+  owasp_category: A01:2021
+  severity: high
   tags:
     - idor
     - access-control
+    - business-logic
 
 requests:
-  - name: Try to access admin profile
+  - name: Access admin profile
     method: GET
     path: /api/Users/1
+    headers:
+      Authorization: "{{bearer_token}}"
     matchers:
       - type: status
         values: [200]
@@ -18,12 +23,14 @@ requests:
         words: ["admin"]
     on_match:
       vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
-      message: Can access admin user profile (ID=1) with current user token
-      remediation: Enforce strict authorization checks on user data access
+      message: Admin user profile accessible via sequential ID enumeration
+      remediation: Implement ownership check comparing requested user ID with authenticated user's ID
 
-  - name: Try to access another user profile
+  - name: Access another user profile
     method: GET
     path: /api/Users/2
+    headers:
+      Authorization: "{{bearer_token}}"
     matchers:
       - type: status
         values: [200]
@@ -32,5 +39,5 @@ requests:
         condition: exists
     on_match:
       vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
-      message: Can access other user profiles by ID
-      remediation: Enforce strict authorization checks on user data access
+      message: Other user profiles accessible by changing user ID in request
+      remediation: Implement proper authorization - users should only access their own data

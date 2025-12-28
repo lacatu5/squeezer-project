@@ -1,18 +1,19 @@
 id: generic-xss-reflected
 info:
-  name: Reflected XSS (GET)
-  description: Detects reflected XSS in GET parameters across discovered endpoints
-  owasp_category: A03:2025
+  name: Reflected XSS
+  description: Tests for reflected cross-site scripting in discovered endpoints
+  owasp_category: A03:2021
   severity: medium
   tags:
     - xss
     - injection
+    - client-side
     - generic
 
 generic:
   endpoint: "{{all_discovered}}"
   method: GET
-  parameter: "input"
+  parameter: "{{input_param}}"
 
   payloads:
     - "<script>alert(1)</script>"
@@ -21,6 +22,12 @@ generic:
     - "\"'><script>alert(1)</script>"
     - "javascript:alert(1)"
     - "<iframe src=javascript:alert(1)>"
+    - "<body onload=alert(1)>"
+    - "<input onfocus=alert(1) autofocus>"
+    - "<marquee onstart=alert(1)>"
+    - "<details open ontoggle=alert(1)>"
+    - "'-alert(1)-'"
+    - "\"-alert(1)-\""
 
   matchers:
     - type: regex
@@ -31,7 +38,10 @@ generic:
         - "<svg[^>]*onload"
         - "javascript:alert\\("
         - "<iframe[^>]*src.*javascript"
-        - "<script[^>]*>"
+        - "<body[^>]*onload"
+        - "onfocus\\s*=.*alert"
+        - "ontoggle\\s*=.*alert"
+        - "<marquee[^>]*onstart"
         - "onerror\\s*="
         - "onload\\s*="
     - type: word
@@ -42,6 +52,7 @@ generic:
         - "<svg"
         - "onerror"
         - "onload"
+        - "javascript:"
       case_sensitive: false
 
   matchers_condition: or

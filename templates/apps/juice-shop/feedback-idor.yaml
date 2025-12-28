@@ -1,15 +1,20 @@
 id: feedback-idor
 info:
-  name: Feedback IDOR Vulnerability
-  description: Detects IDOR on feedback endpoints by accessing other users feedback
+  name: Feedback IDOR
+  description: Access control violation - users can view feedback from other users
+  owasp_category: A01:2021
+  severity: medium
   tags:
     - idor
     - access-control
+    - business-logic
 
 requests:
-  - name: Try to access feedback from user 1
+  - name: Access feedback ID 1
     method: GET
     path: /api/Feedbacks/1
+    headers:
+      Authorization: "{{bearer_token}}"
     matchers:
       - type: status
         values: [200]
@@ -18,5 +23,37 @@ requests:
         condition: exists
     on_match:
       vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
-      message: Can access feedback from other users by sequential ID
-      remediation: Verify ownership before allowing access to user-generated content
+      message: Feedback from other users accessible via sequential ID enumeration
+      remediation: Verify feedback ownership before allowing access - check UserId matches authenticated user
+
+  - name: Access feedback ID 2
+    method: GET
+    path: /api/Feedbacks/2
+    headers:
+      Authorization: "{{bearer_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data"
+        condition: exists
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Sequential feedback IDs can be enumerated - privacy violation
+      remediation: Implement authorization check ensuring users can only access their own feedback
+
+  - name: Access feedback list
+    method: GET
+    path: /api/Feedbacks/
+    headers:
+      Authorization: "{{bearer_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data"
+        condition: exists
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: All feedback accessible - may reveal other users' data
+      remediation: Filter feedback by authenticated user's ID; never expose all records

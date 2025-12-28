@@ -1,22 +1,18 @@
 id: generic-security-headers
 info:
   name: Missing Security Headers
-  description: Detects missing security headers (CSP, HSTS, X-Frame-Options, etc.)
-  owasp_category: A05:2025
+  description: Tests for missing security headers
+  owasp_category: A05:2021
   severity: low
   tags:
     - headers
     - misconfiguration
     - generic
 
-targets:
-  - id: MISSING_CSP
-    description: Missing Content-Security-Policy header
-    endpoints:
-      - path: "{{endpoint}}"
-        method: GET
-    requests:
-      - method: GET
+requests:
+  - name: Check Content-Security-Policy
+    method: GET
+    path: /
     matchers:
       - type: word
         part: header
@@ -25,16 +21,14 @@ targets:
         condition: and
         case_sensitive: false
         negative: true
-    evidence_strength: direct
-    message: "Missing Content-Security-Policy header - XSS risk"
+    on_match:
+      vulnerability: MISSING_CSP
+      message: Missing Content-Security-Policy header - XSS risk
+      remediation: Implement strict CSP policy
 
-  - id: MISSING_HSTS
-    description: Missing HTTP Strict-Transport-Security header
-    endpoints:
-      - path: "{{endpoint}}"
-        method: GET
-    requests:
-      - method: GET
+  - name: Check HSTS
+    method: GET
+    path: /
     matchers:
       - type: word
         part: header
@@ -43,16 +37,14 @@ targets:
         condition: and
         case_sensitive: false
         negative: true
-    evidence_strength: direct
-    message: "Missing HSTS header - TLS downgrade risk"
+    on_match:
+      vulnerability: MISSING_HSTS
+      message: Missing HSTS header - TLS downgrade risk
+      remediation: Enable HSTS with max-age of at least 1 year
 
-  - id: MISSING_X_FRAME_OPTIONS
-    description: Missing X-Frame-Options header
-    endpoints:
-      - path: "{{endpoint}}"
-        method: GET
-    requests:
-      - method: GET
+  - name: Check X-Frame-Options
+    method: GET
+    path: /
     matchers:
       - type: word
         part: header
@@ -61,16 +53,14 @@ targets:
         condition: and
         case_sensitive: false
         negative: true
-    evidence_strength: direct
-    message: "Missing X-Frame-Options header - clickjacking risk"
+    on_match:
+      vulnerability: MISSING_X_FRAME_OPTIONS
+      message: Missing X-Frame-Options header - clickjacking risk
+      remediation: Add X-Frame-Options: DENY or SAMEORIGIN
 
-  - id: MISSING_X_CONTENT_TYPE_OPTIONS
-    description: Missing X-Content-Type-Options header
-    endpoints:
-      - path: "{{endpoint}}"
-        method: GET
-    requests:
-      - method: GET
+  - name: Check X-Content-Type-Options
+    method: GET
+    path: /
     matchers:
       - type: word
         part: header
@@ -79,5 +69,39 @@ targets:
         condition: and
         case_sensitive: false
         negative: true
-    evidence_strength: direct
-    message: "Missing X-Content-Type-Options header - MIME sniffing risk"
+    on_match:
+      vulnerability: MISSING_X_CONTENT_TYPE_OPTIONS
+      message: Missing X-Content-Type-Options header - MIME sniffing risk
+      remediation: Add X-Content-Type-Options: nosniff
+
+  - name: Check X-XSS-Protection
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "x-xss-protection"
+        condition: and
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_X_XSS_PROTECTION
+      message: Missing X-XSS-Protection header
+      remediation: Add X-XSS-Protection: 1; mode=block
+
+  - name: Check Referrer-Policy
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "referrer-policy"
+        condition: and
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_REFERRER_POLICY
+      message: Missing Referrer-Policy header - privacy risk
+      remediation: Add Referrer-Policy: no-referrer

@@ -215,4 +215,5 @@ def create_finding(
         remediation=on_match.get("remediation") or "",
         request_details=f"{config.method} {config.path}",
         response_details=match_result.response_details,
+        tags=list(template.info.tags) if template.info.tags else [],
     )

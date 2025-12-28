@@ -1,8 +1,8 @@
 id: generic-debug-endpoints
 info:
   name: Debug Endpoints Exposure
-  description: Detects exposed debug endpoints and development tools
-  owasp_category: A05:2025
+  description: Tests for exposed debug endpoints and development tools
+  owasp_category: A05:2021
   severity: medium
   tags:
     - debug
@@ -10,19 +10,20 @@ info:
     - generic
 
 requests:
-  - name: "debug_endpoint_actuator"
+  - name: Spring Boot Actuator
     method: GET
-    path: "/actuator"
+    path: /actuator
     matchers:
       - type: status
         status: [200, 403]
     on_match:
-      vulnerability: "DEBUG_ACTUATOR"
-      message: "Spring Boot Actuator endpoint exposed"
+      vulnerability: DEBUG_ACTUATOR
+      message: Spring Boot Actuator endpoint exposed
+      remediation: Disable Actuator in production or restrict access
 
-  - name: "debug_endpoint_health"
+  - name: Health check endpoint
     method: GET
-    path: "/actuator/health"
+    path: /health
     matchers:
       - type: json
         selector: "$.status"
@@ -31,42 +32,46 @@ requests:
         part: body
     matchers_condition: or
     on_match:
-      vulnerability: "DEBUG_HEALTH_ENDPOINT"
-      message: "Health check endpoint exposed"
+      vulnerability: DEBUG_HEALTH_ENDPOINT
+      message: Health check endpoint exposed
+      remediation: Restrict access to health endpoints
 
-  - name: "debug_endpoint_env"
+  - name: Environment variables endpoint
     method: GET
-    path: "/actuator/env"
+    path: /actuator/env
     matchers:
       - type: status
         status: [200, 403]
     on_match:
-      vulnerability: "DEBUG_ENV_ENDPOINT"
-      message: "Environment variables endpoint exposed"
+      vulnerability: DEBUG_ENV_ENDPOINT
+      message: Environment variables endpoint exposed
+      remediation: Disable environment endpoint in production
 
-  - name: "debug_endpoint_info"
+  - name: Application info endpoint
     method: GET
-    path: "/actuator/info"
+    path: /actuator/info
     matchers:
       - type: status
         status: [200]
     on_match:
-      vulnerability: "DEBUG_INFO_ENDPOINT"
-      message: "Application info endpoint exposed"
+      vulnerability: DEBUG_INFO_ENDPOINT
+      message: Application info endpoint exposed
+      remediation: Disable info endpoint in production
 
-  - name: "debug_endpoint_admin"
+  - name: Admin debug endpoint
     method: GET
-    path: "/admin/debug"
+    path: /admin/debug
     matchers:
       - type: status
         status: [200, 403]
     on_match:
-      vulnerability: "DEBUG_ADMIN_ENDPOINT"
-      message: "Debug admin endpoint accessible"
+      vulnerability: DEBUG_ADMIN_ENDPOINT
+      message: Debug admin endpoint accessible
+      remediation: Remove admin debug endpoints
 
-  - name: "debug_endpoint_console"
+  - name: Console endpoint
     method: GET
-    path: "/console"
+    path: /console
     matchers:
       - type: word
         words:
@@ -78,35 +83,39 @@ requests:
         part: body
         condition: or
     on_match:
-      vulnerability: "DEBUG_CONSOLE"
-      message: "Debug console endpoint exposed"
+      vulnerability: DEBUG_CONSOLE
+      message: Debug console endpoint exposed
+      remediation: Remove console access endpoints
 
-  - name: "debug_endpoint_trace"
+  - name: Trace endpoint
     method: GET
-    path: "/actuator/httptrace"
+    path: /actuator/httptrace
     matchers:
       - type: status
         status: [200, 403]
     on_match:
-      vulnerability: "DEBUG_TRACE_ENDPOINT"
-      message: "HTTP trace endpoint exposed"
+      vulnerability: DEBUG_TRACE_ENDPOINT
+      message: HTTP trace endpoint exposed
+      remediation: Disable trace endpoint in production
 
-  - name: "debug_endpoint_threaddump"
+  - name: Thread dump endpoint
     method: GET
-    path: "/actuator/threaddump"
+    path: /actuator/threaddump
     matchers:
       - type: status
         status: [200, 403]
     on_match:
-      vulnerability: "DEBUG_THREADDUMP_ENDPOINT"
-      message: "Thread dump endpoint exposed"
+      vulnerability: DEBUG_THREADDUMP_ENDPOINT
+      message: Thread dump endpoint exposed
+      remediation: Disable thread dump endpoint in production
 
-  - name: "debug_endpoint_heapdump"
+  - name: Heap dump endpoint
     method: GET
-    path: "/actuator/heapdump"
+    path: /actuator/heapdump
     matchers:
       - type: status
         status: [200, 403]
     on_match:
-      vulnerability: "DEBUG_HEAPDUMP_ENDPOINT"
-      message: "Heap dump endpoint exposed"
+      vulnerability: DEBUG_HEAPDUMP_ENDPOINT
+      message: Heap dump endpoint exposed
+      remediation: Disable heap dump endpoint in production

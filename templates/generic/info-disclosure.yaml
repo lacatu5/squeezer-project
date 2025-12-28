@@ -1,8 +1,8 @@
 id: generic-info-disclosure
 info:
   name: Information Disclosure
-  description: Detects sensitive information disclosure in headers and error messages
-  owasp_category: A02:2025
+  description: Tests for sensitive information disclosure in headers and error responses
+  owasp_category: A02:2021
   severity: low
   tags:
     - info-disclosure
@@ -10,82 +10,108 @@ info:
     - generic
 
 requests:
-  - name: Server Version Disclosure
+  - name: Server version disclosure
     method: GET
     path: /
-    matchers:
-      - type: word
-        words:
-          - "Server:"
-          - "X-Powered-By:"
-          - "X-AspNet-Version:"
-          - "X-AspNetMvc-Version:"
-        part: header
-        condition: or
-    on_match:
-      vulnerability: INFO_DISCLOSURE_HEADERS
-      message: Server version disclosed via HTTP headers
-      remediation: Remove unnecessary headers and use generic server tokens
-
-  - name: Stack Trace Disclosure
-    method: GET
-    path: /nonexistent-page-404
     matchers:
       - type: regex
         condition: or
         regex:
-          - "at\\s+\\w+\\("
-          - "Stack trace"
-          - "javax\\.servlet\\."
-          - "System\\.Web\\."
-          - "TypeError:"
-          - "ReferenceError:"
-          - "PHP (Fatal error|Warning|Notice)"
+          - '^Server:\s+[A-Za-z0-9/\.]+'
+          - '^X-Powered-By:\s+[A-Za-z0-9/\.]+'
+          - '^X-AspNet-Version:\s+'
+          - '^X-AspNetMvc-Version:\s+'
+        part: header
+    on_match:
+      vulnerability: INFO_DISCLOSURE_HEADERS
+      message: Server technology version disclosed via HTTP headers
+      remediation: Remove unnecessary headers and use generic server tokens
+
+  - name: Stack trace disclosure
+    method: GET
+    path: /nonexistent-random-path-404
+    matchers:
+      - type: regex
+        condition: or
+        regex:
+          - 'at\s+\w+\('
+          - 'Stack trace'
+          - 'javax\.servlet\.'
+          - 'System\.Web\.'
+          - 'TypeError:'
+          - 'ReferenceError:'
+          - 'PHP (Fatal error|Warning|Notice)'
+          - '\.java:\d+'
+          - 'Caused by:'
         part: body
     on_match:
       vulnerability: STACK_TRACE_DISCLOSURE
       message: Stack trace or detailed error messages exposed
       remediation: Use generic error messages in production
 
-  - name: Debug Mode Exposure
+  - name: Debug endpoint
     method: GET
     path: /debug
     matchers:
       - type: status
-        status: [200, 403]
+        condition: in
+        status:
+          - 200
+          - 403
     on_match:
       vulnerability: DEBUG_ENDPOINT_EXPOSED
       message: Debug endpoint exposed
       remediation: Disable debug endpoints in production
 
-  - name: Backup File Exposure
+  - name: Backup file exposure
     method: GET
     path: /backup.zip
     matchers:
-      - type: word
-        words:
-          - "application/zip"
-          - "PK\x03\x04"
-        part: header
+      - type: regex
         condition: or
+        regex:
+          - 'application/(zip|x-zip-compressed)'
+          - '^PK\x03\x04'
+        part: header
     on_match:
       vulnerability: BACKUP_FILE_EXPOSED
       message: Backup file exposed
       remediation: Remove backup files from web root
 
-  - name: ENV File Exposure
+  - name: Environment file exposure
     method: GET
     path: /.env
     matchers:
       - type: regex
         condition: or
         regex:
-          - "DB_PASSWORD="
-          - "SECRET_KEY="
-          - "API_KEY="
-          - "DATABASE_URL="
-          - "AWS_"
+          - 'DB_PASSWORD='
+          - 'SECRET_KEY='
+          - 'API_KEY='
+          - 'DATABASE_URL='
+          - 'AWS_'
+          - 'JWT_SECRET='
+          - 'MYSQL_'
+          - 'POSTGRES_'
+          - 'REDIS_'
     on_match:
       vulnerability: ENV_FILE_EXPOSED
       message: Environment file exposed - credentials may be leaked
       remediation: Never store .env files in web-accessible directories
+
+  - name: Directory listing
+    method: GET
+    path: /assets/
+    matchers:
+      - type: regex
+        condition: or
+        regex:
+          - '<title>.*index of'
+          - '<title>.*directory listing'
+          - 'Parent Directory</a>'
+          - '<a href=".*">.*</a>\s*[0-9]{1,2}:[0-9]{2}'
+        case_sensitive: false
+    on_match:
+      vulnerability: DIRECTORY_LISTING
+      message: Directory listing enabled
+      remediation: Disable directory listing in web server configuration

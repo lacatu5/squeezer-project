@@ -1,18 +1,22 @@
 id: negative-quantity
 info:
   name: Negative Quantity Business Logic Flaw
-  description: Detects if server accepts negative quantity values in basket items
+  description: Input validation bypass - server accepts negative values allowing refund abuse
+  owasp_category: A05:2021
+  severity: high
   tags:
     - business-logic
     - input-validation
+    - refund-abuse
 
 requests:
-  - name: Add item with negative quantity
+  - name: Add item with large negative quantity
     method: POST
-    path: /api/BasketItems
+    path: /api/BasketItems/
     headers:
+      Authorization: "{{bearer_token}}"
       Content-Type: application/json
-    body: '{"ProductId": 1, "quantity": -100, "basketId": 999}'
+    body: '{"ProductId": 1, "quantity": -100, "basketId": "{{basket_id}}"}'
     matchers:
       - type: status
         values: [200, 201]
@@ -21,5 +25,41 @@ requests:
         condition: negative
     on_match:
       vulnerability: NEGATIVE_QUANTITY
-      message: Server accepted negative quantity in basket item
-      remediation: Validate that quantity is a positive integer on the server side
+      message: Server accepts negative quantity values - allows total manipulation and refund abuse
+      remediation: Validate quantity is a positive integer (>= 1) on server side
+
+  - name: Add item with negative one quantity
+    method: POST
+    path: /api/BasketItems/
+    headers:
+      Authorization: "{{bearer_token}}"
+      Content-Type: application/json
+    body: '{"ProductId": 1, "quantity": -1, "basketId": "{{basket_id}}"}'
+    matchers:
+      - type: status
+        values: [200, 201]
+      - type: json
+        selector: "$.data.quantity"
+        value: -1
+    on_match:
+      vulnerability: NEGATIVE_QUANTITY
+      message: Negative quantity accepted - cart total manipulation possible
+      remediation: Implement strict input validation: quantity must be >= 1
+
+  - name: Add item with zero quantity
+    method: POST
+    path: /api/BasketItems/
+    headers:
+      Authorization: "{{bearer_token}}"
+      Content-Type: application/json
+    body: '{"ProductId": 1, "quantity": 0, "basketId": "{{basket_id}}"}'
+    matchers:
+      - type: status
+        values: [200, 201]
+      - type: json
+        selector: "$.data.quantity"
+        value: 0
+    on_match:
+      vulnerability: NEGATIVE_QUANTITY
+      message: Zero quantity accepted - logic flaw may allow free items
+      remediation: Validate minimum quantity of 1 for all basket items

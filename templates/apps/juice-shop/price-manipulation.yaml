@@ -1,18 +1,22 @@
 id: price-manipulation
 info:
   name: Price Manipulation Business Logic Flaw
-  description: Detects if client-provided price is accepted without validation
+  description: Server accepts client-provided price values allowing payment bypass
+  owasp_category: A05:2021
+  severity: critical
   tags:
     - business-logic
     - price-manipulation
+    - payment-bypass
 
 requests:
-  - name: Add item with manipulated negative price
+  - name: Add item with negative price
     method: POST
-    path: /api/BasketItems
+    path: /api/BasketItems/
     headers:
+      Authorization: "{{bearer_token}}"
       Content-Type: application/json
-    body: '{"ProductId": 1, "quantity": 1, "price": -999.99, "basketId": 999}'
+    body: '{"ProductId": 1, "quantity": 1, "price": -999.99, "basketId": "{{basket_id}}"}'
     matchers:
       - type: status
         values: [200, 201]
@@ -21,5 +25,35 @@ requests:
         condition: exists
     on_match:
       vulnerability: PRICE_MANIPULATION
-      message: Server accepted request with client-provided negative price
-      remediation: Never accept price from client; always use server-side product catalog
+      message: Server accepts client-provided price parameter - business logic flaw allows price tampering
+      remediation: Never trust client-provided price; always retrieve from server-side product catalog
+
+  - name: Add item with zero price
+    method: POST
+    path: /api/BasketItems/
+    headers:
+      Authorization: "{{bearer_token}}"
+      Content-Type: application/json
+    body: '{"ProductId": 1, "quantity": 1, "price": 0, "basketId": "{{basket_id}}"}'
+    matchers:
+      - type: status
+        values: [200, 201]
+    on_match:
+      vulnerability: PRICE_MANIPULATION
+      message: Zero price accepted - free items possible
+      remediation: Price must always come from server-side product catalog
+
+  - name: Add item with manipulated price
+    method: POST
+    path: /api/BasketItems/
+    headers:
+      Authorization: "{{bearer_token}}"
+      Content-Type: application/json
+    body: '{"ProductId": 1, "quantity": 1, "price": 0.01, "basketId": "{{basket_id}}"}'
+    matchers:
+      - type: status
+        values: [200, 201]
+    on_match:
+      vulnerability: PRICE_MANIPULATION
+      message: Price override allowed - payment amount manipulation possible
+      remediation: Remove price parameter from basket item creation; enforce server-side pricing

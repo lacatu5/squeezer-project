@@ -29,6 +29,7 @@ class Finding(BaseModel):
     response_details: Optional[str] = None
     payload_count: int = 1
     endpoint_count: int = 1
+    tags: List[str] = Field(default_factory=list)
 
 
 class ParameterInfo(BaseModel):

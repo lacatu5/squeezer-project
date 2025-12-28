@@ -182,4 +182,5 @@ def create_finding_from_dict(data: Dict[str, Any]) -> "Finding":
         evidence=data.get("evidence", {}),
         message=data.get("message", ""),
         remediation=data.get("remediation", ""),
+        tags=data.get("tags", []),
     )
