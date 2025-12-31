@@ -1,0 +1,45 @@
+id: juice-shop-data-export-sqli
+info:
+  name: Data Export SQL Injection
+  author: dast-mvp
+  severity: critical
+  description: Tests for SQL injection in data export functionality
+  tags:
+    - juice-shop
+    - sqli
+    - data-exfiltration
+
+requests:
+  - path: /rest/user/data-export
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 401
+      - type: word
+        words:
+          - '"status":'
+          - email
+        condition: or
+
+  - path: /rest/user/data-export?format=json
+    method: GET
+    matchers:
+      - type: status
+        status:
+          - 200
+
+  - path: /api/Users
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - '"data":'
+          - email
+        condition: and

@@ -1,0 +1,57 @@
+id: juice-shop-basket-access
+info:
+  name: Unauthorized Basket Access (IDOR)
+  author: dast-mvp
+  severity: high
+  description: Tests for IDOR vulnerability allowing access to other users' baskets
+  tags:
+    - juice-shop
+    - idor
+    - authorization
+
+requests:
+  - path: /rest/basket/1
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - '"status":"success"'
+          - Products
+        condition: and
+
+  - path: /rest/basket/2
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - '"status":"success"'
+          - Products
+        condition: and
+
+  - path: /rest/basket/3
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - '"status":"success"'
+          - Products
+        condition: and
+
+  - path: /api/BasketItems
+    method: GET
+    matchers:
+      - type: status
+        status:
+          - 200
