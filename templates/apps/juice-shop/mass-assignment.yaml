@@ -1,8 +1,8 @@
-id: mass-assignment
+id: juice-shop-mass-assignment
 info:
   name: Mass Assignment Privilege Escalation
   description: Registration endpoint accepts role parameter allowing admin account creation
-  owasp_category: A01:2021
+  owasp_category: A01:2025
   severity: critical
   tags:
     - business-logic

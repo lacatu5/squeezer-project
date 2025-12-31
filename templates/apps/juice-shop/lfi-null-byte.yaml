@@ -2,6 +2,7 @@ id: juice-shop-lfi-null-byte
 info:
   name: Local File Inclusion - Null Byte Injection
   author: dast-mvp
+  owasp_category: A05:2025
   severity: high
   description: Tests for LFI vulnerabilities using null byte and path traversal
   tags:

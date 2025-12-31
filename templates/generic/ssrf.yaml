@@ -2,7 +2,7 @@ id: generic-ssrf
 info:
   name: Server-Side Request Forgery
   description: Tests for SSRF vulnerabilities
-  owasp_category: A03:2021
+  owasp_category: A05:2025
   severity: high
   tags:
     - ssrf

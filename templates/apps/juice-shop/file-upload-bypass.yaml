@@ -2,6 +2,7 @@ id: juice-shop-file-upload-bypass
 info:
   name: File Upload Validation Bypass
   author: dast-mvp
+  owasp_category: A01:2025
   severity: high
   description: Tests for file upload validation bypass vulnerabilities
   tags:

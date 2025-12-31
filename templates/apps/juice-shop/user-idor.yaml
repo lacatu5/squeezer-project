@@ -1,8 +1,8 @@
-id: user-idor
+id: juice-shop-user-idor
 info:
   name: User Profile IDOR
   description: Access control violation - users can view other users' profiles by enumerating IDs
-  owasp_category: A01:2021
+  owasp_category: A01:2025
   severity: high
   tags:
     - idor

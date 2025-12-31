@@ -1,8 +1,8 @@
-id: price-manipulation
+id: juice-shop-price-manipulation
 info:
   name: Price Manipulation Business Logic Flaw
   description: Server accepts client-provided price values allowing payment bypass
-  owasp_category: A05:2021
+  owasp_category: A02:2025
   severity: critical
   tags:
     - business-logic

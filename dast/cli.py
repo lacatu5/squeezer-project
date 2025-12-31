@@ -65,8 +65,7 @@ def _save_results(report: ScanReport, output: str) -> None:
     console.print(f"[green]Results saved to: {output_path}[/green]")
 
 
-@app.command()
-def scan(
+def main(
     target: str = typer.Argument(..., help="Target URL to scan"),
     bearer: str = typer.Option(None, "-b", "--bearer", help="Bearer token for authentication"),
     crawl: bool = typer.Option(False, "--crawl", help="Crawl target first to auto-discover endpoints"),
@@ -238,4 +237,4 @@ def scan(
 
 
 if __name__ == "__main__":
-    app()
+    typer.run(main)

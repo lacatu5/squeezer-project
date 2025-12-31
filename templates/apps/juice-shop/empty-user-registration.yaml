@@ -2,6 +2,7 @@ id: juice-shop-empty-user-registration
 info:
   name: Empty User Registration Bypass
   author: dast-mvp
+  owasp_category: A07:2025
   severity: medium
   description: Tests if application allows registration with empty/null values
   tags:

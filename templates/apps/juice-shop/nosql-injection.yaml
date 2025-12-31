@@ -2,6 +2,7 @@ id: juice-shop-nosql-injection
 info:
   name: NoSQL Injection - MongoDB Operators
   author: dast-mvp
+  owasp_category: A05:2025
   severity: critical
   description: Tests for NoSQL injection vulnerabilities using MongoDB operators
   tags:

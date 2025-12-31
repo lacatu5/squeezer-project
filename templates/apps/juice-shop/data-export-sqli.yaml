@@ -2,6 +2,7 @@ id: juice-shop-data-export-sqli
 info:
   name: Data Export SQL Injection
   author: dast-mvp
+  owasp_category: A05:2025
   severity: critical
   description: Tests for SQL injection in data export functionality
   tags:

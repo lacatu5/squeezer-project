@@ -1,8 +1,8 @@
-id: negative-quantity
+id: juice-shop-negative-quantity
 info:
   name: Negative Quantity Business Logic Flaw
   description: Input validation bypass - server accepts negative values allowing refund abuse
-  owasp_category: A05:2021
+  owasp_category: A02:2025
   severity: high
   tags:
     - business-logic
@@ -44,7 +44,7 @@ requests:
     on_match:
       vulnerability: NEGATIVE_QUANTITY
       message: Negative quantity accepted - cart total manipulation possible
-      remediation: Implement strict input validation: quantity must be >= 1
+      remediation: "Implement strict input validation: quantity must be >= 1"
 
   - name: Add item with zero quantity
     method: POST

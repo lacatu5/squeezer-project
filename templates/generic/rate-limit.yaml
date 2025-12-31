@@ -2,7 +2,7 @@ id: generic-rate-limit
 info:
   name: Missing Rate Limiting
   description: Tests for absence of rate limiting on endpoints
-  owasp_category: A04:2021
+  owasp_category: A06:2025
   severity: medium
   tags:
     - rate-limit

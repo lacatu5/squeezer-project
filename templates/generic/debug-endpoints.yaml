@@ -2,7 +2,7 @@ id: generic-debug-endpoints
 info:
   name: Debug Endpoints Exposure
   description: Tests for exposed debug endpoints and development tools
-  owasp_category: A05:2021
+  owasp_category: A02:2025
   severity: medium
   tags:
     - debug

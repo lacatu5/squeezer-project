@@ -2,7 +2,7 @@ id: generic-jwt-weakness
 info:
   name: JWT Token Weaknesses
   description: Tests for weak JWT implementations (requires valid JWT from {{jwt_token}})
-  owasp_category: A08:2021
+  owasp_category: A08:2025
   severity: high
   tags:
     - jwt
