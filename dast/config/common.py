@@ -28,15 +28,6 @@ class SeverityLevel(str, Enum):
     INFO = "info"
 
 
-class ScanProfile(str, Enum):
-    """Scan intensity profiles - controls which detection tiers run."""
-
-    PASSIVE = "passive"
-    STANDARD = "standard"
-    THOROUGH = "thorough"
-    AGGRESSIVE = "aggressive"
-
-
 class DetectionTier(str, Enum):
     """Detection tier levels - ordered by invasiveness."""
 

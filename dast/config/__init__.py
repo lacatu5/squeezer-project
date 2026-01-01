@@ -8,7 +8,6 @@ from dast.config.common import (
     AuthType,
     DetectionTier,
     EvidenceStrength,
-    ScanProfile,
     SeverityLevel,
 )
 
@@ -46,7 +45,6 @@ __all__ = [
     "AuthType",
     "DetectionTier",
     "EvidenceStrength",
-    "ScanProfile",
     "SeverityLevel",
     # Target
     "AuthConfig",

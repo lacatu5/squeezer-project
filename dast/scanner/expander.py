@@ -307,7 +307,6 @@ def _expand_auto_mapped_json(
 def expand_template(
     template: Template,
     target,
-    scan_profile,
     load_payloads_fn,
     build_get_fn,
     build_post_fn,
@@ -318,7 +317,6 @@ def expand_template(
         return expand_generic_template(
             template=template,
             target=target,
-            scan_profile=scan_profile,
             load_payloads_fn=load_payloads_fn,
             build_get_fn=build_get_fn,
             build_post_fn=build_post_fn,
@@ -446,7 +444,6 @@ def _expand_xml_endpoint(
 def expand_generic_template(
     template: Template,
     target,
-    scan_profile,
     load_payloads_fn,
     build_get_fn,
     build_post_fn,
@@ -672,20 +669,13 @@ def expand_with_tiers(
     template: Template,
     endpoint_path: str,
     generic: GenericTemplate,
-    scan_profile,
-    profile_tiers_map,
     build_get_fn,
     build_post_fn,
 ) -> List[RequestConfig]:
     requests = []
-    allowed_tiers = profile_tiers_map.get(scan_profile, [DetectionTier.PASSIVE])
 
     for tier_config in generic.detection_tiers:
         tier = tier_config.get_tier()
-
-        if tier not in allowed_tiers:
-            logger.debug(f"Skipping {tier.value} tier (scan_profile: {scan_profile.value})")
-            continue
 
         if tier == DetectionTier.AGGRESSIVE:
             logger.warning("Running aggressive detection tier - may cause delays")

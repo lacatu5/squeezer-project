@@ -9,7 +9,6 @@ from dast.auth import AuthContext, Authenticator
 from dast.config import (
     DetectionTier,
     RequestConfig,
-    ScanProfile,
     ScanReport,
     TargetConfig,
     Template,
@@ -27,22 +26,12 @@ from dast.utils import TargetValidator, logger, sanitize_url
 
 
 class TemplateEngine:
-    # Tier mapping: which tiers run for each profile
-    PROFILE_TIERS = {
-        ScanProfile.PASSIVE: [DetectionTier.PASSIVE],
-        ScanProfile.STANDARD: [DetectionTier.PASSIVE, DetectionTier.ACTIVE],
-        ScanProfile.THOROUGH: [DetectionTier.PASSIVE, DetectionTier.ACTIVE, DetectionTier.AGGRESSIVE],
-        ScanProfile.AGGRESSIVE: [DetectionTier.PASSIVE, DetectionTier.ACTIVE, DetectionTier.AGGRESSIVE],
-    }
-
     def __init__(
         self,
         target: TargetConfig,
         validate_target: bool = True,
-        scan_profile: ScanProfile = ScanProfile.STANDARD,
     ):
         self.target = target
-        self.scan_profile = scan_profile
         self.authenticator = Authenticator()
         self._auth_context: Optional[AuthContext] = None
         self._client: Optional[httpx.AsyncClient] = None
@@ -187,7 +176,6 @@ class TemplateEngine:
         return expand_template(
             template=template,
             target=self.target,
-            scan_profile=self.scan_profile,
             load_payloads_fn=self._load_payloads_from_file,
             build_get_fn=build_get_request,
             build_post_fn=build_post_request,
@@ -204,8 +192,6 @@ class TemplateEngine:
             template=template,
             endpoint_path=endpoint_path,
             generic=generic,
-            scan_profile=self.scan_profile,
-            profile_tiers_map=self.PROFILE_TIERS,
             build_get_fn=build_get_request,
             build_post_fn=build_post_request,
         )
@@ -262,7 +248,6 @@ async def run_scan(
     target: TargetConfig,
     templates: List[Template],
     validate_target: bool = True,
-    scan_profile: ScanProfile = ScanProfile.STANDARD,
 ) -> ScanReport:
     start_time = time.time()
     target_url = sanitize_url(target.base_url)
@@ -270,7 +255,7 @@ async def run_scan(
     logger.info(f"Scanning {target_url} with {len(templates)} templates")
     report = ScanReport(target=target.base_url, templates_executed=len(templates))
 
-    engine = TemplateEngine(target, validate_target=validate_target, scan_profile=scan_profile)
+    engine = TemplateEngine(target, validate_target=validate_target)
 
     try:
         await engine.initialize()

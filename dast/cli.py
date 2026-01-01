@@ -14,7 +14,7 @@ from dast.analyzer import (
     extract_parameters_from_url,
 )
 from dast.crawler import KatanaCrawler
-from dast.config import AuthType, EndpointInfo, ScanProfile, ScanReport, TargetConfig
+from dast.config import AuthType, EndpointInfo, ScanReport, TargetConfig
 from dast.report import generate_html_report
 from dast.scanner import load_templates, run_scan
 from dast.utils import setup_logging
@@ -74,7 +74,6 @@ def main(
     template: str = typer.Option(None, "-T", "--template", help="Test specific template file"),
     output: str = typer.Option(None, "-o", "--output", help="Output JSON file for results"),
     html: str = typer.Option(None, "--html", help="Output HTML report file"),
-    profile: str = typer.Option(None, "--profile", help="Scan profile: passive, standard, thorough, aggressive"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
 ):
     async def _scan():
@@ -83,17 +82,6 @@ def main(
 
         if not verbose:
             print_banner()
-
-        scan_profile = ScanProfile.STANDARD
-        if profile:
-            try:
-                scan_profile = ScanProfile(profile.lower())
-                if scan_profile in (ScanProfile.THOROUGH, ScanProfile.AGGRESSIVE):
-                    console.print("[yellow]Warning: Thorough/Aggressive profiles may cause delays.[/yellow]")
-            except ValueError:
-                console.print(f"[red]Invalid profile: {profile}[/red]")
-                console.print("[dim]Valid profiles: passive, standard, thorough, aggressive[/dim]")
-                raise typer.Exit(1)
 
         target_config = TargetConfig(name="Target", base_url=target)
 
@@ -219,7 +207,6 @@ def main(
             target_config,
             templates,
             validate_target=True,
-            scan_profile=scan_profile,
         )
 
         _print_report(report)
