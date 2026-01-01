@@ -312,11 +312,6 @@ class ScanReport(BaseModel):
     def add_finding(self, finding: Finding) -> None:
         self.findings.append(finding)
 
-    def add_finding_from_dict(self, data: Dict[str, Any]) -> None:
-        from dast.core.validators import create_finding_from_dict
-        finding = create_finding_from_dict(data)
-        self.findings.append(finding)
-
     def group_similar_findings(self) -> List[Finding]:
         from urllib.parse import urlparse
         

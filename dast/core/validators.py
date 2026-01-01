@@ -6,7 +6,7 @@ This module implements professional-grade validation patterns inspired by:
 - Burp Suite (retry with consistency)
 """
 
-from typing import TYPE_CHECKING, Any, Dict, List
+from typing import TYPE_CHECKING, List
 from httpx import Response
 
 from dast.config.common import EvidenceStrength
@@ -142,45 +142,3 @@ class ConfidenceCalculator:
             return "low"
 
         return "low"
-
-
-def create_finding_from_dict(data: Dict[str, Any]) -> "Finding":
-    from dast.config.common import OWASPCategory, SeverityLevel
-    from dast.config.scan import Finding
-
-    owasp_str = data.get("owasp_category", "A02:2025")
-    if isinstance(owasp_str, str):
-        for cat in OWASPCategory:
-            if cat.value == owasp_str or cat.name.lower().replace("_", "") in owasp_str.lower().replace(":", "").replace("-", "").replace(" ", ""):
-                owasp_category = cat
-                break
-        else:
-            owasp_category = OWASPCategory.A02_SECURITY_MISCONFIGURATION
-    else:
-        owasp_category = owasp_str
-
-    severity_str = data.get("severity", "Medium")
-    if isinstance(severity_str, str):
-        severity_map = {
-            "critical": SeverityLevel.CRITICAL,
-            "high": SeverityLevel.HIGH,
-            "medium": SeverityLevel.MEDIUM,
-            "low": SeverityLevel.LOW,
-            "info": SeverityLevel.INFO,
-        }
-        severity = severity_map.get(severity_str.lower(), SeverityLevel.MEDIUM)
-    else:
-        severity = severity_str
-
-    return Finding(
-        template_id=data.get("template_id", "dom-xss"),
-        vulnerability_type=data.get("vulnerability_type", "Unknown"),
-        severity=severity,
-        owasp_category=owasp_category,
-        evidence_strength=EvidenceStrength.DIRECT,
-        url=data.get("url", ""),
-        evidence=data.get("evidence", {}),
-        message=data.get("message", ""),
-        remediation=data.get("remediation", ""),
-        tags=data.get("tags", []),
-    )

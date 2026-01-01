@@ -35,7 +35,7 @@ def _severity_chart(severity):
     bars = []
     for key, label in [("critical", "Crit"), ("high", "High"), ("medium", "Med"), ("low", "Low")]:
         value = severity.get(key, 0)
-        height = max(20, (value / max_val) * 160) if value else 4
+        height = max(16, min(140, (value / max_val) * 140)) if value else 4
         color = colors.get(key, "#666")
         bars.append(f'''
             <div class="bar">
@@ -48,7 +48,7 @@ def _severity_chart(severity):
 
 def _owasp_chart(owasp_data):
     if not owasp_data:
-        return '<div style="color: #555; text-align: center; padding: 40px;">No OWASP findings</div>'
+        return '<div style="color: #858585; text-align: center; padding: 40px;">No OWASP findings</div>'
 
     max_val = max((d["count"] for d in owasp_data), default=1)
 
@@ -56,7 +56,7 @@ def _owasp_chart(owasp_data):
     for item in owasp_data:
         code = item["code"]
         value = item["count"]
-        height = max(20, (value / max_val) * 160)
+        height = max(16, min(140, (value / max_val) * 140))
         color = "#ff4444" if code in ["A01", "A05", "A07"] else "#ff8800" if code in ["A02", "A03", "A04", "A06"] else "#ffcc00"
         bars.append(f'''
             <div class="bar">
@@ -74,7 +74,7 @@ def _evidence_chart(evidence_data):
     bars = []
     for key, label in [("direct", "Direct"), ("inference", "Inf"), ("heuristic", "Heur")]:
         value = evidence_data.get(key, 0)
-        height = max(20, (value / total) * 160) if value else 4
+        height = max(16, min(140, (value / total) * 140)) if value else 4
         color = colors.get(key, "#666")
         bars.append(f'''
             <div class="bar">

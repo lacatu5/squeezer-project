@@ -39,9 +39,6 @@ from dast.core.matchers import (
     WordMatcher,
     RegexMatcher,
     JsonMatcher,
-    SemanticMatcher,
-    DiffMatcher,
-    TimeMatcher,
     create_matcher,
     evaluate_matchers,
 )
@@ -78,9 +75,6 @@ __all__ = [
     "WordMatcher",
     "RegexMatcher",
     "JsonMatcher",
-    "SemanticMatcher",
-    "DiffMatcher",
-    "TimeMatcher",
     "create_matcher",
     "evaluate_matchers",
 ]

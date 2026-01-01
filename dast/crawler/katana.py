@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urljoin, urlparse, parse_qs
 
-import httpx
-from selectolax.parser import HTMLParser
+
+import time
 
 from dast.crawler.models import KatanaEndpoint, KatanaStatistics
 from dast.crawler.report import SimpleCrawlerReport
@@ -161,97 +161,10 @@ class KatanaCrawler:
                 unique.append(ep)
         return unique
 
-    async def _verify_endpoints(self, endpoints: List[KatanaEndpoint]) -> List[KatanaEndpoint]:
-        verified = []
-
-        async with httpx.AsyncClient(timeout=10.0, follow_redirects=True) as client:
-            for endpoint in endpoints[:100]:
-                try:
-                    response = await client.get(
-                        endpoint.url,
-                        headers=self.headers,
-                        cookies=self.cookies,
-                    )
-                    endpoint.status_code = response.status_code
-                    endpoint.content_type = response.headers.get("content-type")
-                    endpoint.content_length = len(response.content)
-                    verified.append(endpoint)
-                except Exception:
-                    verified.append(endpoint)
-
-        verified.extend(endpoints[100:])
-        return verified
-
-    def _extract_forms_from_html(self, html: str, url: str) -> List[Dict[str, Any]]:
-        forms = []
-
-        tree = HTMLParser(html)
-
-        for form_node in tree.css("form"):
-            action = form_node.attrs.get("action", "")
-            method = (form_node.attrs.get("method", "GET") or "GET").upper()
-
-            if not action.startswith("http"):
-                action = urljoin(url, action)
-
-            fields = []
-
-            for input_node in form_node.css("input"):
-                field = {
-                    "name": input_node.attrs.get("name", ""),
-                    "type": input_node.attrs.get("type", "text"),
-                    "value": input_node.attrs.get("value", ""),
-                }
-                if field["name"]:
-                    fields.append(field)
-
-            for textarea in form_node.css("textarea"):
-                field = {
-                    "name": textarea.attrs.get("name", ""),
-                    "type": "textarea",
-                    "value": textarea.text().strip() or textarea.attrs.get("value", ""),
-                }
-                if field["name"]:
-                    fields.append(field)
-
-            for select in form_node.css("select"):
-                options = [
-                    opt.attrs.get("value", opt.text().strip())
-                    for opt in select.css("option")
-                    if opt.attrs.get("value") or opt.text().strip()
-                ]
-                field = {
-                    "name": select.attrs.get("name", ""),
-                    "type": "select",
-                    "value": select.attrs.get("value", options[0] if options else ""),
-                    "options": options,
-                }
-                if field["name"]:
-                    fields.append(field)
-
-            for btn in form_node.css("button"):
-                field = {
-                    "name": btn.attrs.get("name", ""),
-                    "type": btn.attrs.get("type", "submit"),
-                    "value": btn.attrs.get("value", btn.text().strip()),
-                }
-                if field["name"]:
-                    fields.append(field)
-
-            forms.append({
-                "action": action,
-                "method": method,
-                "fields": fields,
-                "field_count": len(fields),
-            })
-
-        return forms
 
     async def crawl(self, verify: bool = False) -> SimpleCrawlerReport:
-        import time
 
         start_time = time.time()
-
         try:
             cmd = self._build_katana_command()
 
@@ -300,13 +213,8 @@ class KatanaCrawler:
             self.stats.duration_seconds = time.time() - start_time
 
             return self._generate_report()
-
-        except FileNotFoundError:
-            raise RuntimeError(
-                "Katana binary not found. Install with:\n"
-                "  go install github.com/projectdiscovery/katana/cmd/katana@latest\n"
-                "Or download from: https://github.com/projectdiscovery/katana/releases"
-            )
+        except Exception as e:
+            raise RuntimeError(f"Katana crawl failed: {e}")
 
     def _generate_report(self) -> SimpleCrawlerReport:
         api_count = sum(1 for e in self.endpoints if e._classify_type() == "api")
@@ -342,30 +250,3 @@ class KatanaCrawler:
 
     def get_discovered_params(self) -> Dict[str, List[str]]:
         return {path: sorted(params) for path, params in self.all_discovered_params.items()}
-
-
-async def crawl_with_katana(
-    url: str,
-    max_depth: int = 3,
-    js_crawl: bool = True,
-    cookies: Optional[Dict[str, str]] = None,
-    headers: Optional[Dict[str, str]] = None,
-    verify: bool = False,
-    output_file: Optional[str] = None,
-    filter_static: bool = True,
-) -> SimpleCrawlerReport:
-    crawler = KatanaCrawler(
-        base_url=url,
-        max_depth=max_depth,
-        js_crawl=js_crawl,
-        cookies=cookies,
-        headers=headers,
-        filter_static=filter_static,
-    )
-
-    report = await crawler.crawl(verify=verify)
-
-    if output_file:
-        report.save_yaml(output_file)
-
-    return report
