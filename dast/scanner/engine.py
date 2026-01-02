@@ -20,7 +20,6 @@ from dast.scanner.expander import (
     build_post_request,
     expand_broadcast_template,
     expand_template,
-    expand_with_tiers,
 )
 from dast.utils import TargetValidator, logger, sanitize_url
 
@@ -182,18 +181,7 @@ class TemplateEngine:
             expand_broadcast_fn=lambda t, g, e: expand_broadcast_template(
                 t, g, e, self.target, self._load_payloads_from_file,
                 build_get_request, build_post_request,
-                lambda tmpl, ep, gen: self._expand_with_tiers(tmpl, ep, gen),
             ),
-            expand_tiers_fn=lambda t, ep, g: self._expand_with_tiers(t, ep, g),
-        )
-
-    def _expand_with_tiers(self, template: Template, endpoint_path: str, generic) -> List[RequestConfig]:
-        return expand_with_tiers(
-            template=template,
-            endpoint_path=endpoint_path,
-            generic=generic,
-            build_get_fn=build_get_request,
-            build_post_fn=build_post_request,
         )
 
     async def _execute_request(

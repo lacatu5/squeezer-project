@@ -1,0 +1,1431 @@
+{
+  "target": "http://localhost:3000",
+  "templates_executed": 6,
+  "duration_seconds": 5.497473955154419,
+  "findings": [
+    {
+      "template_id": "generic-jwt-weakness",
+      "vulnerability_type": "JWT_ACCEPTED",
+      "severity": "high",
+      "owasp_category": "A08:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "matches": []
+          },
+          "matcher_1": {
+            "status": 200,
+            "expected": [
+              200,
+              201,
+              401,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "1/1",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "JWT authentication detected - further manual testing recommended",
+      "remediation": "Verify JWT signatures, validate algorithm, check expiration",
+      "request_details": "GET /",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "jwt",
+        "token",
+        "integrity",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-jwt-weakness",
+      "vulnerability_type": "AUTH_OPTIONAL",
+      "severity": "high",
+      "owasp_category": "A08:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "found": [],
+            "content_length": 552
+          },
+          "matcher_1": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "1/1",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Endpoint accessible without JWT - authentication not enforced",
+      "remediation": "Enforce authentication on protected endpoints",
+      "request_details": "GET /",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "jwt",
+        "token",
+        "integrity",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-rate-limit",
+      "vulnerability_type": "MISSING_RATE_LIMIT_HEADERS",
+      "severity": "medium",
+      "owasp_category": "A06:2025",
+      "evidence_strength": "heuristic",
+      "url": "http://localhost:3000/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "found": [],
+            "content_length": 552
+          },
+          "positive_matchers": "0/0",
+          "negative_matchers": "1/1",
+          "condition": "and"
+        },
+        "confidence": "low"
+      },
+      "message": "No rate limit headers present - potential DoS vulnerability",
+      "remediation": "Implement rate limiting and expose rate limit headers",
+      "request_details": "GET /",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "rate-limit",
+        "dos",
+        "abuse",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-rate-limit",
+      "vulnerability_type": "NO_RATE_LIMITING",
+      "severity": "medium",
+      "owasp_category": "A06:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              429,
+              503
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "No rate limiting detected - endpoint accepts excessive requests",
+      "remediation": "Implement rate limiting to prevent abuse and DoS",
+      "request_details": "GET /",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "rate-limit",
+        "dos",
+        "abuse",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-sensitive-data-exposure",
+      "vulnerability_type": "GENERIC_SENSITIVE_DATA_EXPOSURE",
+      "severity": "high",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "heuristic",
+      "url": "http://localhost:3000/rest/memories",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "matches": [
+              "\"email\":\\s*\"[^\"@\\s]+@[^\"@\\s]+\\.[^\"@\\s]+\"\\s*[,}]",
+              "\"password\":\\s*\"[^\"]{8,}\""
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "low"
+      },
+      "message": "Sensitive Data Exposure in Responses:  on rest_memories",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/memories",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "info-disclosure",
+        "sensitive-data",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-info-disclosure",
+      "vulnerability_type": "DEBUG_ENDPOINTS",
+      "severity": "low",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/debug",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "Debug/Actuator endpoints exposed",
+      "remediation": "Disable debug endpoints in production",
+      "request_details": "GET /debug",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "info-disclosure",
+        "misconfig",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=http://169.254.169.254/latest/meta-data/iam/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=http://169.254.169.254/latest/meta-data/iam/",
+      "response_details": null,
+      "payload_count": 24,
+      "endpoint_count": 3,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=http://127.0.0.1:80",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://127.0.0.1:80 on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=http://127.0.0.1:80",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=http://localhost:22",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://localhost:22 on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=http://localhost:22",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=file:///etc/passwd",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: file:///etc/passwd on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=file:///etc/passwd",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=http://[::1]/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://[::1]/ on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=http://[::1]/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=http://metadata.google.internal/computeMetadata/v1/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://metadata.google.interna on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=http://metadata.google.internal/computeMetadata/v1/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=http://169.254.169.254/latest/user-data",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=http://169.254.169.254/latest/user-data",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/rest/continue-code?{{url_param}}=http://169.254.169.254/latest/static/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on rest_continue_code",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/rest/continue-code?{{url_param}}=http://169.254.169.254/latest/static/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=http://169.254.169.254/latest/meta-data/iam/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=http://169.254.169.254/latest/meta-data/iam/",
+      "response_details": null,
+      "payload_count": 8,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=http://127.0.0.1:80",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://127.0.0.1:80 on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=http://127.0.0.1:80",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=http://localhost:22",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://localhost:22 on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=http://localhost:22",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=file:///etc/passwd",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: file:///etc/passwd on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=file:///etc/passwd",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=http://[::1]/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://[::1]/ on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=http://[::1]/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=http://metadata.google.internal/computeMetadata/v1/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://metadata.google.interna on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=http://metadata.google.internal/computeMetadata/v1/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=http://169.254.169.254/latest/user-data",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=http://169.254.169.254/latest/user-data",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Hints?{{url_param}}=http://169.254.169.254/latest/static/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on api_Hints",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Hints?{{url_param}}=http://169.254.169.254/latest/static/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=http://169.254.169.254/latest/meta-data/iam/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=http://169.254.169.254/latest/meta-data/iam/",
+      "response_details": null,
+      "payload_count": 8,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=http://127.0.0.1:80",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://127.0.0.1:80 on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=http://127.0.0.1:80",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=http://localhost:22",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://localhost:22 on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=http://localhost:22",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=file:///etc/passwd",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: file:///etc/passwd on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=file:///etc/passwd",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=http://[::1]/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://[::1]/ on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=http://[::1]/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=http://metadata.google.internal/computeMetadata/v1/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://metadata.google.interna on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=http://metadata.google.internal/computeMetadata/v1/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=http://169.254.169.254/latest/user-data",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=http://169.254.169.254/latest/user-data",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-ssrf",
+      "vulnerability_type": "GENERIC_SSRF",
+      "severity": "high",
+      "owasp_category": "A05:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/api/Challenges?{{url_param}}=http://169.254.169.254/latest/static/",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              201
+            ]
+          },
+          "matcher_1": {
+            "matches": [
+              "Code.*:.*[A-Z0-9]{4}"
+            ]
+          },
+          "positive_matchers": "2/2",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "high"
+      },
+      "message": "Server-Side Request Forgery: http://169.254.169.254/latest/ on api_Challenges",
+      "remediation": "",
+      "request_details": "GET http://localhost:3000/api/Challenges?{{url_param}}=http://169.254.169.254/latest/static/",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "ssrf",
+        "request-forgery",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-debug-endpoints",
+      "vulnerability_type": "DEBUG_ENDPOINTS",
+      "severity": "medium",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/actuator",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "Debug/Actuator endpoints exposed",
+      "remediation": "Disable Actuator in production or restrict access",
+      "request_details": "GET /actuator",
+      "response_details": null,
+      "payload_count": 7,
+      "endpoint_count": 7,
+      "tags": [
+        "debug",
+        "misconfiguration",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-debug-endpoints",
+      "vulnerability_type": "DEBUG_ENV_ENDPOINT",
+      "severity": "medium",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/actuator/env",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "Environment variables endpoint exposed",
+      "remediation": "Disable environment endpoint in production",
+      "request_details": "GET /actuator/env",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "debug",
+        "misconfiguration",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-debug-endpoints",
+      "vulnerability_type": "DEBUG_INFO_ENDPOINT",
+      "severity": "medium",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/actuator/info",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "Application info endpoint exposed",
+      "remediation": "Disable info endpoint in production",
+      "request_details": "GET /actuator/info",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "debug",
+        "misconfiguration",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-debug-endpoints",
+      "vulnerability_type": "DEBUG_ADMIN_ENDPOINT",
+      "severity": "medium",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/admin/debug",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "Debug admin endpoint accessible",
+      "remediation": "Remove admin debug endpoints",
+      "request_details": "GET /admin/debug",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "debug",
+        "misconfiguration",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-debug-endpoints",
+      "vulnerability_type": "DEBUG_TRACE_ENDPOINT",
+      "severity": "medium",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/actuator/httptrace",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "HTTP trace endpoint exposed",
+      "remediation": "Disable trace endpoint in production",
+      "request_details": "GET /actuator/httptrace",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "debug",
+        "misconfiguration",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-debug-endpoints",
+      "vulnerability_type": "DEBUG_THREADDUMP_ENDPOINT",
+      "severity": "medium",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/actuator/threaddump",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "Thread dump endpoint exposed",
+      "remediation": "Disable thread dump endpoint in production",
+      "request_details": "GET /actuator/threaddump",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "debug",
+        "misconfiguration",
+        "generic"
+      ]
+    },
+    {
+      "template_id": "generic-debug-endpoints",
+      "vulnerability_type": "DEBUG_HEAPDUMP_ENDPOINT",
+      "severity": "medium",
+      "owasp_category": "A02:2025",
+      "evidence_strength": "direct_observation",
+      "url": "http://localhost:3000/actuator/heapdump",
+      "evidence": {
+        "status_code": 200,
+        "matcher_evidence": {
+          "matcher_0": {
+            "status": 200,
+            "expected": [
+              200,
+              403
+            ]
+          },
+          "positive_matchers": "1/1",
+          "negative_matchers": "0/0",
+          "condition": "and"
+        },
+        "confidence": "medium"
+      },
+      "message": "Heap dump endpoint exposed",
+      "remediation": "Disable heap dump endpoint in production",
+      "request_details": "GET /actuator/heapdump",
+      "response_details": null,
+      "payload_count": 1,
+      "endpoint_count": 1,
+      "tags": [
+        "debug",
+        "misconfiguration",
+        "generic"
+      ]
+    }
+  ],
+  "errors": []
+}
