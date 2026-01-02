@@ -63,32 +63,21 @@ class KatanaCrawler:
             cookie_str = "; ".join(f"{k}={v}" for k, v in self.cookies.items())
             cmd.extend(["-H", f"Cookie: {cookie_str}"])
 
-        if self.headers:
-            for key, value in self.headers.items():
-                cmd.extend(["-H", f"{key}: {value}"])
-
-        if output_file:
-            cmd.extend(["-o", output_file])
-
         return cmd
 
     def _parse_katana_output(self, output: str) -> List[KatanaEndpoint]:
         endpoints = []
 
         for line in output.strip().splitlines():
-            if not line.strip():
-                continue
-            try:
                 data = json.loads(line)
 
-                if "request" in data:
-                    request = data.get("request", {})
-                    response = data.get("response", {})
+                request = data.get("request", {})
+                response = data.get("response", {})
 
-                    url = request.get("endpoint", "")
-                    query_params = self._extract_query_params(url)
+                url = request.get("endpoint", "")
+                query_params = self._extract_query_params(url)
 
-                    endpoint = KatanaEndpoint(
+                endpoint = KatanaEndpoint(
                         url=url,
                         method=request.get("method", "GET"),
                         status_code=response.get("status_code"),
@@ -97,22 +86,8 @@ class KatanaCrawler:
                         source="katana",
                         query_params=query_params,
                     )
-                else:
-                    url = data.get("url", data.get("endpoint", ""))
-                    query_params = self._extract_query_params(url)
-
-                    endpoint = KatanaEndpoint(
-                        url=url,
-                        method=data.get("method", "GET"),
-                        status_code=data.get("status_code"),
-                        content_type=data.get("content_type"),
-                        content_length=data.get("content_length", 0),
-                        source=data.get("source", "unknown"),
-                        query_params=query_params,
-                    )
                 endpoints.append(endpoint)
-            except json.JSONDecodeError:
-                continue
+
 
         return endpoints
 
@@ -136,8 +111,6 @@ class KatanaCrawler:
 
         for ep in endpoints:
             parsed_url = urlparse(ep.url)
-            if parsed_url.netloc != self.base_domain:
-                continue
 
             if self.filter_static:
                 url_lower = ep.url.lower()
@@ -165,56 +138,41 @@ class KatanaCrawler:
     async def crawl(self, verify: bool = False) -> SimpleCrawlerReport:
 
         start_time = time.time()
-        try:
-            cmd = self._build_katana_command()
+        cmd = self._build_katana_command()
 
-            print(f"Running: {' '.join(cmd)}")
+        print(f"Running: {' '.join(cmd)}")
 
-            process = await asyncio.create_subprocess_exec(
+        process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
             )
 
-            try:
-                stdout, stderr = await asyncio.wait_for(
+        stdout, stderr = await asyncio.wait_for(
                     process.communicate(),
                     timeout=self.timeout,
                 )
-            except asyncio.TimeoutError:
-                process.kill()
-                await process.wait()
-                raise TimeoutError(f"Katana crawl timed out after {self.timeout} seconds")
 
-            output = stdout.decode("utf-8", errors="ignore")
-            errors = stderr.decode("utf-8", errors="ignore")
+        output = stdout.decode("utf-8", errors="ignore")
 
-            if process.returncode != 0 and not output:
-                raise RuntimeError(f"Katana failed: {errors}")
+        raw_endpoints = self._parse_katana_output(output)
+        self.endpoints = self._deduplicate_endpoints(raw_endpoints)
+            
+        self.stats.total_requests = len(raw_endpoints)
+        self.stats.successful_requests = sum(1 for e in self.endpoints if e.status_code and 200 <= e.status_code < 400)
+        self.stats.failed_requests = sum(1 for e in self.endpoints if e.status_code and e.status_code >= 400)
+        self.stats.unique_urls = len(self.endpoints)
+        self.stats.unique_domains = 1
+        self.stats.api_endpoints = sum(1 for e in self.endpoints if "api" in e.to_dict()["type"])
+        self.stats.html_pages = sum(1 for e in self.endpoints if e.to_dict()["type"] == "page")
+        self.stats.forms_discovered = len(self.forms)
+        self.stats.interesting_endpoints = sum(1 for e in self.endpoints if e.to_dict()["interesting"])
+        self.stats.javascript_files = sum(1 for e in self.endpoints if e.url.endswith(".js"))
 
-            raw_endpoints = self._parse_katana_output(output)
-            self.endpoints = self._deduplicate_endpoints(raw_endpoints)
+        self.stats.end_time = datetime.utcnow().isoformat()
+        self.stats.duration_seconds = time.time() - start_time
 
-            if verify:
-                self.endpoints = await self._verify_endpoints(self.endpoints)
-
-            self.stats.total_requests = len(raw_endpoints)
-            self.stats.successful_requests = sum(1 for e in self.endpoints if e.status_code and 200 <= e.status_code < 400)
-            self.stats.failed_requests = sum(1 for e in self.endpoints if e.status_code and e.status_code >= 400)
-            self.stats.unique_urls = len(self.endpoints)
-            self.stats.unique_domains = 1
-            self.stats.api_endpoints = sum(1 for e in self.endpoints if "api" in e.to_dict()["type"])
-            self.stats.html_pages = sum(1 for e in self.endpoints if e.to_dict()["type"] == "page")
-            self.stats.forms_discovered = len(self.forms)
-            self.stats.interesting_endpoints = sum(1 for e in self.endpoints if e.to_dict()["interesting"])
-            self.stats.javascript_files = sum(1 for e in self.endpoints if e.url.endswith(".js"))
-
-            self.stats.end_time = datetime.utcnow().isoformat()
-            self.stats.duration_seconds = time.time() - start_time
-
-            return self._generate_report()
-        except Exception as e:
-            raise RuntimeError(f"Katana crawl failed: {e}")
+        return self._generate_report()
 
     def _generate_report(self) -> SimpleCrawlerReport:
         api_count = sum(1 for e in self.endpoints if e._classify_type() == "api")

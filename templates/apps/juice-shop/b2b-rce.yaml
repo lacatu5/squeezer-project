@@ -33,20 +33,28 @@ requests:
     headers:
       Content-Type: application/json
     body: '{"orderLinesData":"(function(){var x=1; while(x<10){x++;} return x;})()"}'
+    matchers_condition: and
     matchers:
       - type: status
         status:
           - 200
-          - 401
-          - 503
+      - type: word
+        words:
+          - orderNo
+          - orderLines
+        condition: or
 
   - path: /b2b/v2/orders
     method: POST
     headers:
       Content-Type: application/json
     body: '{"orderLinesData":"(function(){return global.process.version})()"}'
+    matchers_condition: and
     matchers:
       - type: status
         status:
           - 200
-          - 401
+      - type: regex
+        regex:
+          - 'v[0-9]+\.[0-9]+\.[0-9]+'
+          - 'orderNo'

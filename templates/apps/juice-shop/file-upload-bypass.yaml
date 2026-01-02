@@ -39,8 +39,14 @@ requests:
 
   - path: /profile/image/upload
     method: POST
+    matchers_condition: and
     matchers:
       - type: status
         status:
           - 200
           - 204
+      - type: word
+        words:
+          - '"status":"success"'
+          - 'profileImage'
+        condition: or

