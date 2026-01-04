@@ -162,7 +162,6 @@ def scan(
     app: str = typer.Option(None, "--app", help="Use app-specific templates"),
     template: str = typer.Option(None, "-T", "--template", help="Test specific template file"),
     output: str = typer.Option(None, "-o", "--output", help="Output JSON file for results"),
-    html: str = typer.Option(None, "--html", help="Output HTML report file"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
 ):
     async def _scan():
@@ -325,9 +324,9 @@ def scan(
         if output:
             _save_results(report, output)
 
-        if html:
-            generate_html_report(report, html)
-            console.print(f"[green]HTML report: {html}[/green]")
+        html_path = "report.html"
+        generate_html_report(report, html_path)
+        console.print(f"[green]HTML report: {html_path}[/green]")
 
         raise typer.Exit(0 if report.findings else 1)
 
