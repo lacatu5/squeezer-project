@@ -1,0 +1,433 @@
+name: test
+target_url: http://localhost:3000
+created_at: '2026-01-12T01:06:36.941066'
+endpoints:
+- url: http://localhost:3000
+  path: ''
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/application/vnd.ms-word.do
+  path: /application/vnd.ms-word.do
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/%5C/index.html
+  path: /%5C/index.html
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/@ng/component?c=
+  path: /@ng/component
+  method: GET
+  query: c=
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/redirect?to=http
+  path: /redirect
+  method: GET
+  query: to=http
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/application/vnd.openxmlformats-officedocument.wordprocessingml.do
+  path: /application/vnd.openxmlformats-officedocument.wordprocessingml.do
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/snippets/verdict
+  path: /snippets/verdict
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/rest/web3
+  path: /rest/web3
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/snippets/fixes
+  path: /snippets/fixes
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/api/Cards
+  path: /api/Cards
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/order-history
+  path: /rest/order-history
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  - api
+  type: api
+- url: http://localhost:3000/rest/wallet/balance
+  path: /rest/wallet/balance
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/image-captcha/
+  path: /rest/image-captcha/
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  - api
+  type: api
+- url: http://localhost:3000/track-result/new
+  path: /track-result/new
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/api/Addresss
+  path: /api/Addresss
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Recycles
+  path: /api/Recycles
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/user
+  path: /rest/user
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - api
+  type: api
+- url: http://localhost:3000/api/Complaints
+  path: /api/Complaints
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/chatbot
+  path: /rest/chatbot
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/address/create
+  path: /address/create
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/address/edit/
+  path: /address/edit/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/rest/products
+  path: /rest/products
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/2fa/enter
+  path: /2fa/enter
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/api/SecurityAnswers
+  path: /api/SecurityAnswers
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/track-order
+  path: /rest/track-order
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/address/select
+  path: /address/select
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/address/saved
+  path: /address/saved
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/api/BasketItems
+  path: /api/BasketItems
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  - api
+  type: api
+- url: http://localhost:3000/rest/admin
+  path: /rest/admin
+  method: GET
+  query: ''
+  tags:
+  - admin
+  - api
+  type: api
+- url: http://localhost:3000/rest/deluxe-membership
+  path: /rest/deluxe-membership
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/saveLoginIp
+  path: /rest/saveLoginIp
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/user/whoami
+  path: /rest/user/whoami
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - api
+  type: api
+- url: http://localhost:3000/rest/user/reset-password
+  path: /rest/user/reset-password
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - api
+  type: api
+- url: http://localhost:3000/rest/user/change-password?current=
+  path: /rest/user/change-password
+  method: GET
+  query: current=
+  tags:
+  - user-data
+  - api
+  type: api
+- url: http://localhost:3000/rest/user/login
+  path: /rest/user/login
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - authentication
+  - api
+  type: api
+- url: http://localhost:3000/rest/user/authentication-details/
+  path: /rest/user/authentication-details/
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - authentication
+  - api
+  type: api
+- url: http://localhost:3000/api/Users
+  path: /api/Users
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - api
+  type: api
+- url: http://localhost:3000/rest/country-mapping
+  path: /rest/country-mapping
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/continue-code-fixIt/apply/
+  path: /rest/continue-code-fixIt/apply/
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/continue-code-findIt/apply/
+  path: /rest/continue-code-findIt/apply/
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/continue-code/apply/
+  path: /rest/continue-code/apply/
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/captcha
+  path: /rest/captcha
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Deliverys
+  path: /api/Deliverys
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/user/security-question?email=
+  path: /rest/user/security-question
+  method: GET
+  query: email=
+  tags:
+  - user-data
+  - api
+  type: api
+- url: http://localhost:3000/rest/continue-code-fixIt
+  path: /rest/continue-code-fixIt
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Products
+  path: /api/Products
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/memories
+  path: /rest/memories
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/SecurityQuestions
+  path: /api/SecurityQuestions
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Quantitys
+  path: /api/Quantitys
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/continue-code
+  path: /rest/continue-code
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/repeat-notification
+  path: /rest/repeat-notification
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Hints
+  path: /api/Hints
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/Trident/
+  path: /Trident/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/Edge/
+  path: /Edge/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/rest/continue-code-findIt
+  path: /rest/continue-code-findIt
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Feedbacks
+  path: /api/Feedbacks
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Challenges
+  path: /api/Challenges
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/%5C%22/ftp/legal.md%5C%22
+  path: /api/%5C%22/ftp/legal.md%5C%22
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/%5C%22/
+  path: /api/%5C%22/
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+auth:
+  type: bearer

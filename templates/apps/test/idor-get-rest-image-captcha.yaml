@@ -1,0 +1,17 @@
+id: test-idor-get-rest-image-captcha
+info:
+  name: 'IDOR: /rest/image-captcha/'
+  owasp_category: A01:2025
+  severity: high
+  tags:
+  - idor
+  - test
+requests:
+- path: /rest/image-captcha//1
+  method: GET
+  headers:
+    Authorization: '{{bearer_token}}'
+  matchers:
+  - type: status
+    status:
+    - 200

@@ -1,0 +1,17 @@
+id: test-idor-get-rest-order-history
+info:
+  name: 'IDOR: /rest/order-history'
+  owasp_category: A01:2025
+  severity: high
+  tags:
+  - idor
+  - test
+requests:
+- path: /rest/order-history/1
+  method: GET
+  headers:
+    Authorization: '{{bearer_token}}'
+  matchers:
+  - type: status
+    status:
+    - 200
