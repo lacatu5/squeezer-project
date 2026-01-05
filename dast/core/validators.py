@@ -39,17 +39,15 @@ class ConsistencyChecker:
         if not responses:
             return False
 
-        # All must have same status code
         status_codes = {r.status_code for r in responses}
         if len(status_codes) > 1:
             return False
 
-        # Content lengths should be similar (within threshold)
         lengths = [len(r.text) for r in responses]
         avg_length = sum(lengths) / len(lengths)
 
         if avg_length == 0:
-            return True  # All empty responses are consistent
+            return True  
 
         for length in lengths:
             variance = abs(length - avg_length) / avg_length
@@ -79,7 +77,6 @@ class ConsistencyChecker:
         if len1 == 0 and len2 == 0:
             return 1.0
 
-        # Use length-based similarity (fast and effective)
         max_len = max(len1, len2)
         if max_len == 0:
             return 1.0
@@ -123,19 +120,16 @@ class ConfidenceCalculator:
         if not is_consistent:
             return "low"
 
-        # DIRECT evidence (status codes, negative patterns, etc.)
         if evidence_strength == EvidenceStrength.DIRECT:
             if passed_matchers >= 2:
                 return "high"
             return "medium"
 
-        # INFERENCE evidence (JSON values, time delays, diffs)
         if evidence_strength == EvidenceStrength.INFERENCE:
             if passed_matchers >= 2 and is_consistent:
                 return "medium"
             return "low"
 
-        # HEURISTIC evidence (regex patterns, word matches)
         if evidence_strength == EvidenceStrength.HEURISTIC:
             if passed_matchers >= 3 and is_consistent:
                 return "medium"

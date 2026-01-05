@@ -1,16 +1,9 @@
 name: test
 target_url: http://localhost:3000
-created_at: '2026-01-12T01:06:36.941066'
+created_at: '2026-01-12T01:24:13.056158'
 endpoints:
 - url: http://localhost:3000
   path: ''
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/application/vnd.ms-word.do
-  path: /application/vnd.ms-word.do
   method: GET
   query: ''
   tags:
@@ -23,10 +16,17 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/@ng/component?c=
-  path: /@ng/component
+- url: http://localhost:3000/application/vnd.openxmlformats-officedocument.wordprocessingml.do
+  path: /application/vnd.openxmlformats-officedocument.wordprocessingml.do
   method: GET
-  query: c=
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/application/vnd.ms-word.do
+  path: /application/vnd.ms-word.do
+  method: GET
+  query: ''
   tags:
   - general
   type: page
@@ -37,17 +37,17 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/application/vnd.openxmlformats-officedocument.wordprocessingml.do
-  path: /application/vnd.openxmlformats-officedocument.wordprocessingml.do
+- url: http://localhost:3000/snippets/verdict
+  path: /snippets/verdict
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/snippets/verdict
-  path: /snippets/verdict
+- url: http://localhost:3000/@ng/component?c=
+  path: /@ng/component
   method: GET
-  query: ''
+  query: c=
   tags:
   - general
   type: page
@@ -72,27 +72,20 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/rest/order-history
-  path: /rest/order-history
-  method: GET
-  query: ''
-  tags:
-  - commerce
-  - api
-  type: api
-- url: http://localhost:3000/rest/wallet/balance
-  path: /rest/wallet/balance
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
 - url: http://localhost:3000/rest/image-captcha/
   path: /rest/image-captcha/
   method: GET
   query: ''
   tags:
   - file-handling
+  - api
+  type: api
+- url: http://localhost:3000/rest/order-history
+  path: /rest/order-history
+  method: GET
+  query: ''
+  tags:
+  - commerce
   - api
   type: api
 - url: http://localhost:3000/track-result/new
@@ -102,6 +95,21 @@ endpoints:
   tags:
   - general
   type: page
+- url: http://localhost:3000/rest/wallet/balance
+  path: /rest/wallet/balance
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/user
+  path: /rest/user
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - api
+  type: api
 - url: http://localhost:3000/api/Addresss
   path: /api/Addresss
   method: GET
@@ -114,14 +122,6 @@ endpoints:
   method: GET
   query: ''
   tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/user
-  path: /rest/user
-  method: GET
-  query: ''
-  tags:
-  - user-data
   - api
   type: api
 - url: http://localhost:3000/api/Complaints
@@ -138,15 +138,15 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/address/create
-  path: /address/create
+- url: http://localhost:3000/address/edit/
+  path: /address/edit/
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/address/edit/
-  path: /address/edit/
+- url: http://localhost:3000/address/create
+  path: /address/create
   method: GET
   query: ''
   tags:
@@ -345,8 +345,8 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/api/SecurityQuestions
-  path: /api/SecurityQuestions
+- url: http://localhost:3000/rest/continue-code
+  path: /rest/continue-code
   method: GET
   query: ''
   tags:
@@ -359,15 +359,15 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/rest/continue-code
-  path: /rest/continue-code
+- url: http://localhost:3000/rest/repeat-notification
+  path: /rest/repeat-notification
   method: GET
   query: ''
   tags:
   - api
   type: api
-- url: http://localhost:3000/rest/repeat-notification
-  path: /rest/repeat-notification
+- url: http://localhost:3000/api/SecurityQuestions
+  path: /api/SecurityQuestions
   method: GET
   query: ''
   tags:
@@ -415,15 +415,15 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/api/%5C%22/ftp/legal.md%5C%22
-  path: /api/%5C%22/ftp/legal.md%5C%22
+- url: http://localhost:3000/api/%5C%22/
+  path: /api/%5C%22/
   method: GET
   query: ''
   tags:
   - api
   type: api
-- url: http://localhost:3000/api/%5C%22/
-  path: /api/%5C%22/
+- url: http://localhost:3000/api/%5C%22/ftp/legal.md%5C%22
+  path: /api/%5C%22/ftp/legal.md%5C%22
   method: GET
   query: ''
   tags:

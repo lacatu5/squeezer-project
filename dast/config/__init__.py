@@ -3,7 +3,6 @@
 This package re-exports all commonly used classes for convenient importing.
 """
 
-# Common enumerations
 from dast.config.common import (
     AuthType,
     DetectionTier,
@@ -11,14 +10,12 @@ from dast.config.common import (
     SeverityLevel,
 )
 
-# Target configuration
 from dast.config.target import (
     AuthConfig,
     EndpointsConfig,
     TargetConfig,
 )
 
-# Template configuration
 from dast.config.template import (
     DetectionTierConfig,
     ExtractorConfig,
@@ -30,7 +27,6 @@ from dast.config.template import (
     TemplateInfo,
 )
 
-# Scan and crawler models
 from dast.config.scan import (
     CrawlerReport,
     CrawlerStatistics,
@@ -41,16 +37,13 @@ from dast.config.scan import (
 )
 
 __all__ = [
-    # Enums
     "AuthType",
     "DetectionTier",
     "EvidenceStrength",
     "SeverityLevel",
-    # Target
     "AuthConfig",
     "EndpointsConfig",
     "TargetConfig",
-    # Template
     "DetectionTierConfig",
     "ExtractorConfig",
     "GenericTemplate",
@@ -59,7 +52,6 @@ __all__ = [
     "RequestConfig",
     "Template",
     "TemplateInfo",
-    # Scan
     "CrawlerReport",
     "CrawlerStatistics",
     "EndpointInfo",

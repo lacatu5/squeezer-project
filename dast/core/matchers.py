@@ -52,7 +52,6 @@ class StatusMatcher(Matcher):
         super().__init__(config)
         self.statuses: List[int] = []
 
-        # Support both 'status' and 'values' keys
         status_value = config.status or getattr(config, 'values', None)
         if status_value:
             if isinstance(status_value, int):
@@ -81,7 +80,6 @@ class StatusMatcher(Matcher):
         else:
             matched = status in self.statuses
 
-        # Status matchers provide direct observation
         strength = EvidenceStrength.DIRECT if matched else EvidenceStrength.HEURISTIC
 
         return self._apply_negative(MatchResult(
@@ -102,12 +100,11 @@ class WordMatcher(Matcher):
         self.case_sensitive = config.case_sensitive
 
     def matches(self, response: Response) -> MatchResult:
-        # Get the content to search
         if self.part == "header":
             content = str(response.headers)
         elif self.part == "all":
             content = f"{response.headers}\n{response.text}"
-        else:  # body
+        else:  
             content = response.text
 
         if not self.case_sensitive:
@@ -116,7 +113,6 @@ class WordMatcher(Matcher):
         else:
             search_words = self.words
 
-        # Check for matches
         found_words = []
         for word in search_words:
             if word in content:
@@ -126,10 +122,9 @@ class WordMatcher(Matcher):
             matched = len(found_words) == len(search_words)
         elif self.condition == "or":
             matched = len(found_words) > 0
-        else:  # default to AND
+        else:  
             matched = len(found_words) == len(search_words)
 
-        # Word matchers are heuristic (pattern-based)
         return self._apply_negative(MatchResult(
             matched=matched,
             evidence={"found": found_words, "content_length": len(content)},
@@ -179,7 +174,6 @@ class JsonMatcher(Matcher):
         if not path:
             return data
 
-        # Remove leading $.
         path = path.lstrip("$.")
 
         parts = path.split(".")
@@ -232,7 +226,6 @@ class JsonMatcher(Matcher):
         else:
             matched = extracted is not None
 
-        # JSON field existence is inference-level evidence
         return self._apply_negative(MatchResult(
             matched=matched,
             evidence={"selector": self.selector, "extracted": extracted, "expected": self.value},
@@ -278,41 +271,31 @@ def evaluate_matchers(matchers: List[Matcher], response: Response, condition: st
         result = matcher.matches(response)
         results.append(result)
 
-        # Track positive and negative matchers separately
         if matcher.negative:
             negative_results.append(result)
         else:
             positive_results.append(result)
 
-    # Evaluate positive matchers with the configured condition
     if positive_results:
         if condition == "or":
             positive_matched = any(r.matched for r in positive_results)
         else:
             positive_matched = all(r.matched for r in positive_results)
     else:
-        # No positive matchers - require at least one negative to pass
         positive_matched = True
 
-    # Evaluate negative matchers with AND (all must pass, i.e., NOT match)
-    # For negative matchers, matched=true means the negative condition was triggered (bad)
-    # So we need all negative matchers to have matched=true (meaning they excluded the pattern)
     negative_matched = all(r.matched for r in negative_results) if negative_results else True
 
-    # Overall match: positive must match AND all negatives must pass
     matched = positive_matched and negative_matched
 
     evidence = {}
     for i, r in enumerate(results):
         evidence[f"matcher_{i}"] = r.evidence
 
-    # Add breakdown to evidence
     evidence["positive_matchers"] = f"{sum(r.matched for r in positive_results)}/{len(positive_results)}" if positive_results else "0/0"
     evidence["negative_matchers"] = f"{sum(r.matched for r in negative_results)}/{len(negative_results)}" if negative_results else "0/0"
     evidence["condition"] = condition
 
-    # Determine evidence strength: use highest from positive matchers that matched
-    # Priority: DIRECT > INFERENCE > HEURISTIC
     strength = EvidenceStrength.HEURISTIC
     for r in positive_results:
         if r.matched:

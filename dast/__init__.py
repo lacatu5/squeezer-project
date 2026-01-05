@@ -7,7 +7,6 @@ A modular vulnerability scanning framework with support for:
 
 __version__ = "0.2.0"
 
-# Core modules
 from dast.config import (
     SeverityLevel,
     AuthType,
@@ -44,9 +43,7 @@ from dast.core.matchers import (
 )
 
 __all__ = [
-    # Version
     "__version__",
-    # Config
     "SeverityLevel",
     "AuthType",
     "ExtractorConfig",
@@ -59,15 +56,12 @@ __all__ = [
     "Template",
     "Finding",
     "ScanReport",
-    # Engine
     "ExecutionContext",
     "TemplateEngine",
     "load_templates",
     "run_scan",
-    # Auth
     "Authenticator",
     "AuthContext",
-    # Extractors
     "ExtractionResult",
     "MatchResult",
     "Matcher",

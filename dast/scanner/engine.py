@@ -15,12 +15,6 @@ from dast.config import (
 )
 from dast.scanner.context import ExecutionContext
 from dast.scanner.executor import execute_request
-from dast.scanner.expander import (
-    build_get_request,
-    build_post_request,
-    expand_broadcast_template,
-    expand_template,
-)
 from dast.utils import TargetValidator, logger, sanitize_url
 
 
@@ -98,15 +92,11 @@ class TemplateEngine:
     async def execute_template(self, template: Template, report: ScanReport) -> None:
         logger.debug(f"Executing template: {template.id}")
 
-        # Expand generic template if present
         requests_to_execute = self._expand_template(template)
 
-        # Create execution context
-        # Include endpoints in variables for direct interpolation {{endpoint_name}}
         variables = self.target.get_variables().copy()
         variables.update(self.target.get_endpoints())
 
-        # Add discovered_params for template use
         discovered_params = self.target.get_discovered_params()
         if discovered_params:
             variables["discovered_params"] = discovered_params
@@ -117,7 +107,6 @@ class TemplateEngine:
         )
         context.variables.update(template.variables)
 
-        # Execute each request
         for i, request_config in enumerate(requests_to_execute, 1):
             request_name = request_config.name or f"Request {i}"
             logger.debug(f"  Executing: {request_name}")
@@ -133,56 +122,13 @@ class TemplateEngine:
             except httpx.ConnectError as e:
                 logger.error(f"  [-] Connection error: {e}")
                 report.add_error(f"Template {template.id}: Connection error - {request_name}")
-                break  # Stop processing this template on connection errors
+                break  
             except Exception as e:
                 logger.debug(f"  [-] Request failed: {e}")
                 report.add_error(f"Template {template.id}: {request_name} - {str(e)}")
 
-    def _load_payloads_from_file(self, file_path: str) -> List[str]:
-        project_root = Path(__file__).parent.parent.parent.resolve()
-        payloads_dir = project_root / "payloads"
-
-        path = Path(file_path)
-        if not path.is_absolute():
-            path = (project_root / file_path).resolve()
-        else:
-            path = path.resolve()
-        if not (path.is_relative_to(payloads_dir) or path.is_relative_to(project_root)):
-            raise ValueError(
-                f"Payload file path validation failed: {file_path} "
-                f"(resolved to {path}) is outside allowed directories"
-            )
-
-        if not path.exists():
-            logger.warning(f"Payload file not found: {file_path}")
-            return []
-
-        payloads = []
-        try:
-            with open(path, "r", encoding="utf-8", errors="ignore") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#"):
-                        continue
-                    payloads.append(line)
-            logger.debug(f"Loaded {len(payloads)} payloads from {file_path}")
-        except Exception as e:
-            logger.error(f"Failed to load payload file {file_path}: {e}")
-
-        return payloads
-
     def _expand_template(self, template: Template) -> List[RequestConfig]:
-        return expand_template(
-            template=template,
-            target=self.target,
-            load_payloads_fn=self._load_payloads_from_file,
-            build_get_fn=build_get_request,
-            build_post_fn=build_post_request,
-            expand_broadcast_fn=lambda t, g, e: expand_broadcast_template(
-                t, g, e, self.target, self._load_payloads_from_file,
-                build_get_request, build_post_request,
-            ),
-        )
+        return template.requests
 
     async def _execute_request(
         self,

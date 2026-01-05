@@ -14,9 +14,9 @@ class KatanaEndpoint:
     status_code: Optional[int] = None
     content_type: Optional[str] = None
     content_length: int = 0
-    source: str = "unknown"  # katana source field
+    source: str = "unknown"  
     timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-    query_params: Dict[str, str] = field(default_factory=dict)  # discovered query params
+    query_params: Dict[str, str] = field(default_factory=dict)  
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary."""
@@ -66,7 +66,6 @@ class KatanaEndpoint:
         from urllib.parse import urlparse, parse_qs
         parsed = urlparse(self.url)
         params = parse_qs(parsed.query)
-        # Flatten single values, keep lists for multiple values
         return {k: v[0] if len(v) == 1 else v for k, v in params.items()}
 
 
@@ -77,7 +76,7 @@ class KatanaStatistics:
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
-    unique_urls: int = 0  # Match CrawlerStatistics naming
+    unique_urls: int = 0  
     unique_domains: int = 0
     endpoints_by_method: Dict[str, int] = field(default_factory=dict)
     endpoints_by_status: Dict[str, int] = field(default_factory=dict)

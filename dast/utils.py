@@ -13,21 +13,17 @@ from tenacity import (
 )
 
 
-# Configure logging
 def setup_logging(verbose: bool = False) -> None:
     level = logging.DEBUG if verbose else logging.INFO
 
-    # Configure our logger
     logging.basicConfig(
         level=level,
         format='%(asctime)s - %(levelname)s - %(message)s',
         datefmt='%H:%M:%S'
     )
 
-    # Suppress noisy httpx logging
     logging.getLogger("httpx").setLevel(logging.WARNING)
 
-    # Configure module-level logger
     logger.setLevel(level)
 
 
@@ -104,7 +100,6 @@ def sanitize_url(url: str) -> str:
     try:
         parsed = urlparse(url)
         if parsed.password:
-            # Remove password from URL
             safe = parsed._replace(
                 netloc=f"{parsed.username}:****@{parsed.hostname}"
             )

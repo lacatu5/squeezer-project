@@ -26,9 +26,8 @@ class SimpleCrawlerReport(BaseModel):
     summary: Dict[str, int]
     endpoints: List[Dict[str, Any]] = PDField(default_factory=list)
     cookies: List[str] = PDField(default_factory=list)
-    discovered_params: Dict[str, List[str]] = PDField(default_factory=dict)  # path -> param names
+    discovered_params: Dict[str, List[str]] = PDField(default_factory=dict)  
 
-    # Static file extensions to blacklist
     _STATIC_EXTENSIONS: Set[str] = {
         '.css', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico',
         '.woff', '.woff2', '.ttf', '.eot', '.otf',
@@ -38,7 +37,6 @@ class SimpleCrawlerReport(BaseModel):
         '.webmanifest', '.json', '.yaml', '.yml',
     }
 
-    # Static path patterns to blacklist
     _STATIC_PATH_PATTERNS: Set[str] = {
         '/assets/', '/static/', '/images/', '/img/', '/fonts/',
         '/media/', '/_next/static/', '/__webpack__/', '/public/',
@@ -49,12 +47,10 @@ class SimpleCrawlerReport(BaseModel):
         """Check if a URL points to a static asset."""
         url_lower = url.lower()
 
-        # Check extension
         for ext in self._STATIC_EXTENSIONS:
             if url_lower.endswith(ext):
                 return True
 
-        # Check static path patterns
         for pattern in self._STATIC_PATH_PATTERNS:
             if pattern in url_lower:
                 return True
@@ -68,23 +64,18 @@ class SimpleCrawlerReport(BaseModel):
         ep_type = endpoint.get('type', '')
         full_url = endpoint.get('full_url', url_lower)
 
-        # API endpoints are highest priority
         if ep_type == 'api':
             score += 100
 
-        # Auth endpoints
         if ep_type == 'auth' or any(x in url_lower for x in ['login', 'signin', 'auth', 'logout']):
             score += 80
 
-        # Admin endpoints
         if ep_type == 'admin' or any(x in url_lower for x in ['admin', 'dashboard', 'panel']):
             score += 70
 
-        # Endpoints with query parameters (injection points)
         if '?' in full_url:
             score += 50
 
-        # Known interesting paths
         interesting_keywords = [
             'user', 'profile', 'search', 'filter', 'sort',
             'api', 'rest', 'graphql', 'query',
@@ -96,22 +87,18 @@ class SimpleCrawlerReport(BaseModel):
         for keyword in interesting_keywords:
             if keyword in url_lower:
                 score += 30
-                break  # Only count once
+                break  
 
         return score
 
     def _sanitize_endpoint_key(self, path: str) -> str:
         """Convert a URL path to a valid endpoint key name."""
-        # Remove leading/trailing slashes and special chars
         clean = path.strip('/').replace('-', '_').replace('.', '_')
 
-        # Replace remaining slashes with underscores
         clean = clean.replace('/', '_')
 
-        # Remove consecutive underscores
         clean = re.sub(r'_+', '_', clean)
 
-        # Return "root" if empty
         return clean or "root"
 
     def _generate_endpoint_key(self, url: str, existing_keys: Dict[str, str]) -> str:
@@ -123,7 +110,6 @@ class SimpleCrawlerReport(BaseModel):
         key = base_key
         counter = 1
 
-        # Ensure uniqueness by appending counter if needed
         while key in existing_keys:
             key = f"{base_key}_{counter}"
             counter += 1
@@ -146,44 +132,35 @@ class SimpleCrawlerReport(BaseModel):
         Returns:
             TargetConfig ready for vulnerability scanning
         """
-        # Parse base URL from report
         parsed_base = urlparse(self.target)
         if parsed_base.netloc:
             target_name = name or f"crawled_{parsed_base.netloc.replace('.', '_')}"
         else:
             target_name = name or "crawled_target"
 
-        # Filter and process endpoints
         filtered_endpoints: List[Dict[str, Any]] = []
 
         for ep in self.endpoints:
             url = ep.get('full_url', ep.get('url', ''))
 
-            # Skip static assets if enabled
             if exclude_static and self._is_static_asset(url):
                 continue
 
             filtered_endpoints.append(ep)
 
-        # Log warning if no endpoints after filtering
         if not filtered_endpoints:
             from dast.utils import logger
             logger.warning("Crawler report has no endpoints after filtering")
 
-        # Sort by priority if requested
         if prioritize:
             filtered_endpoints.sort(key=self._get_endpoint_priority, reverse=True)
 
-        # Build custom endpoints dict
         custom_endpoints: Dict[str, str] = {}
         for ep in filtered_endpoints:
             url = ep.get('full_url', ep.get('url', ''))
             key = self._generate_endpoint_key(url, custom_endpoints)
             custom_endpoints[key] = url
 
-        # Build authentication config from cookies
-        # Note: cookies in report are just names (no values)
-        # User should provide actual cookie values via --cookies flag
         if self.cookies:
             auth_config = AuthConfig(
                 type=AuthType.NONE,
@@ -192,7 +169,6 @@ class SimpleCrawlerReport(BaseModel):
         else:
             auth_config = AuthConfig()
 
-        # Create TargetConfig
         return TargetConfig(
             name=target_name,
             base_url=self.target,
