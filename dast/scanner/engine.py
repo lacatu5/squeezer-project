@@ -7,7 +7,6 @@ import httpx
 
 from dast.auth import AuthContext, Authenticator
 from dast.config import (
-    DetectionTier,
     RequestConfig,
     ScanReport,
     TargetConfig,

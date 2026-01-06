@@ -146,7 +146,7 @@ def init_app(
         console.print(f"\n[dim]Endpoints cached: {result['endpoints_discovered']}[/dim]")
         console.print(f"[dim]Templates created: {len(result['templates_created'])}[/dim]")
 
-        console.print(f"\n[bold]Next steps:[/bold]")
+        console.print("\n[bold]Next steps:[/bold]")
         console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
         console.print(f"  2. Run: [green]dast scan {target} --app {app_name}[/green]")
 

@@ -12,7 +12,7 @@ from httpx import Response
 from dast.config.common import EvidenceStrength
 
 if TYPE_CHECKING:
-    from dast.config.scan import Finding
+    pass
 
 
 class ConsistencyChecker:

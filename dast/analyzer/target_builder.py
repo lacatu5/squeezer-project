@@ -49,7 +49,7 @@ def _add_fallback_endpoints(target: TargetConfig, endpoints: list) -> None:
         target.endpoints.custom.setdefault("ssti", "JSON:/rest/products:input")
         target.endpoints.custom.setdefault("xxe", "XML:/rest/data")
         count += 2
-        console.print(f"[dim]  → Added SSTI and XXE endpoints for testing[/dim]")
+        console.print("[dim]  → Added SSTI and XXE endpoints for testing[/dim]")
 
 
 def add_json_injection_endpoints(

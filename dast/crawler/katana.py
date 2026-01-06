@@ -2,7 +2,7 @@ import asyncio
 import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Set
-from urllib.parse import urljoin, urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 
 
 import time
