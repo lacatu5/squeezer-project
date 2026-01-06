@@ -114,7 +114,7 @@ def build_auto_target_config(
 
     for ep in endpoints:
         path = getattr(ep, "path", urlparse(getattr(ep, "url", "")).path)
-        method = getattr(ep, "method", "GET")
+        getattr(ep, "method", "GET")
 
         if "/rest/user/login" in path or "/api/user/login" in path:
             auto_endpoints["login"] = f"{base_url}{path}"
