@@ -1,7 +1,6 @@
 """Crawler report models for Katana."""
 
 import re
-from pathlib import Path
 from typing import Any, Dict, List, Optional, Set
 from urllib.parse import urlparse
 
@@ -179,23 +178,6 @@ class SimpleCrawlerReport(BaseModel):
             ),
             discovered_params=self.discovered_params,
         )
-
-    def save_yaml(self, path: str) -> None:
-        """Save report to YAML file."""
-        import yaml
-
-        data = {
-            "target": self.target,
-            "timestamp": self.timestamp,
-            "summary": self.summary,
-            "endpoints": self.endpoints,
-        }
-        if self.cookies:
-            data["cookies"] = self.cookies
-        if self.discovered_params:
-            data["discovered_params"] = self.discovered_params
-
-        Path(path).write_text(yaml.dump(data, sort_keys=False, default_flow_style=False))
 
     def model_dump(self) -> Dict[str, Any]:
         """Return dict representation."""

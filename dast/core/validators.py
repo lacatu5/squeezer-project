@@ -56,34 +56,6 @@ class ConsistencyChecker:
 
         return True
 
-    @staticmethod
-    def get_similarity_score(response1: Response, response2: Response) -> float:
-        """Calculate similarity score between two responses (0-1).
-
-        Returns 1.0 if identical, 0.0 if completely different.
-        Uses length-based comparison for speed (faster than text diff).
-
-        Args:
-            response1: First response
-            response2: Second response
-
-        Returns:
-            Similarity score from 0.0 to 1.0
-        """
-        if response1.status_code != response2.status_code:
-            return 0.0
-
-        len1, len2 = len(response1.text), len(response2.text)
-        if len1 == 0 and len2 == 0:
-            return 1.0
-
-        max_len = max(len1, len2)
-        if max_len == 0:
-            return 1.0
-
-        length_diff = abs(len1 - len2) / max_len
-        return 1.0 - length_diff
-
 
 class ConfidenceCalculator:
     """Calculate confidence level from matcher results and evidence strength.
@@ -97,7 +69,6 @@ class ConfidenceCalculator:
     @staticmethod
     def calculate(
         evidence_strength: EvidenceStrength,
-        matcher_count: int,
         passed_matchers: int,
         is_consistent: bool = True,
     ) -> str:
@@ -110,7 +81,6 @@ class ConfidenceCalculator:
 
         Args:
             evidence_strength: Strength of best matcher
-            matcher_count: Total matchers evaluated
             passed_matchers: Matchers that passed
             is_consistent: Response was consistent across retries
 

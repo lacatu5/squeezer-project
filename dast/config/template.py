@@ -9,7 +9,6 @@ from dast.config.common import DetectionTier, OWASPCategory, SeverityLevel
 
 class ExtractorConfig(BaseModel):
     name: str
-    location: str = "body"
     selector: Optional[str] = None
     regex: Optional[str] = None
     group: int = 1
@@ -31,17 +30,10 @@ class MatcherConfig(BaseModel):
     selector: Optional[str] = None
     value: Optional[Any] = None
 
-    dsl: Optional[str] = None
-    expression: Optional[str] = None
-
-    expected_type: Optional[str] = None
-
     base_response: Optional[str] = None
     diff_condition: str = "different"
 
     threshold_ms: int = 1000
-    threshold_sec: Optional[int] = None
-    diff_threshold_ms: Optional[int] = None
 
     class Config:
         populate_by_name = True
@@ -64,18 +56,15 @@ class RequestConfig(BaseModel):
 
     on_match: Optional[Dict[str, Any]] = None
 
-    model_config = {"populate_by_name": True}
-
 
 class TemplateInfo(BaseModel):
     name: str
-    author: Optional[str] = None
     severity: Union[SeverityLevel, str] = SeverityLevel.MEDIUM
     owasp_category: Optional[Union[OWASPCategory, str]] = None
     description: Optional[str] = None
     tags: List[str] = Field(default_factory=list)
 
-    def get_owasp_category(self) -> OWASPCategory:
+    def get_owasp_category(self) -> Optional[OWASPCategory]:
         if self.owasp_category is not None:
             if isinstance(self.owasp_category, OWASPCategory):
                 return self.owasp_category
@@ -87,62 +76,7 @@ class TemplateInfo(BaseModel):
             for category in OWASPCategory:
                 if category.name == category_str or category.name.replace("_", "") == category_str.replace("_", "").replace(":", "").upper():
                     return category
-
-        tags_lower = [t.lower() for t in self.tags]
-
-        if any(tag in tags_lower for tag in [
-            "access", "idor", "privilege", "authz", "authorization",
-            "bypass", "escalation", "admin", "race", "directory"
-        ]):
-            return OWASPCategory.A01_BROKEN_ACCESS_CONTROL
-
-        if any(tag in tags_lower for tag in [
-            "sqli", "sql", "injection", "nosql", "mongo", "ldap",
-            "xss", "ssti", "template", "xxe", "command", "rce"
-        ]):
-            return OWASPCategory.A05_INJECTION
-
-        if any(tag in tags_lower for tag in [
-            "auth", "jwt", "session", "login", "credential",
-            "password", "token", "csrf", "brute"
-        ]):
-            return OWASPCategory.A07_AUTHENTICATION_FAILURES
-
-        if any(tag in tags_lower for tag in [
-            "crypt", "crypto", "hash", "encryption", "tls", "ssl",
-            "certificate", "key", "exposure", "sensitive"
-        ]):
-            return OWASPCategory.A04_CRYPTOGRAPHIC_FAILURES
-
-        if any(tag in tags_lower for tag in [
-            "config", "header", "misconfig", "default", "debug",
-            "stack", "disclosure", "info", "version", "fingerprint"
-        ]):
-            return OWASPCategory.A02_SECURITY_MISCONFIGURATION
-
-        if any(tag in tags_lower for tag in [
-            "integrity", "supply", "dependency", "component", "ssrf",
-            "redirect", "open", "pollution", "prototype"
-        ]):
-            return OWASPCategory.A08_INTEGRITY_FAILURES
-
-        if any(tag in tags_lower for tag in [
-            "design", "architecture", "mass", "limit", "rate",
-            "hpp", "parameter"
-        ]):
-            return OWASPCategory.A06_INSECURE_DESIGN
-
-        if any(tag in tags_lower for tag in [
-            "error", "exception", "handling", "debug", "stack"
-        ]):
-            return OWASPCategory.A10_EXCEPTION_CONDITIONS
-
-        if any(tag in tags_lower for tag in [
-            "log", "monitor", "audit", "detection"
-        ]):
-            return OWASPCategory.A09_LOGGING_FAILURES
-
-        return OWASPCategory.A02_SECURITY_MISCONFIGURATION
+        return None
 
 
 class Template(BaseModel):
@@ -166,14 +100,6 @@ class Template(BaseModel):
 class DetectionTierConfig(BaseModel):
     tier: Union[DetectionTier, str]
 
-    detection_type: Optional[str] = None
-
-    baseline_payload: Optional[str] = None
-
-    true_payload: Optional[str] = None
-
-    false_payload: Optional[str] = None
-
     threshold_ms: int = 5000
 
     matchers: List[MatcherConfig] = Field(default_factory=list)
@@ -194,15 +120,9 @@ class GenericTemplate(BaseModel):
 
     method: str = "GET"
 
-    parameter: Optional[str] = None
-
-    body_template: Optional[str] = None
-
     content_type: str = "application/x-www-form-urlencoded"
 
     payloads: List[Union[str, "PayloadConfig"]] = Field(default_factory=list)
-
-    payloads_file: Optional[str] = None
 
     headers: Dict[str, str] = Field(default_factory=dict)
 
@@ -215,4 +135,3 @@ class PayloadConfig(BaseModel):
     name: str
     value: str
     description: Optional[str] = None
-    full_request: Optional[str] = None

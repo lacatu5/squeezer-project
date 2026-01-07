@@ -77,65 +77,6 @@ def generate_idor_template(endpoint: dict, app_name: str) -> dict | None:
     }
 
 
-def generate_validation_template(endpoint: dict, app_name: str) -> dict | None:
-    path = endpoint.get('path', '')
-    method = endpoint.get('method', 'POST')
-
-    if method not in ['POST', 'PUT', 'PATCH']:
-        return None
-
-    return {
-        'id': f"{app_name}-validation-{endpoint_to_template_name(path, method)}",
-        'info': {
-            'name': f"Validation: {path}",
-            'owasp_category': 'A02:2025',
-            'severity': 'medium',
-            'tags': ['validation', app_name],
-        },
-        'requests': [
-            {
-                'path': path,
-                'method': method,
-                'headers': {
-                    'Authorization': '{{bearer_token}}',
-                    'Content-Type': 'application/json',
-                },
-                'body': '{}',
-                'matchers': [
-                    {'type': 'status', 'status': [200, 201]},
-                ],
-            },
-        ],
-    }
-
-
-def generate_auth_template(endpoint: dict, app_name: str) -> dict | None:
-    path = endpoint.get('path', '')
-    method = endpoint.get('method', 'GET')
-
-    if not any(x in path.lower() for x in ['/api/', '/rest/']):
-        return None
-
-    return {
-        'id': f"{app_name}-auth-{endpoint_to_template_name(path, method)}",
-        'info': {
-            'name': f"Auth: {path}",
-            'owasp_category': 'A07:2025',
-            'severity': 'high',
-            'tags': ['auth', app_name],
-        },
-        'requests': [
-            {
-                'path': path,
-                'method': method,
-                'matchers': [
-                    {'type': 'status', 'status': [200]},
-                ],
-            },
-        ],
-    }
-
-
 def scaffold_app(
     app_name: str,
     target_url: str,

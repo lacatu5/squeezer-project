@@ -18,7 +18,6 @@ class MatchResult:
     evidence: Dict[str, Any]
     message: str
     evidence_strength: EvidenceStrength = EvidenceStrength.HEURISTIC
-    request_details: Optional[str] = None
     response_details: Optional[str] = None
 
 

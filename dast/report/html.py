@@ -18,7 +18,7 @@ def _split_filter(value, sep=None, maxsplit=-1):
     return []
 
 
-def _truncate_filter(value, length=255, killwords=False, end=''):
+def _truncate_filter(value, length=255, end=''):
     if isinstance(value, str) and len(value) > length:
         return value[:length] + end
     return value

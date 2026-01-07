@@ -10,7 +10,6 @@ from dast.config import AuthConfig, AuthType
 class AuthContext:
     """Authentication context with session data."""
 
-    authenticated: bool = False
     headers: Dict[str, str] = field(default_factory=dict)
     cookies: Dict[str, str] = field(default_factory=dict)
     token: Optional[str] = None
@@ -29,19 +28,19 @@ class Authenticator:
         auth_type = config.type or AuthType.NONE
 
         if auth_type == AuthType.NONE:
-            return AuthContext(authenticated=True)
+            return AuthContext()
 
         if auth_type == AuthType.BEARER:
             return self._auth_bearer(config)
 
-        return AuthContext(authenticated=False, error=f"Unknown auth type: {auth_type}")
+        return AuthContext(error=f"Unknown auth type: {auth_type}")
 
     def _auth_bearer(self, config: AuthConfig) -> AuthContext:
         """Bearer token authentication."""
         token = config.token or ""
 
         if not token:
-            return AuthContext(authenticated=False, error="Token required for Bearer auth")
+            return AuthContext(error="Token required for Bearer auth")
 
         headers = {"Authorization": f"Bearer {token}"}
         if config.headers:
@@ -57,7 +56,6 @@ class Authenticator:
                     cookies[k.strip()] = v.strip()
 
         return AuthContext(
-            authenticated=True,
             headers=headers,
             cookies=cookies,
         )

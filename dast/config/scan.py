@@ -25,7 +25,6 @@ class Finding(BaseModel):
     evidence: Dict[str, Any] = Field(default_factory=dict)
     message: str = ""
     remediation: str = ""
-    request_details: Optional[str] = None
     response_details: Optional[str] = None
     payload_count: int = 1
     endpoint_count: int = 1
@@ -37,9 +36,6 @@ class ParameterInfo(BaseModel):
 
     name: str
     type: str = "unknown"
-    location: str = "unknown"
-    example_values: List[str] = Field(default_factory=list)
-    required: bool = False
 
 
 class EndpointInfo(BaseModel):
@@ -52,21 +48,12 @@ class EndpointInfo(BaseModel):
     content_type: Optional[str] = None
 
     query_params: List[ParameterInfo] = Field(default_factory=list)
-    form_fields: List[ParameterInfo] = Field(default_factory=list)
-    json_params: List[ParameterInfo] = Field(default_factory=list)
     headers: Dict[str, str] = Field(default_factory=dict)
     cookies: Dict[str, str] = Field(default_factory=dict)
 
     forms: List[Dict[str, Any]] = Field(default_factory=list)
-    links: List[str] = Field(default_factory=list)
-    api_patterns: List[str] = Field(default_factory=list)
-    is_api: bool = False
-    requires_auth: bool = False
 
-    response_size: int = 0
-    has_json: bool = False
-    has_html: bool = False
-    error_indicators: List[str] = Field(default_factory=list)
+    is_api: bool = False
 
 
 class CrawlerStatistics(BaseModel):
@@ -108,22 +95,6 @@ class CrawlerReport(BaseModel):
 
     forms: List[Dict[str, Any]] = Field(default_factory=list)
     auth_data: Dict[str, Any] = Field(default_factory=dict)
-    storage_data: Dict[str, Any] = Field(default_factory=dict)
-    discovered_cookies: Dict[str, str] = Field(default_factory=dict)
-
-    def get_endpoints_by_method(self, method: str) -> List[Union[EndpointInfo, Dict[str, Any]]]:
-        return [
-            e for e in self.endpoints
-            if (isinstance(e, EndpointInfo) and e.method == method) or
-            (isinstance(e, dict) and e.get("method") == method)
-        ]
-
-    def get_api_endpoints(self) -> List[Union[EndpointInfo, Dict[str, Any]]]:
-        return [
-            e for e in self.endpoints
-            if (isinstance(e, EndpointInfo) and e.is_api) or
-            (isinstance(e, dict) and e.get("type") == "api")
-        ]
 
     def get_forms(self) -> List[Dict[str, Any]]:
         if self.forms:
@@ -151,7 +122,7 @@ class CrawlerReport(BaseModel):
         elif auth_type == "session":
             cookie_name = self.auth_data.get("cookie_name", "session")
             return AuthConfig(
-                type=AuthType.FORM,
+                type=AuthType.NONE,
                 headers={"Cookie": f"{cookie_name}={self.auth_data.get('jwt_token', '')}"},
             )
 
@@ -189,12 +160,6 @@ class CrawlerReport(BaseModel):
             endpoints=EndpointsConfig(base="", custom=custom_endpoints),
         )
         return self.target_config
-
-    def save_yaml(self, path: Union[str, Path]) -> None:
-        path = Path(path)
-        path.parent.mkdir(parents=True, exist_ok=True)
-        with open(path, "w") as f:
-            yaml.dump(self.model_dump(exclude_none=True), f, sort_keys=False)
 
     @classmethod
     def from_yaml(cls, path: Union[str, Path]) -> "CrawlerReport":

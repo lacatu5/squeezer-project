@@ -2,10 +2,9 @@
 
 import random
 import re
-import string
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import httpx
 
@@ -18,20 +17,15 @@ class ExecutionContext:
     - variables: Extracted values from previous requests
     - endpoints: Named endpoint URLs
     - responses: History of all responses for comparison
-    - request_count: Total requests made in this workflow
     """
 
     variables: Dict[str, Any] = field(default_factory=dict)
     endpoints: Dict[str, str] = field(default_factory=dict)
     responses: List[httpx.Response] = field(default_factory=list)
-    request_count: int = 0
 
     _named_responses: Dict[str, httpx.Response] = field(default_factory=dict)
 
     def interpolate(self, text: str, max_iterations: int = 10) -> str:
-        """Replace variable placeholders in text."""
-        if not isinstance(text, str):
-            return str(text)
 
         result = text
         prev_result = None
@@ -70,21 +64,6 @@ class ExecutionContext:
 
         return result
 
-    def _rand_base(self, length_str: str) -> str:
-        length = int(length_str) if length_str else 16
-        return "".join(random.choices(string.ascii_letters + string.digits, k=length))
-
-    def set(self, name: str, value: Any) -> None:
-        self.variables[name] = value
-
-    def get(self, name: str, default: Any = None) -> Any:
-        return self.variables.get(name, default)
-
+ 
     def save_response(self, name: str, response: httpx.Response) -> None:
         self._named_responses[name] = response
-
-    def get_response(self, name: str) -> Optional[httpx.Response]:
-        return self._named_responses.get(name)
-
-    def get_last_response(self) -> Optional[httpx.Response]:
-        return self.responses[-1] if self.responses else None

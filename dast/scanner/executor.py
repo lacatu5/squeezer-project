@@ -107,7 +107,6 @@ async def execute_request(
             is_consistent = True
 
         context.responses.append(response)
-        context.request_count += 1
 
         if config.name:
             context.save_response(config.name, response)
@@ -132,7 +131,6 @@ async def execute_request(
                 from dast.core.validators import ConfidenceCalculator
                 confidence = ConfidenceCalculator.calculate(
                     result.evidence_strength,
-                    len(matchers),
                     sum(1 for m in matchers if m.matches(response).matched),
                     is_consistent=is_consistent,
                 )

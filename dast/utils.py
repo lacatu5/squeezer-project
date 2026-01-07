@@ -5,12 +5,6 @@ from typing import Any
 from urllib.parse import urlparse
 
 import httpx
-from tenacity import (
-    retry,
-    stop_after_attempt,
-    wait_exponential,
-    retry_if_exception_type,
-)
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -79,21 +73,6 @@ class TargetValidator:
             return True, ""
         except Exception as e:
             return False, f"Invalid URL: {e}"
-
-
-@retry(
-    stop=stop_after_attempt(3),
-    wait=wait_exponential(multiplier=1, min=0.5, max=10),
-    retry=retry_if_exception_type((httpx.NetworkError, httpx.TimeoutException, OSError)),
-    reraise=True,
-)
-async def retry_request(
-    client,
-    method: str,
-    url: str,
-    **kwargs
-) -> httpx.Response:
-    return await client.request(method, url, **kwargs)
 
 
 def sanitize_url(url: str) -> str:

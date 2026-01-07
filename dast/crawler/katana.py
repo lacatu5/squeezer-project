@@ -24,7 +24,6 @@ class KatanaCrawler:
         filter_static: bool = True,
     ):
         self.base_url = base_url
-        self.base_domain = urlparse(base_url).netloc
         self.max_depth = max_depth
         self.js_crawl = js_crawl
         self.cookies = cookies or {}
@@ -36,7 +35,6 @@ class KatanaCrawler:
         self.endpoints: List[KatanaEndpoint] = []
         self.forms: List[Dict[str, Any]] = []
         self.stats = KatanaStatistics()
-        self.discovered_cookies: Dict[str, str] = {}
         self.all_discovered_params: Dict[str, Set[str]] = {}
 
     def _build_katana_command(
@@ -135,7 +133,7 @@ class KatanaCrawler:
         return unique
 
 
-    async def crawl(self, verify: bool = False) -> SimpleCrawlerReport:
+    async def crawl(self) -> SimpleCrawlerReport:
 
         start_time = time.time()
         cmd = self._build_katana_command()
@@ -148,10 +146,10 @@ class KatanaCrawler:
                 stderr=asyncio.subprocess.PIPE,
             )
 
-        stdout, stderr = await asyncio.wait_for(
-                    process.communicate(),
-                    timeout=self.timeout,
-                )
+        stdout, _ = await asyncio.wait_for(
+            process.communicate(),
+            timeout=self.timeout,
+        )
 
         output = stdout.decode("utf-8", errors="ignore")
 
