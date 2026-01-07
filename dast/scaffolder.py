@@ -6,6 +6,10 @@ from urllib.parse import urlparse
 
 import yaml
 
+from dast.utils import load_static_files_config
+
+_STATIC_EXTENSIONS = set(ext.lstrip('.') for ext in load_static_files_config()["extensions"])
+
 
 def sanitize_name(name: str) -> str:
     return re.sub(r'[^a-z0-9_-]', '-', name.lower()).strip('-')
@@ -97,7 +101,7 @@ def scaffold_app(
         parsed = urlparse(url)
         path = parsed.path
 
-        if any(ext in path for ext in ['.js', '.css', '.png', '.jpg', '.svg', '.ico', '.woff']):
+        if any(path.endswith(f'.{ext}') for ext in _STATIC_EXTENSIONS):
             continue
 
         method = ep.get('method', 'GET')

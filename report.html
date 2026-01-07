@@ -85,7 +85,7 @@
     <div class="container">
         <header>
             <h1>DAST Scan Report</h1>
-            <div class="subtitle">http://localhost:3000 • Scanned at 2026-01-12 01:24:49</div>
+            <div class="subtitle">http://localhost:3000 • Scanned at 2026-01-12 02:10:56</div>
         </header>
 
         <div class="grid">
@@ -312,17 +312,6 @@
                         <div class="finding-message">No rate limit headers present - potential DoS vulnerability</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -381,17 +370,6 @@
                         <div class="finding-url">http://localhost:3000/</div>
                         <div class="finding-message">No rate limiting detected - endpoint accepts excessive requests</div>
 
-                        
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /</span></div>
-                            
-                            
-                        </div>
                         
 
                         
@@ -452,17 +430,6 @@
                         <div class="finding-message">User registration accepts role parameter - privilege escalation to admin possible</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">POST /api/Users/</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -522,17 +489,6 @@
                         <div class="finding-message">Tests for Remote Code Execution in B2B order processing</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">POST /b2b/v2/orders</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -589,17 +545,6 @@
                         <div class="finding-url">http://localhost:3000/api/Users/1</div>
                         <div class="finding-message">Admin user profile accessible via sequential ID enumeration</div>
 
-                        
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /api/Users/1</span></div>
-                            
-                            
-                        </div>
                         
 
                         
@@ -660,17 +605,6 @@
                         <div class="finding-message">Tests for file upload validation bypass vulnerabilities</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">POST /api/Complaints</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -727,17 +661,6 @@
                         <div class="finding-url">http://localhost:3000/api/BasketItems/</div>
                         <div class="finding-message">Server accepts negative quantity values - allows total manipulation and refund abuse</div>
 
-                        
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">POST /api/BasketItems/</span></div>
-                            
-                            
-                        </div>
                         
 
                         
@@ -798,17 +721,6 @@
                         <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /rest/basket/1</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -865,17 +777,6 @@
                         <div class="finding-url">http://localhost:3000/rest/basket/2</div>
                         <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
 
-                        
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /rest/basket/2</span></div>
-                            
-                            
-                        </div>
                         
 
                         
@@ -934,17 +835,6 @@
                         <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /rest/basket/3</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -1002,17 +892,6 @@
                         <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /api/BasketItems</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -1069,17 +948,6 @@
                         <div class="finding-url">http://localhost:3000/api/Feedbacks/1</div>
                         <div class="finding-message">Feedback from other users accessible via sequential ID enumeration</div>
 
-                        
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /api/Feedbacks/1</span></div>
-                            
-                            
-                        </div>
                         
 
                         
@@ -1140,17 +1008,6 @@
                         <div class="finding-message">Tests for LFI vulnerabilities using null byte and path traversal</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /ftp/package.json.bak%2500.md</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -1208,17 +1065,6 @@
                         <div class="finding-message">Tests for LFI vulnerabilities using null byte and path traversal</div>
 
                         
-                        <div class="raw-data">
-                            
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">GET /ftp/coupons_2013.md.bak%2500.md</span></div>
-                            
-                            
-                        </div>
-                        
 
                         
                         <h3 class="section-title">Evidence</h3>
@@ -1258,7 +1104,7 @@
         
 
         <footer>
-            Generated by DAST MVP • 2026-01-12 01:24:49 • 23 total findings (14 unique)
+            Generated by DAST MVP • 2026-01-12 02:10:56 • 23 total findings (14 unique)
         </footer>
     </div>
 

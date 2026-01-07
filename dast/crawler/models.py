@@ -1,25 +1,36 @@
-"""Data models for Katana crawler."""
-
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
+
+from pydantic import BaseModel, Field as PDField
+
+from dast.config import (
+    AuthConfig,
+    AuthType,
+    EndpointsConfig,
+    TargetConfig,
+)
+from dast.utils import load_static_files_config, load_keywords_config
+
+_STATIC_CONFIG = load_static_files_config()
+_KEYWORDS_CONFIG = load_keywords_config()
+_STATIC_EXTENSIONS = set(ext.lstrip('.') for ext in _STATIC_CONFIG["extensions"])
 
 
 @dataclass
 class KatanaEndpoint:
-    """An endpoint discovered by Katana."""
-
     url: str
     method: str = "GET"
     status_code: Optional[int] = None
     content_type: Optional[str] = None
     content_length: int = 0
-    source: str = "unknown"  
+    source: str = "unknown"
     timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-    query_params: Dict[str, str] = field(default_factory=dict)  
+    query_params: Dict[str, str] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
         return {
             "url": self.url,
             "method": self.method,
@@ -35,32 +46,23 @@ class KatanaEndpoint:
         }
 
     def _classify_type(self) -> str:
-        """Classify endpoint type."""
         url_lower = self.url.lower()
 
         if any(p in url_lower for p in ["/api/", "/rest/", "/graphql"]):
             return "api"
-        if url_lower.endswith((".js", ".css", ".png", ".jpg", ".gif", ".svg", ".ico", ".woff", ".ttf")):
+        if any(url_lower.endswith(f".{ext}") for ext in _STATIC_EXTENSIONS):
             return "static"
-        if any(p in url_lower for p in ["login", "signin", "auth", "logout"]):
+        if any(p in url_lower for p in _KEYWORDS_CONFIG["auth"]):
             return "auth"
-        if any(p in url_lower for p in ["admin", "dashboard", "panel"]):
+        if any(p in url_lower for p in _KEYWORDS_CONFIG["admin"]):
             return "admin"
         return "page"
 
     def _is_interesting(self) -> bool:
-        """Check if endpoint is interesting for security testing."""
         url_lower = self.url.lower()
-        interesting = [
-            "admin", "dashboard", "config", "settings", "upload", "download",
-            "export", "import", "backup", "debug", "test", "api", "auth",
-            "login", "logout", "reset", "forgot", "user", "profile", "cart",
-            "checkout", "payment", "order", "basket", "manage"
-        ]
-        return any(pattern in url_lower for pattern in interesting)
+        return any(pattern in url_lower for pattern in _KEYWORDS_CONFIG["interesting"])
 
     def _extract_query_params(self) -> Dict[str, str]:
-        """Extract query parameters from the URL."""
         if "?" not in self.url:
             return {}
         from urllib.parse import urlparse, parse_qs
@@ -71,12 +73,10 @@ class KatanaEndpoint:
 
 @dataclass
 class KatanaStatistics:
-    """Statistics from Katana crawl."""
-
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
-    unique_urls: int = 0  
+    unique_urls: int = 0
     unique_domains: int = 0
     endpoints_by_method: Dict[str, int] = field(default_factory=dict)
     endpoints_by_status: Dict[str, int] = field(default_factory=dict)
@@ -92,7 +92,6 @@ class KatanaStatistics:
     duration_seconds: float = 0.0
 
     def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary."""
         return {
             "total_requests": self.total_requests,
             "successful_requests": self.successful_requests,
@@ -112,3 +111,12 @@ class KatanaStatistics:
             "end_time": self.end_time,
             "duration_seconds": self.duration_seconds,
         }
+
+
+class SimpleCrawlerReport(BaseModel):
+    target: str
+    timestamp: str
+    summary: Dict[str, int]
+    endpoints: List[Dict[str, Any]] = PDField(default_factory=list)
+    cookies: List[str] = PDField(default_factory=list)
+    discovered_params: Dict[str, List[str]] = PDField(default_factory=dict)

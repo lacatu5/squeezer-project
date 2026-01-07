@@ -1,0 +1,11 @@
+{
+    "interesting": [
+        "admin", "dashboard", "config", "settings", "upload", "download",
+        "export", "import", "backup", "debug", "test", "api", "auth",
+        "login", "logout", "reset", "forgot", "user", "profile", "cart",
+        "checkout", "payment", "order", "basket", "manage", "search",
+        "filter", "sort", "product", "item", "list", "account"
+    ],
+    "auth": ["login", "signin", "auth", "logout"],
+    "admin": ["admin", "dashboard", "panel"]
+}

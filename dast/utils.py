@@ -1,10 +1,38 @@
 
+import json
 import logging
 import time
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
 import httpx
+
+
+_config_dir = Path(__file__).parent / "config"
+
+
+def load_static_files_config():
+    config_path = _config_dir / "static_files.json"
+    if config_path.exists():
+        with open(config_path) as f:
+            return json.load(f)
+    return {
+        "extensions": [".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico"],
+        "paths": ["/assets/", "/static/", "/images/", "/fonts/", "/media/"]
+    }
+
+
+def load_keywords_config():
+    config_path = _config_dir / "keywords.json"
+    if config_path.exists():
+        with open(config_path) as f:
+            return json.load(f)
+    return {
+        "interesting": ["admin", "api", "auth", "user", "login"],
+        "auth": ["login", "signin", "auth", "logout"],
+        "admin": ["admin", "dashboard", "panel"]
+    }
 
 
 def setup_logging(verbose: bool = False) -> None:

@@ -7,8 +7,12 @@ from urllib.parse import urlparse, parse_qs
 
 import time
 
-from dast.crawler.models import KatanaEndpoint, KatanaStatistics
-from dast.crawler.report import SimpleCrawlerReport
+from dast.crawler.models import KatanaEndpoint, KatanaStatistics, SimpleCrawlerReport
+from dast.utils import load_static_files_config
+
+_STATIC_CONFIG = load_static_files_config()
+_STATIC_EXTENSIONS = set(ext.lstrip('.') for ext in _STATIC_CONFIG["extensions"])
+_STATIC_PATHS = set(_STATIC_CONFIG["paths"])
 
 
 class KatanaCrawler:
@@ -100,22 +104,15 @@ class KatanaCrawler:
         seen = set()
         unique = []
 
-        static_paths = ['/assets/', '/static/', '/images/', '/fonts/', '/media/', '/_next/static/', '/__webpack__/']
-        static_extensions = {
-            'js', 'css', 'png', 'jpg', 'jpeg', 'gif', 'svg', 'ico', 'woff', 'woff2', 'ttf', 'eot',
-            'mp4', 'mp3', 'wav', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webp', 'bmp', 'tiff', 'tif',
-            'map', 'txt', 'xml', 'swf', 'webm', 'otf'
-        }
-
         for ep in endpoints:
             parsed_url = urlparse(ep.url)
 
             if self.filter_static:
                 url_lower = ep.url.lower()
-                if any(x in url_lower for x in static_paths):
+                if any(x in url_lower for x in _STATIC_PATHS):
                     continue
                 path = parsed_url.path.lower()
-                if any(path.endswith(f'.{ext}') for ext in static_extensions):
+                if any(path.endswith(f'.{ext}') for ext in _STATIC_EXTENSIONS):
                     continue
 
             url = ep.url.split("#")[0]
