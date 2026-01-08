@@ -1,0 +1,57 @@
+id: juice-shop-empty-user-registration
+info:
+  name: Empty User Registration Bypass
+  author: dast-mvp
+  owasp_category: A07:2025
+  severity: medium
+  description: Tests if application allows registration with empty/null values
+  tags:
+    - juice-shop
+    - authentication
+    - validation-bypass
+
+requests:
+  - path: /api/Users
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"email":"","password":"test123"}'
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - '"status":"success"'
+
+  - path: /api/Users
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"email":"test@test.com","password":""}'
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - '"status":"success"'
+
+  - path: /api/Users
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"email":null,"password":"test123"}'
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - '"status":"success"'

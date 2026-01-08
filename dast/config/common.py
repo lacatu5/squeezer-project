@@ -50,3 +50,4 @@ class AuthType(str, Enum):
     NONE = "none"
     BASIC = "basic"
     BEARER = "bearer"
+    LAB = "lab"

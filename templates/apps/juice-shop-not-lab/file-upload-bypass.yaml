@@ -1,0 +1,52 @@
+id: juice-shop-file-upload-bypass
+info:
+  name: File Upload Validation Bypass
+  author: dast-mvp
+  owasp_category: A01:2025
+  severity: high
+  description: Tests for file upload validation bypass vulnerabilities
+  tags:
+    - juice-shop
+    - file-upload
+    - bypass
+
+requests:
+  - path: /file-upload
+    method: POST
+    headers:
+      Content-Type: multipart/form-data
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 204
+          - 410
+
+  - path: /api/Complaints
+    method: POST
+    headers:
+      Content-Type: application/json
+    body: '{"message":"test complaint","file":"../../../etc/passwd"}'
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - '"status":"success"'
+
+  - path: /profile/image/upload
+    method: POST
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 204
+      - type: word
+        words:
+          - '"status":"success"'
+          - 'profileImage'
+        condition: or

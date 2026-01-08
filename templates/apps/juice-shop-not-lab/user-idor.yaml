@@ -1,0 +1,43 @@
+id: juice-shop-user-idor
+info:
+  name: User Profile IDOR
+  description: Access control violation - users can view other users' profiles by enumerating IDs
+  owasp_category: A01:2025
+  severity: high
+  tags:
+    - idor
+    - access-control
+    - business-logic
+
+requests:
+  - name: Access admin profile
+    method: GET
+    path: /api/Users/1
+    headers:
+      Authorization: "{{bearer_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data.role"
+        words: ["admin"]
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Admin user profile accessible via sequential ID enumeration
+      remediation: Implement ownership check comparing requested user ID with authenticated user's ID
+
+  - name: Access another user profile
+    method: GET
+    path: /api/Users/2
+    headers:
+      Authorization: "{{bearer_token}}"
+    matchers:
+      - type: status
+        values: [200]
+      - type: json
+        selector: "$.data"
+        condition: exists
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Other user profiles accessible by changing user ID in request
+      remediation: Implement proper authorization - users should only access their own data
