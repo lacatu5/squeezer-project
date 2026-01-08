@@ -6,12 +6,6 @@ from urllib.parse import urlparse
 
 from pydantic import BaseModel, Field as PDField
 
-from dast.config import (
-    AuthConfig,
-    AuthType,
-    EndpointsConfig,
-    TargetConfig,
-)
 from dast.utils import load_static_files_config, load_keywords_config
 
 _STATIC_CONFIG = load_static_files_config()

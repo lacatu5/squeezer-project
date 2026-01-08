@@ -12,22 +12,6 @@ _env = Environment(
 )
 
 
-def _split_filter(value, sep=None, maxsplit=-1):
-    if isinstance(value, str):
-        return value.split(sep, maxsplit)
-    return []
-
-
-def _truncate_filter(value, length=255, end=''):
-    if isinstance(value, str) and len(value) > length:
-        return value[:length] + end
-    return value
-
-
-_env.filters['split'] = _split_filter
-_env.filters['truncate'] = _truncate_filter
-
-
 def _severity_chart(severity):
     max_val = max((v for v in severity.values() if v > 0), default=1)
     colors = {"critical": "#ff4444", "high": "#ff8800", "medium": "#ffcc00", "low": "#00cc66"}

@@ -8,15 +8,15 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from dast.analyzer import (
-    build_auto_target_config,
-    discover_and_add_json_endpoints,
-    extract_parameters_from_url,
-)
 from dast.crawler import KatanaCrawler
-from dast.config import AuthType, EndpointInfo, ScanReport, TargetConfig
+from dast.config import AuthType, ScanReport, TargetConfig
 from dast.report import generate_html_report
-from dast.scaffolder import scaffold_app, get_cached_endpoints, load_app_config
+from dast.scaffolder import (
+    get_cached_endpoints,
+    load_app_config,
+    scaffold_app,
+    sanitize_name,
+)
 from dast.scanner import load_templates, run_scan
 from dast.utils import setup_logging
 
@@ -171,38 +171,23 @@ def scan(
             print_banner()
 
         target_config = TargetConfig(name="Target", base_url=target)
+        project_root = get_project_root()
 
         if bearer:
             target_config.authentication.type = AuthType.BEARER
             target_config.authentication.token = bearer
 
-        endpoint_infos = []
-        project_root = get_project_root()
-
         cached_endpoints = None
+        effective_app = app
+
         if app and not crawl:
             cached_endpoints = get_cached_endpoints(app, project_root)
-            if cached_endpoints:
-                console.print(f"[cyan]Using {len(cached_endpoints)} cached endpoints from '{app}'[/cyan]")
 
-                for ep in cached_endpoints:
-                    url = ep.get('url', '')
-                    if url:
-                        params = extract_parameters_from_url(url, ep.get('method', 'GET'))
-                        endpoint_infos.append(EndpointInfo(
-                            url=url,
-                            method=ep.get('method', 'GET'),
-                            path=ep.get('path', urlparse(url).path),
-                            query_params=params,
-                            is_api='api' in ep.get('tags', []),
-                        ))
+        if not cached_endpoints and not template:
+            if not app:
+                parsed = urlparse(target)
+                effective_app = sanitize_name(parsed.netloc.replace(":", "-"))
 
-                target_config.endpoints.custom = {
-                    f"endpoint_{i}": ep.get('path', '')
-                    for i, ep in enumerate(cached_endpoints)
-                }
-
-        if crawl or (not cached_endpoints and not template):
             crawl_cookies = {}
             if bearer:
                 crawl_cookies['token'] = bearer
@@ -232,46 +217,32 @@ def scan(
 
             console.print(f"[cyan]Found {len(report.endpoints)} endpoints[/cyan]")
 
-            for ep in report.endpoints:
-                url = ep.get('full_url', ep.get('url', ''))
+            scaffold_app(
+                app_name=effective_app,
+                target_url=target,
+                endpoints=report.endpoints,
+                output_dir=project_root,
+                bearer_token=bearer,
+            )
+            console.print(f"[dim]Cached to '{effective_app}'[/dim]")
+
+            cached_endpoints = get_cached_endpoints(effective_app, project_root)
+
+        if cached_endpoints:
+            if not app:
+                console.print(f"[cyan]Using {len(cached_endpoints)} endpoints from '{effective_app}'[/cyan]")
+
+            if target_config.endpoints.custom is None:
+                target_config.endpoints.custom = {}
+
+            for ep in cached_endpoints:
+                url = ep.get('url', '')
                 if url:
-                    params = extract_parameters_from_url(url, ep.get('method', 'GET'))
-                    endpoint_infos.append(EndpointInfo(
-                        url=url,
-                        method=ep.get('method', 'GET'),
-                        path=urlparse(url).path,
-                        query_params=params,
-                        is_api=ep.get('type') == 'api',
-                    ))
+                    target_config.endpoints.custom[url] = url
 
-            try:
-                target_config = report.to_target_config(
-                    name="crawled_target",
-                    prioritize=True,
-                    exclude_static=True,
-                )
-                if bearer:
-                    target_config.authentication.type = AuthType.BEARER
-                    target_config.authentication.token = bearer
-            except Exception as e:
-                console.print(f"[red]Failed to generate target config: {e}[/red]")
-                raise typer.Exit(1)
-
-            if not target_config.get_endpoints():
-                console.print("[yellow]No scanable endpoints found[/yellow]")
-                raise typer.Exit(1)
-
-            try:
-                with Progress(
-                    SpinnerColumn(),
-                    TextColumn("[progress.description]{task.description}"),
-                    console=console,
-                ) as progress:
-                    task = progress.add_task("Discovering JSON injection points...", total=None)
-                    await discover_and_add_json_endpoints(target_config, report.endpoints, crawl_cookies)
-                    progress.update(task, completed=True)
-            except Exception:
-                pass
+        if not target_config.get_endpoints() and not template:
+            console.print("[yellow]No scanable endpoints found[/yellow]")
+            raise typer.Exit(1)
 
         template_paths = []
 
@@ -286,10 +257,10 @@ def scan(
                 generic_path = project_root / "templates" / "generic"
                 if generic_path.exists():
                     template_paths.append(generic_path)
-            if app:
-                app_path = project_root / "templates" / "apps" / app
-                if app_path.exists():
-                    template_paths.append(app_path)
+
+            app_path = project_root / "templates" / "apps" / effective_app
+            if app_path.exists():
+                template_paths.append(app_path)
 
         if not template_paths:
             console.print("[red]No templates found. Use --generic or --app[/red]")
@@ -300,18 +271,6 @@ def scan(
         if not templates:
             console.print("[red]No templates to execute[/red]")
             raise typer.Exit(1)
-
-        if endpoint_infos:
-            auto_endpoints = build_auto_target_config(
-                endpoints=endpoint_infos,
-                templates=templates,
-                base_url=target,
-            )
-
-            for var_name, path in auto_endpoints.items():
-                if target_config.endpoints.custom and var_name not in target_config.endpoints.custom:
-                    if target_config.endpoints.custom is not None:
-                        target_config.endpoints.custom[var_name] = path
 
         report = await run_scan(
             target_config,
