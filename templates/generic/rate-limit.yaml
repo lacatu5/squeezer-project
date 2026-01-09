@@ -7,7 +7,7 @@ info:
   tags:
     - rate-limit
     - dos
-    - abuse
+    - misconfiguration
     - generic
 
 requests:

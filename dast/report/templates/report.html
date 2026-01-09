@@ -1,323 +1,188 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DAST Scan Report - {{ target }}</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace; background: #1e1e1e; color: #cccccc; line-height: 1.5; font-size: 13px; }
-        .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-        header { background: #252526; border: 1px solid #3c3c3c; padding: 20px; margin-bottom: 20px; }
-        h1 { font-size: 20px; color: #fff; margin-bottom: 5px; letter-spacing: -0.5px; }
-        .subtitle { color: #666; font-size: 12px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .card { background: #252526; border: 1px solid #3c3c3c; padding: 15px; }
-        .card-title { font-size: 11px; color: #858585; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 1px; }
-        .card-value { font-size: 28px; font-weight: 600; }
-        .card-value.critical { color: #ff4444; }
-        .card-value.high { color: #ff8800; }
-        .card-value.medium { color: #ffcc00; }
-        .card-value.low { color: #00cc66; }
-        .chart-container { height: 180px; display: flex; align-items: flex-end; gap: 6px; padding: 12px 0 6px; overflow: hidden; }
-        .bar { flex: 1; min-width: 30px; display: flex; flex-direction: column; align-items: center; gap: 4px; max-height: 100%; }
-        .bar-fill { width: 100%; transition: height 0.2s ease; min-height: 2px; border-radius: 2px 2px 0 0; }
-        .bar-label { font-size: 10px; color: #858585; flex-shrink: 0; }
-        .bar-value { font-size: 12px; font-weight: 600; flex-shrink: 0; }
-        .finding-card { background: #252526; border: 1px solid #3c3c3c; margin-bottom: 15px; }
-        .finding-card.critical { border-left: 3px solid #ff4444; }
-        .finding-card.high { border-left: 3px solid #ff8800; }
-        .finding-card.medium { border-left: 3px solid #ffcc00; }
-        .finding-card.low { border-left: 3px solid #00cc66; }
-        .finding-header { padding: 15px; border-bottom: 1px solid #3c3c3c; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .badge { padding: 3px 8px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge.critical { background: #ff4444; color: #000; }
-        .badge.high { background: #ff8800; color: #000; }
-        .badge.medium { background: #ffcc00; color: #000; }
-        .badge.low { background: #00cc66; color: #000; }
-        .badge.direct { background: #00cc66; color: #000; }
-        .badge.inference { background: #ff8800; color: #000; }
-        .badge.heuristic { background: #00aaff; color: #000; }
-        .finding-title { font-size: 14px; font-weight: 600; color: #fff; flex: 1; }
-        .finding-body { padding: 15px; }
-        .finding-url { font-size: 12px; color: #00aaff; word-break: break-all; margin-bottom: 10px; }
-        .finding-message { color: #cccccc; font-size: 13px; margin-bottom: 15px; line-height: 1.5; }
-        .section-title { font-size: 11px; color: #858585; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; padding-bottom: 5px; border-bottom: 1px solid #3c3c3c; }
-        .owasp-badge { padding: 2px 6px; font-size: 10px; font-weight: 600; margin-right: 6px; }
-        .owasp-a01, .owasp-a05, .owasp-a07 { background: #ff4444; color: #000; }
-        .owasp-a02, .owasp-a03, .owasp-a04, .owasp-a06 { background: #ff8800; color: #000; }
-        .owasp-a08, .owasp-a09, .owasp-a10 { background: #ffcc00; color: #000; }
-        .filter-section { background: #252526; border: 1px solid #3c3c3c; padding: 15px; margin-bottom: 20px; }
-        .filter-group { margin-bottom: 15px; }
-        .filter-group:last-child { margin-bottom: 0; }
-        .filter-label { font-size: 10px; color: #858585; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 8px; }
-        .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; }
-        .filter-btn { padding: 5px 10px; border: 1px solid #3c3c3c; background: #1e1e1e; color: #cccccc; cursor: pointer; font-size: 11px; }
-        .filter-btn:hover { background: #2d2d2d; }
-        .filter-btn.active { background: #00aaff; border-color: #00aaff; color: #000; }
-        footer { text-align: center; padding: 20px; color: #858585; font-size: 11px; border-top: 1px solid #3c3c3c; margin-top: 30px; }
-        .empty-state { text-align: center; padding: 60px 20px; }
-        .empty-title { font-size: 16px; color: #00cc66; }
-        .empty-text { color: #858585; }
-        .remediation { margin-top: 15px; padding: 12px; background: #1e3d1e; border: 1px solid #2d5a2d; font-size: 12px; }
-        .remediation strong { color: #00cc66; }
-        .raw-data { background: #1a1a1a; border: 1px solid #3c3c3c; border-radius: 4px; margin-top: 10px; }
-        .raw-data-header { padding: 10px 15px; background: #252526; border-bottom: 1px solid #3c3c3c; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .raw-data-header:hover { background: #2d2d2d; }
-        .raw-data-title { font-size: 11px; color: #858585; text-transform: uppercase; letter-spacing: 1px; }
-        .raw-data-toggle { font-size: 16px; color: #858585; }
-        .raw-data-content { padding: 15px; font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace; font-size: 11px; color: #cccccc; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow: auto; }
-        .raw-data-content.collapsed { display: none; }
-        .evidence-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; margin-top: 10px; }
-        .evidence-item { background: #1a1a1a; border: 1px solid #3c3c3c; padding: 10px; }
-        .evidence-key { font-size: 10px; color: #858585; text-transform: uppercase; margin-bottom: 4px; }
-        .evidence-value { font-size: 12px; color: #cccccc; word-break: break-all; }
-        .request-line { color: #00aaff; }
-        .response-line { color: #00cc66; }
-        .error-line { color: #ff4444; }
-        @media (max-width: 768px) {
-            .grid { grid-template-columns: 1fr; }
-            .finding-header { flex-direction: column; align-items: flex-start; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>DAST Scan Report</h1>
-            <div class="subtitle">{{ target }} • Scanned at {{ timestamp }}</div>
-        </header>
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
 
-        <div class="grid">
-            <div class="card">
-                <div class="card-value critical">{{ severity.critical }}</div>
-                <div class="card-title">Critical</div>
-            </div>
-            <div class="card">
-                <div class="card-value high">{{ severity.high }}</div>
-                <div class="card-title">High</div>
-            </div>
-            <div class="card">
-                <div class="card-value medium">{{ severity.medium }}</div>
-                <div class="card-title">Medium</div>
-            </div>
-            <div class="card">
-                <div class="card-value low">{{ severity.low }}</div>
-                <div class="card-title">Low</div>
-            </div>
-            <div class="card">
-                <div class="card-value">{{ templates }}</div>
-                <div class="card-title">Templates</div>
-            </div>
-            <div class="card">
-                <div class="card-value">{{ "%.1f"|format(duration) }}s</div>
-                <div class="card-title">Duration</div>
-            </div>
+{% block title %}DAST Scan Report - {{ target }}{% endblock %}
+
+{% block header %}
+<header>
+    <h1>DAST Scan Report</h1>
+    <div class="subtitle">{{ target }} • Scanned at {{ timestamp }}</div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="grid">
+    <div class="card">
+        <div class="card-value critical">{{ severity.critical }}</div>
+        <div class="card-title">Critical</div>
+    </div>
+    <div class="card">
+        <div class="card-value high">{{ severity.high }}</div>
+        <div class="card-title">High</div>
+    </div>
+    <div class="card">
+        <div class="card-value medium">{{ severity.medium }}</div>
+        <div class="card-title">Medium</div>
+    </div>
+    <div class="card">
+        <div class="card-value low">{{ severity.low }}</div>
+        <div class="card-title">Low</div>
+    </div>
+    <div class="card">
+        <div class="card-value">{{ templates }}</div>
+        <div class="card-title">Templates</div>
+    </div>
+    <div class="card">
+        <div class="card-value">{{ "%.1f"|format(duration) }}s</div>
+        <div class="card-title">Duration</div>
+    </div>
+</div>
+
+<div class="grid">
+    <div class="card">
+        <div class="card-title">Severity Distribution</div>
+        {{ macros.severity_chart(severity) }}
+    </div>
+    <div class="card">
+        <div class="card-title">OWASP Top 10 2025</div>
+        {{ macros.owasp_chart(owasp) }}
+    </div>
+    <div class="card">
+        <div class="card-title">Evidence Strength</div>
+        {{ macros.evidence_chart(evidence) }}
+    </div>
+</div>
+
+<h2>Filters</h2>
+<div class="filter-section">
+    <div class="filter-group">
+        <span class="filter-label">Severity</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit ({{ severity.critical }})</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="high">High ({{ severity.high }})</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med ({{ severity.medium }})</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="low">Low ({{ severity.low }})</button>
         </div>
-
-        <div class="grid">
-            <div class="card">
-                <div class="card-title">Severity Distribution</div>
-                <div class="chart-container">{{ severity_chart(severity) | safe }}</div>
-            </div>
-            <div class="card">
-                <div class="card-title">OWASP Top 10 2025</div>
-                <div class="chart-container">{{ owasp_chart(owasp) | safe }}</div>
-            </div>
-            <div class="card">
-                <div class="card-title">Evidence Strength</div>
-                <div class="chart-container">{{ evidence_chart(evidence) | safe }}</div>
-            </div>
-        </div>
-
-        <h2 class="section-title">Filters</h2>
-        <div class="filter-section">
-            <div class="filter-group">
-                <span class="filter-label">Severity</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit ({{ severity.critical }})</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="high">High ({{ severity.high }})</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med ({{ severity.medium }})</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="low">Low ({{ severity.low }})</button>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <span class="filter-label">Type</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter-type="scope" data-filter="app">App ({{ app_count }})</button>
-                    <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic ({{ generic_count }})</button>
-                </div>
-            </div>
-
-            {% if owasp_codes %}
-            <div class="filter-group">
-                <span class="filter-label">OWASP</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="owasp" data-filter="all">All</button>
-                    {% for code in owasp_codes %}
-                    <button class="filter-btn" data-filter-type="owasp" data-filter="{{ code }}">{{ code }}</button>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            {% if tags %}
-            <div class="filter-group">
-                <span class="filter-label">Tags</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="tag" data-filter="all">All</button>
-                    {% for tag in tags %}
-                    <button class="filter-btn" data-filter-type="tag" data-filter="{{ tag }}">{{ tag }}</button>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="filter-group">
-                <span class="filter-label">Evidence</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="evidence" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter-type="evidence" data-filter="direct">Direct ({{ evidence.direct }})</button>
-                    <button class="filter-btn" data-filter-type="evidence" data-filter="inference">Inf ({{ evidence.inference }})</button>
-                    <button class="filter-btn" data-filter-type="evidence" data-filter="heuristic">Heur ({{ evidence.heuristic }})</button>
-                </div>
-            </div>
-        </div>
-
-        <h2 class="section-title">Vulnerabilities</h2>
-        <div id="findings-container">
-            {% if findings %}
-                {% for finding in findings %}
-                {% set sev = finding.severity.value|lower %}
-                {% set owasp_parts = finding.owasp_category.value|split(':') %}
-                {% set owasp_code = owasp_parts|first %}
-                {% set is_generic = "generic" in finding.tags or finding.template_id.startswith("generic-") %}
-                <div class="finding-card {{ sev }}"
-                     data-severity="{{ sev }}"
-                     data-owasp="{{ owasp_code }}"
-                     data-evidence="{{ finding.evidence_strength.value }}"
-                     data-scope="{{ "generic" if is_generic else "app" }}"
-                     data-tags="{{ finding.tags|join(",") }}">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-{{ owasp_code|lower }}">{{ owasp_code }}</span>
-                        <span class="badge {{ sev }}">{{ sev }}</span>
-                        <span class="badge {{ finding.evidence_strength.value }}">{{ finding.evidence_strength.value|replace('_', ' ')|title }}</span>
-                        {% if finding.endpoint_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.endpoint_count }} endpoints</span>{% endif %}
-                        {% if finding.payload_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.payload_count }} payloads</span>{% endif %}
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">{{ finding.template_id }}</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">{{ finding.vulnerability_type }}</div>
-                        <div class="finding-url">{{ finding.url }}</div>
-                        <div class="finding-message">{{ finding.message }}</div>
-
-                        {% if finding.request_details or finding.response_details %}
-                        <div class="raw-data">
-                            {% if finding.request_details %}
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Request</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="request-line">{{ finding.request_details }}</span></div>
-                            {% endif %}
-                            {% if finding.response_details %}
-                            <div class="raw-data-header" onclick="toggleRawData(this)">
-                                <span class="raw-data-title">Response</span>
-                                <span class="raw-data-toggle">+</span>
-                            </div>
-                            <div class="raw-data-content collapsed"><span class="response-line">{{ finding.response_details }}</span></div>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-
-                        {% if finding.evidence %}
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            {% for key, value in finding.evidence.items() %}
-                            {% if value %}
-                            <div class="evidence-item">
-                                <div class="evidence-key">{{ key }}</div>
-                                <div class="evidence-value">{{ value }}</div>
-                            </div>
-                            {% endif %}
-                            {% endfor %}
-                        </div>
-                        {% endif %}
-
-                        {% if finding.remediation %}
-                        <div class="remediation"><strong>Remediation:</strong> {{ finding.remediation }}</div>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="empty-state">
-                    <div class="empty-title">No vulnerabilities found</div>
-                    <div class="empty-text">The scan completed successfully without detecting any security issues.</div>
-                </div>
-            {% endif %}
-        </div>
-
-        {% if errors %}
-        <h2 class="section-title">Errors</h2>
-        <div class="card">
-            <div style="color: #ff4444; font-size: 12px;">{{ errors|join('<br>')|safe }}</div>
-        </div>
-        {% endif %}
-
-        <footer>
-            Generated by DAST MVP • {{ timestamp }} • {{ total_findings }} total findings ({{ unique_findings }} unique)
-        </footer>
     </div>
 
-    <script>
-        const activeFilters = { severity: 'all', scope: 'all', owasp: 'all', tag: 'all', evidence: 'all' };
+    <div class="filter-group">
+        <span class="filter-label">Type</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="app">App ({{ app_count }})</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic ({{ generic_count }})</button>
+        </div>
+    </div>
 
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filterType = btn.dataset.filterType;
-                const filterValue = btn.dataset.filter;
+    {% if owasp_codes %}
+    <div class="filter-group">
+        <span class="filter-label">OWASP</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="owasp" data-filter="all">All</button>
+            {% for code in owasp_codes %}
+            <button class="filter-btn" data-filter-type="owasp" data-filter="{{ code }}">{{ code }}</button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
-                btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+    {% if tags %}
+    <div class="filter-group">
+        <span class="filter-label">Tags</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="tag" data-filter="all">All</button>
+            {% for tag in tags %}
+            <button class="filter-btn" data-filter-type="tag" data-filter="{{ tag }}">{{ tag }}</button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
 
-                activeFilters[filterType] = filterValue;
-                applyFilters();
-            });
+    <div class="filter-group">
+        <span class="filter-label">Evidence</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="evidence" data-filter="all">All</button>
+            <button class="filter-btn" data-filter-type="evidence" data-filter="direct">Direct ({{ evidence.direct }})</button>
+            <button class="filter-btn" data-filter-type="evidence" data-filter="inference">Inf ({{ evidence.inference }})</button>
+            <button class="filter-btn" data-filter-type="evidence" data-filter="heuristic">Heur ({{ evidence.heuristic }})</button>
+        </div>
+    </div>
+</div>
+
+<h2>Vulnerabilities</h2>
+<div id="findings-container">
+    {% if findings %}
+        {% for finding in findings %}
+            {{ macros.finding_card(finding) }}
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-title">No vulnerabilities found</div>
+            <div class="empty-text">The scan completed successfully without detecting any security issues.</div>
+        </div>
+    {% endif %}
+</div>
+
+{% if errors %}
+<h2>Errors</h2>
+<div class="card">
+    <div style="color: #ff4444; font-size: 12px;">{{ errors|join('<br>')|safe }}</div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block footer %}
+<footer>
+    Generated by DAST MVP • {{ timestamp }} • {{ total_findings }} total findings ({{ unique_findings }} unique)
+</footer>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const activeFilters = { severity: 'all', scope: 'all', owasp: 'all', tag: 'all', evidence: 'all' };
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filterType = btn.dataset.filterType;
+            const filterValue = btn.dataset.filter;
+
+            btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            activeFilters[filterType] = filterValue;
+            applyFilters();
         });
+    });
 
-        function applyFilters() {
-            document.querySelectorAll('.finding-card').forEach(card => {
-                const matchSeverity = activeFilters.severity === 'all' || card.dataset.severity === activeFilters.severity;
-                const matchScope = activeFilters.scope === 'all' || card.dataset.scope === activeFilters.scope;
-                const matchOwasp = activeFilters.owasp === 'all' || card.dataset.owasp === activeFilters.owasp;
-                const matchEvidence = activeFilters.evidence === 'all' || card.dataset.evidence === activeFilters.evidence;
+    function applyFilters() {
+        document.querySelectorAll('.finding-card').forEach(card => {
+            const matchSeverity = activeFilters.severity === 'all' || card.dataset.severity === activeFilters.severity;
+            const matchScope = activeFilters.scope === 'all' || card.dataset.scope === activeFilters.scope;
+            const matchOwasp = activeFilters.owasp === 'all' || card.dataset.owasp === activeFilters.owasp;
+            const matchEvidence = activeFilters.evidence === 'all' || card.dataset.evidence === activeFilters.evidence;
 
-                let matchTag = activeFilters.tag === 'all';
-                if (!matchTag) {
-                    const cardTags = card.dataset.tags.split(',');
-                    matchTag = cardTags.includes(activeFilters.tag);
-                }
-
-                const visible = matchSeverity && matchScope && matchOwasp && matchEvidence && matchTag;
-                card.style.display = visible ? 'block' : 'none';
-            });
-        }
-
-        function toggleRawData(header) {
-            const content = header.nextElementSibling;
-            const toggle = header.querySelector('.raw-data-toggle');
-            if (content.classList.contains('collapsed')) {
-                content.classList.remove('collapsed');
-                toggle.textContent = '-';
-            } else {
-                content.classList.add('collapsed');
-                toggle.textContent = '+';
+            let matchTag = activeFilters.tag === 'all';
+            if (!matchTag) {
+                const cardTags = card.dataset.tags.split(',');
+                matchTag = cardTags.includes(activeFilters.tag);
             }
+
+            const visible = matchSeverity && matchScope && matchOwasp && matchEvidence && matchTag;
+            card.style.display = visible ? 'block' : 'none';
+        });
+    }
+
+    function toggleRawData(header) {
+        const content = header.nextElementSibling;
+        const toggle = header.querySelector('.raw-data-toggle');
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            toggle.textContent = '-';
+        } else {
+            content.classList.add('collapsed');
+            toggle.textContent = '+';
         }
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}

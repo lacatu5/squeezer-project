@@ -5,9 +5,9 @@ info:
   owasp_category: A01:2025
   severity: critical
   tags:
-    - business-logic
-    - mass-assignment
+    - input-validation
     - privilege-escalation
+    - access-control
 
 requests:
   - name: Register with admin role

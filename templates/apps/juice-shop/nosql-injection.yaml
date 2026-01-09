@@ -6,9 +6,9 @@ info:
   severity: critical
   description: Tests for NoSQL injection vulnerabilities using MongoDB operators
   tags:
-    - juice-shop
     - nosql
     - injection
+    - access-control
 
 requests:
   - path: /rest/products/search?q={"$ne":""}

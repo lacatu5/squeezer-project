@@ -10,68 +10,6 @@ _env = Environment(
     loader=FileSystemLoader(Path(__file__).parent / "templates"),
     autoescape=select_autoescape(["html"]),
 )
-
-
-def _severity_chart(severity):
-    max_val = max((v for v in severity.values() if v > 0), default=1)
-    colors = {"critical": "#ff4444", "high": "#ff8800", "medium": "#ffcc00", "low": "#00cc66"}
-
-    bars = []
-    for key, label in [("critical", "Crit"), ("high", "High"), ("medium", "Med"), ("low", "Low")]:
-        value = severity.get(key, 0)
-        height = max(16, min(140, (value / max_val) * 140)) if value else 4
-        color = colors.get(key, "#666")
-        bars.append(f'''
-            <div class="bar">
-                <div class="bar-value" style="color: {color}">{value}</div>
-                <div class="bar-fill" style="height: {height}px; background: {color};"></div>
-                <div class="bar-label">{label}</div>
-            </div>''')
-    return "".join(bars)
-
-
-def _owasp_chart(owasp_data):
-    if not owasp_data:
-        return '<div style="color: #858585; text-align: center; padding: 40px;">No OWASP findings</div>'
-
-    max_val = max((d["count"] for d in owasp_data), default=1)
-
-    bars = []
-    for item in owasp_data:
-        code = item["code"]
-        value = item["count"]
-        height = max(16, min(140, (value / max_val) * 140))
-        color = "#ff4444" if code in ["A01", "A05", "A07"] else "#ff8800" if code in ["A02", "A03", "A04", "A06"] else "#ffcc00"
-        bars.append(f'''
-            <div class="bar">
-                <div class="bar-value" style="color: {color}">{value}</div>
-                <div class="bar-fill" style="height: {height}px; background: {color};"></div>
-                <div class="bar-label">{code}</div>
-            </div>''')
-    return "".join(bars)
-
-
-def _evidence_chart(evidence_data):
-    total = sum(evidence_data.values()) or 1
-    colors = {"direct": "#00cc66", "inference": "#ff8800", "heuristic": "#00aaff"}
-
-    bars = []
-    for key, label in [("direct", "Direct"), ("inference", "Inf"), ("heuristic", "Heur")]:
-        value = evidence_data.get(key, 0)
-        height = max(16, min(140, (value / total) * 140)) if value else 4
-        color = colors.get(key, "#666")
-        bars.append(f'''
-            <div class="bar">
-                <div class="bar-value" style="color: {color}">{value}</div>
-                <div class="bar-fill" style="height: {height}px; background: {color};"></div>
-                <div class="bar-label">{label}</div>
-            </div>''')
-    return "".join(bars)
-
-
-_env.globals['severity_chart'] = _severity_chart
-_env.globals['owasp_chart'] = _owasp_chart
-_env.globals['evidence_chart'] = _evidence_chart
 _env.filters['split'] = lambda s, sep=None: s.split(sep) if s else []
 
 

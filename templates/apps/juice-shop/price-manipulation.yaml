@@ -6,8 +6,8 @@ info:
   severity: critical
   tags:
     - business-logic
-    - price-manipulation
     - payment-bypass
+    - input-validation
 
 requests:
   - name: Checkout with modified total

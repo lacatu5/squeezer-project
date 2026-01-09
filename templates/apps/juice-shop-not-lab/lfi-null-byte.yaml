@@ -6,9 +6,9 @@ info:
   severity: high
   description: Tests for LFI vulnerabilities using null byte and path traversal
   tags:
-    - juice-shop
     - lfi
     - path-traversal
+    - info-disclosure
 
 requests:
   - path: /ftp/package.json.bak%2500.md

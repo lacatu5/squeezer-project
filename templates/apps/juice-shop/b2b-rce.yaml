@@ -6,9 +6,9 @@ info:
   severity: critical
   description: Tests for Remote Code Execution in B2B order processing
   tags:
-    - juice-shop
     - rce
     - code-injection
+    - injection
 
 requests:
   - path: /b2b/v2/orders

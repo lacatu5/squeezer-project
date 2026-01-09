@@ -7,7 +7,7 @@ info:
   tags:
     - idor
     - access-control
-    - business-logic
+    - data-exfiltration
 
 requests:
   - name: Access admin profile

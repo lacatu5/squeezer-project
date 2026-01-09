@@ -1,0 +1,128 @@
+{% macro bar_chart(bars, chart_class='') -%}
+<div class="chart-container {{ chart_class }}">
+  {% for label, value, height, color in bars %}
+  <div class="bar">
+    <div class="bar-value" style="color: {{ color }}">{{ value }}</div>
+    <div class="bar-fill" style="height: {{ height }}px; background: {{ color }};"></div>
+    <div class="bar-label">{{ label }}</div>
+  </div>
+  {% endfor %}
+</div>
+{%- endmacro %}
+
+{% macro severity_chart(severity) -%}
+  {% set max_val = [severity.critical, severity.high, severity.medium, severity.low]|max|default(1) %}
+  {% set colors = {'critical': '#ff4444', 'high': '#ff8800', 'medium': '#ffcc00', 'low': '#00cc66'} %}
+  {% set bars = [] %}
+  {% for key, label in [('critical', 'Crit'), ('high', 'High'), ('medium', 'Med'), ('low', 'Low')] %}
+    {% set value = severity[key] %}
+    {% if value > 0 %}
+      {% set height = (16, (value / max_val * 140)|round|int)|max %}
+    {% else %}
+      {% set height = 4 %}
+    {% endif %}
+    {% set _ = bars.append((label, value, height, colors[key])) %}
+  {% endfor %}
+  {{ bar_chart(bars) }}
+{%- endmacro %}
+
+{% macro owasp_chart(owasp_data) -%}
+  {% if not owasp_data %}
+    <div style="color: #858585; text-align: center; padding: 40px;">No OWASP findings</div>
+  {% else %}
+    {% set max_val = owasp_data|map(attribute='count')|max|default(1) %}
+    {% set bars = [] %}
+    {% for item in owasp_data %}
+      {% set height = (16, (item.count / max_val * 140)|round|int)|max %}
+      {% if item.code in ['A01', 'A05', 'A07'] %}
+        {% set color = '#ff4444' %}
+      {% elif item.code in ['A02', 'A03', 'A04', 'A06'] %}
+        {% set color = '#ff8800' %}
+      {% else %}
+        {% set color = '#ffcc00' %}
+      {% endif %}
+      {% set _ = bars.append((item.code, item.count, height, color)) %}
+    {% endfor %}
+    {{ bar_chart(bars) }}
+  {% endif %}
+{%- endmacro %}
+
+{% macro evidence_chart(evidence_data) -%}
+  {% set total = [evidence_data.direct, evidence_data.inference, evidence_data.heuristic]|sum|default(1) %}
+  {% set colors = {'direct': '#00cc66', 'inference': '#ff8800', 'heuristic': '#00aaff'} %}
+  {% set bars = [] %}
+  {% for key, label in [('direct', 'Direct'), ('inference', 'Inf'), ('heuristic', 'Heur')] %}
+    {% set value = evidence_data[key] %}
+    {% if value > 0 %}
+      {% set height = (16, (value / total * 140)|round|int)|max %}
+    {% else %}
+      {% set height = 4 %}
+    {% endif %}
+    {% set _ = bars.append((label, value, height, colors[key])) %}
+  {% endfor %}
+  {{ bar_chart(bars) }}
+{%- endmacro %}
+
+{% macro finding_card(finding) -%}
+  {% set sev = finding.severity.value|lower %}
+  {% set owasp_parts = finding.owasp_category.value|split(':') %}
+  {% set owasp_code = owasp_parts|first %}
+  {% set is_generic = "generic" in finding.tags or finding.template_id.startswith("generic-") %}
+  <div class="finding-card {{ sev }}"
+       data-severity="{{ sev }}"
+       data-owasp="{{ owasp_code }}"
+       data-evidence="{{ finding.evidence_strength.value }}"
+       data-scope="{{ "generic" if is_generic else "app" }}"
+       data-tags="{{ finding.tags|join(",") }}">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-{{ owasp_code|lower }}">{{ owasp_code }}</span>
+      <span class="badge {{ sev }}">{{ sev }}</span>
+      <span class="badge {{ finding.evidence_strength.value }}">{{ finding.evidence_strength.value|replace('_', ' ')|title }}</span>
+      {% if finding.endpoint_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.endpoint_count }} endpoints</span>{% endif %}
+      {% if finding.payload_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.payload_count }} payloads</span>{% endif %}
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">{{ finding.template_id }}</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">{{ finding.vulnerability_type }}</div>
+      <div class="finding-url">{{ finding.url }}</div>
+      <div class="finding-message">{{ finding.message }}</div>
+
+      {% if finding.request_details or finding.response_details %}
+      <div class="raw-data">
+        {% if finding.request_details %}
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">{{ finding.request_details }}</span></div>
+        {% endif %}
+        {% if finding.response_details %}
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Response</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="response-line">{{ finding.response_details }}</span></div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if finding.evidence %}
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        {% for key, value in finding.evidence.items() %}
+        {% if value %}
+        <div class="evidence-item">
+          <div class="evidence-key">{{ key }}</div>
+          <div class="evidence-value">{{ value }}</div>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% if finding.remediation %}
+      <div class="remediation"><strong>Remediation:</strong> {{ finding.remediation }}</div>
+      {% endif %}
+    </div>
+  </div>
+{%- endmacro %}

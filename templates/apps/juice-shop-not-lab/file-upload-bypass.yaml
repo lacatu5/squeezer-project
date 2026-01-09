@@ -6,9 +6,9 @@ info:
   severity: high
   description: Tests for file upload validation bypass vulnerabilities
   tags:
-    - juice-shop
     - file-upload
-    - bypass
+    - input-validation
+    - misconfiguration
 
 requests:
   - path: /file-upload

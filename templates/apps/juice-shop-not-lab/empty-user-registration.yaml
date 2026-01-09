@@ -6,9 +6,9 @@ info:
   severity: medium
   description: Tests if application allows registration with empty/null values
   tags:
-    - juice-shop
     - authentication
-    - validation-bypass
+    - input-validation
+    - authentication-bypass
 
 requests:
   - path: /api/Users

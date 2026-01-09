@@ -10,6 +10,8 @@
         .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
         header { background: #252526; border: 1px solid #3c3c3c; padding: 20px; margin-bottom: 20px; }
         h1 { font-size: 20px; color: #fff; margin-bottom: 5px; letter-spacing: -0.5px; }
+        h2 { font-size: 11px; color: #858585; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; padding-bottom: 5px; border-bottom: 1px solid #3c3c3c; }
+        h3 { font-size: 11px; color: #858585; text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; padding-bottom: 5px; border-bottom: 1px solid #3c3c3c; }
         .subtitle { color: #666; font-size: 12px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .card { background: #252526; border: 1px solid #3c3c3c; padding: 15px; }
@@ -83,1144 +85,1253 @@
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>DAST Scan Report</h1>
-            <div class="subtitle">http://localhost:3000 • Scanned at 2026-01-12 02:51:55</div>
-        </header>
-
-        <div class="grid">
-            <div class="card">
-                <div class="card-value critical">6</div>
-                <div class="card-title">Critical</div>
-            </div>
-            <div class="card">
-                <div class="card-value high">12</div>
-                <div class="card-title">High</div>
-            </div>
-            <div class="card">
-                <div class="card-value medium">8</div>
-                <div class="card-title">Medium</div>
-            </div>
-            <div class="card">
-                <div class="card-value low">0</div>
-                <div class="card-title">Low</div>
-            </div>
-            <div class="card">
-                <div class="card-value">13</div>
-                <div class="card-title">Templates</div>
-            </div>
-            <div class="card">
-                <div class="card-value">5.0s</div>
-                <div class="card-title">Duration</div>
-            </div>
-        </div>
-
-        <div class="grid">
-            <div class="card">
-                <div class="card-title">Severity Distribution</div>
-                <div class="chart-container">
-            <div class="bar">
-                <div class="bar-value" style="color: #ff4444">6</div>
-                <div class="bar-fill" style="height: 70.0px; background: #ff4444;"></div>
-                <div class="bar-label">Crit</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #ff8800">12</div>
-                <div class="bar-fill" style="height: 140px; background: #ff8800;"></div>
-                <div class="bar-label">High</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #ffcc00">8</div>
-                <div class="bar-fill" style="height: 93.33333333333333px; background: #ffcc00;"></div>
-                <div class="bar-label">Med</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #00cc66">0</div>
-                <div class="bar-fill" style="height: 4px; background: #00cc66;"></div>
-                <div class="bar-label">Low</div>
-            </div></div>
-            </div>
-            <div class="card">
-                <div class="card-title">OWASP Top 10 2025</div>
-                <div class="chart-container">
-            <div class="bar">
-                <div class="bar-value" style="color: #ff4444">13</div>
-                <div class="bar-fill" style="height: 140px; background: #ff4444;"></div>
-                <div class="bar-label">A01</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #ff8800">3</div>
-                <div class="bar-fill" style="height: 32.30769230769231px; background: #ff8800;"></div>
-                <div class="bar-label">A02</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #ff4444">5</div>
-                <div class="bar-fill" style="height: 53.84615384615385px; background: #ff4444;"></div>
-                <div class="bar-label">A05</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #ff8800">2</div>
-                <div class="bar-fill" style="height: 21.53846153846154px; background: #ff8800;"></div>
-                <div class="bar-label">A06</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #ff4444">3</div>
-                <div class="bar-fill" style="height: 32.30769230769231px; background: #ff4444;"></div>
-                <div class="bar-label">A07</div>
-            </div></div>
-            </div>
-            <div class="card">
-                <div class="card-title">Evidence Strength</div>
-                <div class="chart-container">
-            <div class="bar">
-                <div class="bar-value" style="color: #00cc66">13</div>
-                <div class="bar-fill" style="height: 121.33333333333334px; background: #00cc66;"></div>
-                <div class="bar-label">Direct</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #ff8800">1</div>
-                <div class="bar-fill" style="height: 16px; background: #ff8800;"></div>
-                <div class="bar-label">Inf</div>
-            </div>
-            <div class="bar">
-                <div class="bar-value" style="color: #00aaff">1</div>
-                <div class="bar-fill" style="height: 16px; background: #00aaff;"></div>
-                <div class="bar-label">Heur</div>
-            </div></div>
-            </div>
-        </div>
-
-        <h2 class="section-title">Filters</h2>
-        <div class="filter-section">
-            <div class="filter-group">
-                <span class="filter-label">Severity</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (6)</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="high">High (12)</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med (8)</button>
-                    <button class="filter-btn" data-filter-type="severity" data-filter="low">Low (0)</button>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <span class="filter-label">Type</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter-type="scope" data-filter="app">App (13)</button>
-                    <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic (2)</button>
-                </div>
-            </div>
-
-            
-            <div class="filter-group">
-                <span class="filter-label">OWASP</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="owasp" data-filter="all">All</button>
-                    
-                    <button class="filter-btn" data-filter-type="owasp" data-filter="A01">A01</button>
-                    
-                    <button class="filter-btn" data-filter-type="owasp" data-filter="A02">A02</button>
-                    
-                    <button class="filter-btn" data-filter-type="owasp" data-filter="A05">A05</button>
-                    
-                    <button class="filter-btn" data-filter-type="owasp" data-filter="A06">A06</button>
-                    
-                    <button class="filter-btn" data-filter-type="owasp" data-filter="A07">A07</button>
-                    
-                </div>
-            </div>
-            
-
-            
-            <div class="filter-group">
-                <span class="filter-label">Tags</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="tag" data-filter="all">All</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="abuse">abuse</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="access-control">access-control</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="authentication">authentication</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="authorization">authorization</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="business-logic">business-logic</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="bypass">bypass</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="code-injection">code-injection</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="dos">dos</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="file-upload">file-upload</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="generic">generic</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="idor">idor</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="input-validation">input-validation</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="juice-shop">juice-shop</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="lfi">lfi</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="mass-assignment">mass-assignment</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="path-traversal">path-traversal</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="privilege-escalation">privilege-escalation</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="rate-limit">rate-limit</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="rce">rce</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="refund-abuse">refund-abuse</button>
-                    
-                    <button class="filter-btn" data-filter-type="tag" data-filter="validation-bypass">validation-bypass</button>
-                    
-                </div>
-            </div>
-            
-
-            <div class="filter-group">
-                <span class="filter-label">Evidence</span>
-                <div class="filter-bar">
-                    <button class="filter-btn active" data-filter-type="evidence" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter-type="evidence" data-filter="direct">Direct (13)</button>
-                    <button class="filter-btn" data-filter-type="evidence" data-filter="inference">Inf (1)</button>
-                    <button class="filter-btn" data-filter-type="evidence" data-filter="heuristic">Heur (1)</button>
-                </div>
-            </div>
-        </div>
-
-        <h2 class="section-title">Vulnerabilities</h2>
-        <div id="findings-container">
-            
-                
-                
-                
-                
-                
-                <div class="finding-card medium"
-                     data-severity="medium"
-                     data-owasp="A06"
-                     data-evidence="heuristic"
-                     data-scope="generic"
-                     data-tags="rate-limit,dos,abuse,generic">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a06">A06</span>
-                        <span class="badge medium">medium</span>
-                        <span class="badge heuristic">Heuristic</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">generic-rate-limit</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">MISSING_RATE_LIMIT_HEADERS</div>
-                        <div class="finding-url">http://localhost:3000/</div>
-                        <div class="finding-message">No rate limit headers present - potential DoS vulnerability</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;found&#39;: [], &#39;content_length&#39;: 552}, &#39;positive_matchers&#39;: &#39;0/0&#39;, &#39;negative_matchers&#39;: &#39;1/1&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">low</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                        <div class="remediation"><strong>Remediation:</strong> Implement rate limiting and expose rate limit headers</div>
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card medium"
-                     data-severity="medium"
-                     data-owasp="A06"
-                     data-evidence="direct_observation"
-                     data-scope="generic"
-                     data-tags="rate-limit,dos,abuse,generic">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a06">A06</span>
-                        <span class="badge medium">medium</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">generic-rate-limit</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">NO_RATE_LIMITING</div>
-                        <div class="finding-url">http://localhost:3000/</div>
-                        <div class="finding-message">No rate limiting detected - endpoint accepts excessive requests</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [429, 503]}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">medium</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                        <div class="remediation"><strong>Remediation:</strong> Implement rate limiting to prevent abuse and DoS</div>
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card critical"
-                     data-severity="critical"
-                     data-owasp="A01"
-                     data-evidence="inference"
-                     data-scope="app"
-                     data-tags="business-logic,mass-assignment,privilege-escalation">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge critical">critical</span>
-                        <span class="badge inference">Inference</span>
-                        
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-mass-assignment</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">MASS_ASSIGNMENT</div>
-                        <div class="finding-url">http://localhost:3000/api/Users/</div>
-                        <div class="finding-message">User registration accepts role parameter - privilege escalation to admin possible</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">201</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;selector&#39;: &#39;$.data.role&#39;, &#39;extracted&#39;: &#39;admin&#39;, &#39;expected&#39;: &#39;admin&#39;}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">low</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                        <div class="remediation"><strong>Remediation:</strong> Use allow-list for accepted fields; never bind user input directly to internal fields like role</div>
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card critical"
-                     data-severity="critical"
-                     data-owasp="A05"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,rce,code-injection">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a05">A05</span>
-                        <span class="badge critical">critical</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-b2b-rce</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_b2b_rce</div>
-                        <div class="finding-url">http://localhost:3000/b2b/v2/orders</div>
-                        <div class="finding-message">Tests for Remote Code Execution in B2B order processing</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200, 401]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;orderno&#39;], &#39;content_length&#39;: 86}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A01"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="idor,access-control,business-logic">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">2 endpoints</span>
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">3 payloads</span>
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-user-idor</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">INSECURE_DIRECT_OBJECT_REFERENCE</div>
-                        <div class="finding-url">http://localhost:3000/api/Users/1</div>
-                        <div class="finding-message">Admin user profile accessible via sequential ID enumeration</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;selector&#39;: &#39;$.data.role&#39;, &#39;extracted&#39;: &#39;admin&#39;, &#39;expected&#39;: None}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                        <div class="remediation"><strong>Remediation:</strong> Implement ownership check comparing requested user ID with authenticated user&#39;s ID</div>
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card medium"
-                     data-severity="medium"
-                     data-owasp="A07"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,authentication,validation-bypass">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a07">A07</span>
-                        <span class="badge medium">medium</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-empty-user-registration</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_empty_user_registration</div>
-                        <div class="finding-url">http://localhost:3000/api/Users</div>
-                        <div class="finding-message">Tests if application allows registration with empty/null values</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">201</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 201, &#39;expected&#39;: [200, 201]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;], &#39;content_length&#39;: 291}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A01"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,file-upload,bypass">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-file-upload-bypass</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_file_upload_bypass</div>
-                        <div class="finding-url">http://localhost:3000/api/Complaints</div>
-                        <div class="finding-message">Tests for file upload validation bypass vulnerabilities</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">201</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 201, &#39;expected&#39;: [200, 201]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;], &#39;content_length&#39;: 184}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A02"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="business-logic,input-validation,refund-abuse">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a02">A02</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-negative-quantity</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">NEGATIVE_QUANTITY</div>
-                        <div class="finding-url">http://localhost:3000/api/BasketItems/</div>
-                        <div class="finding-message">Server accepts negative quantity values - allows total manipulation and refund abuse</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200, 201]}, &#39;matcher_1&#39;: {&#39;selector&#39;: &#39;$.data.quantity&#39;, &#39;extracted&#39;: -100, &#39;expected&#39;: None}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                        <div class="remediation"><strong>Remediation:</strong> Validate quantity is a positive integer (&gt;= 1) on server side</div>
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A01"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,idor,authorization">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_basket_access</div>
-                        <div class="finding-url">http://localhost:3000/rest/basket/1</div>
-                        <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;, &#39;products&#39;], &#39;content_length&#39;: 1310}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A01"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,idor,authorization">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_basket_access</div>
-                        <div class="finding-url">http://localhost:3000/rest/basket/2</div>
-                        <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;, &#39;products&#39;], &#39;content_length&#39;: 557}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A01"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,idor,authorization">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_basket_access</div>
-                        <div class="finding-url">http://localhost:3000/rest/basket/3</div>
-                        <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;, &#39;products&#39;], &#39;content_length&#39;: 557}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A01"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,idor,authorization">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_basket_access</div>
-                        <div class="finding-url">http://localhost:3000/api/BasketItems</div>
-                        <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">medium</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card medium"
-                     data-severity="medium"
-                     data-owasp="A01"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="idor,access-control,business-logic">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a01">A01</span>
-                        <span class="badge medium">medium</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">3 endpoints</span>
-                        <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-feedback-idor</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">INSECURE_DIRECT_OBJECT_REFERENCE</div>
-                        <div class="finding-url">http://localhost:3000/api/Feedbacks/1</div>
-                        <div class="finding-message">Feedback from other users accessible via sequential ID enumeration</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;selector&#39;: &#39;$.data&#39;, &#39;extracted&#39;: {&#39;UserId&#39;: 1, &#39;id&#39;: 1, &#39;comment&#39;: &#39;I love this shop! Best products in town! Highly recommended! (***in@juice-sh.op)&#39;, &#39;rating&#39;: 5, &#39;createdAt&#39;: &#39;2026-01-12T01:51:45.523Z&#39;, &#39;updatedAt&#39;: &#39;2026-01-12T01:51:45.523Z&#39;}, &#39;expected&#39;: None}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                        <div class="remediation"><strong>Remediation:</strong> Verify feedback ownership before allowing access - check UserId matches authenticated user</div>
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A05"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,lfi,path-traversal">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a05">A05</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-lfi-null-byte</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_lfi_null_byte</div>
-                        <div class="finding-url">http://localhost:3000/ftp/package.json.bak%2500.md</div>
-                        <div class="finding-message">Tests for LFI vulnerabilities using null byte and path traversal</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;juice-shop&#39;, &#39;dependencies&#39;], &#39;content_length&#39;: 4289}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">high</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-                
-                
-                
-                
-                <div class="finding-card high"
-                     data-severity="high"
-                     data-owasp="A05"
-                     data-evidence="direct_observation"
-                     data-scope="app"
-                     data-tags="juice-shop,lfi,path-traversal">
-                    <div class="finding-header">
-                        <span class="owasp-badge owasp-a05">A05</span>
-                        <span class="badge high">high</span>
-                        <span class="badge direct_observation">Direct Observation</span>
-                        
-                        
-                        <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-lfi-null-byte</span>
-                    </div>
-                    <div class="finding-body">
-                        <div class="finding-title">juice_shop_lfi_null_byte</div>
-                        <div class="finding-url">http://localhost:3000/ftp/coupons_2013.md.bak%2500.md</div>
-                        <div class="finding-message">Tests for LFI vulnerabilities using null byte and path traversal</div>
-
-                        
-
-                        
-                        <h3 class="section-title">Evidence</h3>
-                        <div class="evidence-grid">
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">status_code</div>
-                                <div class="evidence-value">200</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">matcher_evidence</div>
-                                <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-                            </div>
-                            
-                            
-                            
-                            <div class="evidence-item">
-                                <div class="evidence-key">confidence</div>
-                                <div class="evidence-value">medium</div>
-                            </div>
-                            
-                            
-                        </div>
-                        
-
-                        
-                    </div>
-                </div>
-                
-            
-        </div>
+        
+<header>
+    <h1>DAST Scan Report</h1>
+    <div class="subtitle">http://localhost:3000 • Scanned at 2026-01-12 03:00:22</div>
+</header>
 
         
+<div class="grid">
+    <div class="card">
+        <div class="card-value critical">6</div>
+        <div class="card-title">Critical</div>
+    </div>
+    <div class="card">
+        <div class="card-value high">12</div>
+        <div class="card-title">High</div>
+    </div>
+    <div class="card">
+        <div class="card-value medium">8</div>
+        <div class="card-title">Medium</div>
+    </div>
+    <div class="card">
+        <div class="card-value low">0</div>
+        <div class="card-title">Low</div>
+    </div>
+    <div class="card">
+        <div class="card-value">13</div>
+        <div class="card-title">Templates</div>
+    </div>
+    <div class="card">
+        <div class="card-value">5.0s</div>
+        <div class="card-title">Duration</div>
+    </div>
+</div>
 
-        <footer>
-            Generated by DAST MVP • 2026-01-12 02:51:55 • 26 total findings (15 unique)
-        </footer>
+<div class="grid">
+    <div class="card">
+        <div class="card-title">Severity Distribution</div>
+        
+  
+  
+  
+    
+    
+      
+    
+    
+  
+    
+    
+      
+    
+    
+  
+    
+    
+      
+    
+    
+  
+    
+    
+      
+    
+    
+  
+  <div class="chart-container ">
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff4444">6</div>
+    <div class="bar-fill" style="height: 70px; background: #ff4444;"></div>
+    <div class="bar-label">Crit</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff8800">12</div>
+    <div class="bar-fill" style="height: 140px; background: #ff8800;"></div>
+    <div class="bar-label">High</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ffcc00">8</div>
+    <div class="bar-fill" style="height: 93px; background: #ffcc00;"></div>
+    <div class="bar-label">Med</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #00cc66">0</div>
+    <div class="bar-fill" style="height: 4px; background: #00cc66;"></div>
+    <div class="bar-label">Low</div>
+  </div>
+  
+</div>
+    </div>
+    <div class="card">
+        <div class="card-title">OWASP Top 10 2025</div>
+        
+    
+    
+    
+      
+      
+        
+      
+      
+    
+      
+      
+        
+      
+      
+    
+      
+      
+        
+      
+      
+    
+      
+      
+        
+      
+      
+    
+      
+      
+        
+      
+      
+    
+    <div class="chart-container ">
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff4444">13</div>
+    <div class="bar-fill" style="height: 140px; background: #ff4444;"></div>
+    <div class="bar-label">A01</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff8800">3</div>
+    <div class="bar-fill" style="height: 32px; background: #ff8800;"></div>
+    <div class="bar-label">A02</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff4444">5</div>
+    <div class="bar-fill" style="height: 54px; background: #ff4444;"></div>
+    <div class="bar-label">A05</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff8800">2</div>
+    <div class="bar-fill" style="height: 22px; background: #ff8800;"></div>
+    <div class="bar-label">A06</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff4444">3</div>
+    <div class="bar-fill" style="height: 32px; background: #ff4444;"></div>
+    <div class="bar-label">A07</div>
+  </div>
+  
+</div>
+  
+    </div>
+    <div class="card">
+        <div class="card-title">Evidence Strength</div>
+        
+  
+  
+  
+    
+    
+      
+    
+    
+  
+    
+    
+      
+    
+    
+  
+    
+    
+      
+    
+    
+  
+  <div class="chart-container ">
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #00cc66">13</div>
+    <div class="bar-fill" style="height: 121px; background: #00cc66;"></div>
+    <div class="bar-label">Direct</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff8800">1</div>
+    <div class="bar-fill" style="height: 16px; background: #ff8800;"></div>
+    <div class="bar-label">Inf</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #00aaff">1</div>
+    <div class="bar-fill" style="height: 16px; background: #00aaff;"></div>
+    <div class="bar-label">Heur</div>
+  </div>
+  
+</div>
+    </div>
+</div>
+
+<h2>Filters</h2>
+<div class="filter-section">
+    <div class="filter-group">
+        <span class="filter-label">Severity</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (6)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="high">High (12)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med (8)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="low">Low (0)</button>
+        </div>
     </div>
 
-    <script>
-        const activeFilters = { severity: 'all', scope: 'all', owasp: 'all', tag: 'all', evidence: 'all' };
+    <div class="filter-group">
+        <span class="filter-label">Type</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="app">App (13)</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic (2)</button>
+        </div>
+    </div>
 
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filterType = btn.dataset.filterType;
-                const filterValue = btn.dataset.filter;
+    
+    <div class="filter-group">
+        <span class="filter-label">OWASP</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="owasp" data-filter="all">All</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A01">A01</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A02">A02</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A05">A05</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A06">A06</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A07">A07</button>
+            
+        </div>
+    </div>
+    
 
-                btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+    
+    <div class="filter-group">
+        <span class="filter-label">Tags</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="tag" data-filter="all">All</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="abuse">abuse</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="access-control">access-control</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="authentication">authentication</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="authorization">authorization</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="business-logic">business-logic</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="bypass">bypass</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="code-injection">code-injection</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="dos">dos</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="file-upload">file-upload</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="generic">generic</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="idor">idor</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="input-validation">input-validation</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="juice-shop">juice-shop</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="lfi">lfi</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="mass-assignment">mass-assignment</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="path-traversal">path-traversal</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="privilege-escalation">privilege-escalation</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="rate-limit">rate-limit</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="rce">rce</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="refund-abuse">refund-abuse</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="validation-bypass">validation-bypass</button>
+            
+        </div>
+    </div>
+    
 
-                activeFilters[filterType] = filterValue;
-                applyFilters();
-            });
+    <div class="filter-group">
+        <span class="filter-label">Evidence</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="evidence" data-filter="all">All</button>
+            <button class="filter-btn" data-filter-type="evidence" data-filter="direct">Direct (13)</button>
+            <button class="filter-btn" data-filter-type="evidence" data-filter="inference">Inf (1)</button>
+            <button class="filter-btn" data-filter-type="evidence" data-filter="heuristic">Heur (1)</button>
+        </div>
+    </div>
+</div>
+
+<h2>Vulnerabilities</h2>
+<div id="findings-container">
+    
+        
+            
+  
+  
+  
+  <div class="finding-card medium"
+       data-severity="medium"
+       data-owasp="A06"
+       data-evidence="heuristic"
+       data-scope="generic"
+       data-tags="rate-limit,dos,abuse,generic">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a06">A06</span>
+      <span class="badge medium">medium</span>
+      <span class="badge heuristic">Heuristic</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">generic-rate-limit</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">MISSING_RATE_LIMIT_HEADERS</div>
+      <div class="finding-url">http://localhost:3000/</div>
+      <div class="finding-message">No rate limit headers present - potential DoS vulnerability</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;found&#39;: [], &#39;content_length&#39;: 552}, &#39;positive_matchers&#39;: &#39;0/0&#39;, &#39;negative_matchers&#39;: &#39;1/1&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">low</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Implement rate limiting and expose rate limit headers</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card medium"
+       data-severity="medium"
+       data-owasp="A06"
+       data-evidence="direct_observation"
+       data-scope="generic"
+       data-tags="rate-limit,dos,abuse,generic">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a06">A06</span>
+      <span class="badge medium">medium</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">generic-rate-limit</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">NO_RATE_LIMITING</div>
+      <div class="finding-url">http://localhost:3000/</div>
+      <div class="finding-message">No rate limiting detected - endpoint accepts excessive requests</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [429, 503]}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">medium</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Implement rate limiting to prevent abuse and DoS</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card critical"
+       data-severity="critical"
+       data-owasp="A01"
+       data-evidence="inference"
+       data-scope="app"
+       data-tags="business-logic,mass-assignment,privilege-escalation">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge critical">critical</span>
+      <span class="badge inference">Inference</span>
+      
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-mass-assignment</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">MASS_ASSIGNMENT</div>
+      <div class="finding-url">http://localhost:3000/api/Users/</div>
+      <div class="finding-message">User registration accepts role parameter - privilege escalation to admin possible</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">201</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;selector&#39;: &#39;$.data.role&#39;, &#39;extracted&#39;: &#39;admin&#39;, &#39;expected&#39;: &#39;admin&#39;}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">low</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Use allow-list for accepted fields; never bind user input directly to internal fields like role</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card critical"
+       data-severity="critical"
+       data-owasp="A05"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,rce,code-injection">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a05">A05</span>
+      <span class="badge critical">critical</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-b2b-rce</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_b2b_rce</div>
+      <div class="finding-url">http://localhost:3000/b2b/v2/orders</div>
+      <div class="finding-message">Tests for Remote Code Execution in B2B order processing</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200, 401]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;orderno&#39;], &#39;content_length&#39;: 86}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A01"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="idor,access-control,business-logic">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">2 endpoints</span>
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">3 payloads</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-user-idor</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">INSECURE_DIRECT_OBJECT_REFERENCE</div>
+      <div class="finding-url">http://localhost:3000/api/Users/1</div>
+      <div class="finding-message">Admin user profile accessible via sequential ID enumeration</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;selector&#39;: &#39;$.data.role&#39;, &#39;extracted&#39;: &#39;admin&#39;, &#39;expected&#39;: None}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Implement ownership check comparing requested user ID with authenticated user&#39;s ID</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card medium"
+       data-severity="medium"
+       data-owasp="A07"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,authentication,validation-bypass">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a07">A07</span>
+      <span class="badge medium">medium</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-empty-user-registration</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_empty_user_registration</div>
+      <div class="finding-url">http://localhost:3000/api/Users</div>
+      <div class="finding-message">Tests if application allows registration with empty/null values</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">201</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 201, &#39;expected&#39;: [200, 201]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;], &#39;content_length&#39;: 291}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A01"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,file-upload,bypass">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-file-upload-bypass</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_file_upload_bypass</div>
+      <div class="finding-url">http://localhost:3000/api/Complaints</div>
+      <div class="finding-message">Tests for file upload validation bypass vulnerabilities</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">201</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 201, &#39;expected&#39;: [200, 201]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;], &#39;content_length&#39;: 184}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A02"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="business-logic,input-validation,refund-abuse">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a02">A02</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-negative-quantity</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">NEGATIVE_QUANTITY</div>
+      <div class="finding-url">http://localhost:3000/api/BasketItems/</div>
+      <div class="finding-message">Server accepts negative quantity values - allows total manipulation and refund abuse</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200, 201]}, &#39;matcher_1&#39;: {&#39;selector&#39;: &#39;$.data.quantity&#39;, &#39;extracted&#39;: -100, &#39;expected&#39;: None}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Validate quantity is a positive integer (&gt;= 1) on server side</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A01"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,idor,authorization">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_basket_access</div>
+      <div class="finding-url">http://localhost:3000/rest/basket/1</div>
+      <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;, &#39;products&#39;], &#39;content_length&#39;: 1310}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A01"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,idor,authorization">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_basket_access</div>
+      <div class="finding-url">http://localhost:3000/rest/basket/2</div>
+      <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;, &#39;products&#39;], &#39;content_length&#39;: 557}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A01"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,idor,authorization">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_basket_access</div>
+      <div class="finding-url">http://localhost:3000/rest/basket/3</div>
+      <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;&#34;status&#34;:&#34;success&#34;&#39;, &#39;products&#39;], &#39;content_length&#39;: 557}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A01"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,idor,authorization">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-basket-access</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_basket_access</div>
+      <div class="finding-url">http://localhost:3000/api/BasketItems</div>
+      <div class="finding-message">Tests for IDOR vulnerability allowing access to other users&#39; baskets</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">medium</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card medium"
+       data-severity="medium"
+       data-owasp="A01"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="idor,access-control,business-logic">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge medium">medium</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">3 endpoints</span>
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">5 payloads</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-feedback-idor</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">INSECURE_DIRECT_OBJECT_REFERENCE</div>
+      <div class="finding-url">http://localhost:3000/api/Feedbacks/1</div>
+      <div class="finding-message">Feedback from other users accessible via sequential ID enumeration</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;selector&#39;: &#39;$.data&#39;, &#39;extracted&#39;: {&#39;UserId&#39;: 1, &#39;id&#39;: 1, &#39;comment&#39;: &#39;I love this shop! Best products in town! Highly recommended! (***in@juice-sh.op)&#39;, &#39;rating&#39;: 5, &#39;createdAt&#39;: &#39;2026-01-12T02:00:12.574Z&#39;, &#39;updatedAt&#39;: &#39;2026-01-12T02:00:12.574Z&#39;}, &#39;expected&#39;: None}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Verify feedback ownership before allowing access - check UserId matches authenticated user</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A05"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,lfi,path-traversal">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a05">A05</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-lfi-null-byte</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_lfi_null_byte</div>
+      <div class="finding-url">http://localhost:3000/ftp/package.json.bak%2500.md</div>
+      <div class="finding-message">Tests for LFI vulnerabilities using null byte and path traversal</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;matcher_1&#39;: {&#39;found&#39;: [&#39;juice-shop&#39;, &#39;dependencies&#39;], &#39;content_length&#39;: 4289}, &#39;positive_matchers&#39;: &#39;2/2&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">high</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A05"
+       data-evidence="direct_observation"
+       data-scope="app"
+       data-tags="juice-shop,lfi,path-traversal">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a05">A05</span>
+      <span class="badge high">high</span>
+      <span class="badge direct_observation">Direct Observation</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">juice-shop-lfi-null-byte</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">juice_shop_lfi_null_byte</div>
+      <div class="finding-url">http://localhost:3000/ftp/coupons_2013.md.bak%2500.md</div>
+      <div class="finding-message">Tests for LFI vulnerabilities using null byte and path traversal</div>
+
+      
+
+      
+      <h3 class="section-title">Evidence</h3>
+      <div class="evidence-grid">
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">status_code</div>
+          <div class="evidence-value">200</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">matcher_evidence</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+        </div>
+        
+        
+        
+        <div class="evidence-item">
+          <div class="evidence-key">confidence</div>
+          <div class="evidence-value">medium</div>
+        </div>
+        
+        
+      </div>
+      
+
+      
+    </div>
+  </div>
+        
+    
+</div>
+
+
+
+        
+<footer>
+    Generated by DAST MVP • 2026-01-12 03:00:22 • 26 total findings (15 unique)
+</footer>
+
+    </div>
+
+    
+<script>
+    const activeFilters = { severity: 'all', scope: 'all', owasp: 'all', tag: 'all', evidence: 'all' };
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filterType = btn.dataset.filterType;
+            const filterValue = btn.dataset.filter;
+
+            btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            activeFilters[filterType] = filterValue;
+            applyFilters();
         });
+    });
 
-        function applyFilters() {
-            document.querySelectorAll('.finding-card').forEach(card => {
-                const matchSeverity = activeFilters.severity === 'all' || card.dataset.severity === activeFilters.severity;
-                const matchScope = activeFilters.scope === 'all' || card.dataset.scope === activeFilters.scope;
-                const matchOwasp = activeFilters.owasp === 'all' || card.dataset.owasp === activeFilters.owasp;
-                const matchEvidence = activeFilters.evidence === 'all' || card.dataset.evidence === activeFilters.evidence;
+    function applyFilters() {
+        document.querySelectorAll('.finding-card').forEach(card => {
+            const matchSeverity = activeFilters.severity === 'all' || card.dataset.severity === activeFilters.severity;
+            const matchScope = activeFilters.scope === 'all' || card.dataset.scope === activeFilters.scope;
+            const matchOwasp = activeFilters.owasp === 'all' || card.dataset.owasp === activeFilters.owasp;
+            const matchEvidence = activeFilters.evidence === 'all' || card.dataset.evidence === activeFilters.evidence;
 
-                let matchTag = activeFilters.tag === 'all';
-                if (!matchTag) {
-                    const cardTags = card.dataset.tags.split(',');
-                    matchTag = cardTags.includes(activeFilters.tag);
-                }
-
-                const visible = matchSeverity && matchScope && matchOwasp && matchEvidence && matchTag;
-                card.style.display = visible ? 'block' : 'none';
-            });
-        }
-
-        function toggleRawData(header) {
-            const content = header.nextElementSibling;
-            const toggle = header.querySelector('.raw-data-toggle');
-            if (content.classList.contains('collapsed')) {
-                content.classList.remove('collapsed');
-                toggle.textContent = '-';
-            } else {
-                content.classList.add('collapsed');
-                toggle.textContent = '+';
+            let matchTag = activeFilters.tag === 'all';
+            if (!matchTag) {
+                const cardTags = card.dataset.tags.split(',');
+                matchTag = cardTags.includes(activeFilters.tag);
             }
+
+            const visible = matchSeverity && matchScope && matchOwasp && matchEvidence && matchTag;
+            card.style.display = visible ? 'block' : 'none';
+        });
+    }
+
+    function toggleRawData(header) {
+        const content = header.nextElementSibling;
+        const toggle = header.querySelector('.raw-data-toggle');
+        if (content.classList.contains('collapsed')) {
+            content.classList.remove('collapsed');
+            toggle.textContent = '-';
+        } else {
+            content.classList.add('collapsed');
+            toggle.textContent = '+';
         }
-    </script>
+    }
+</script>
+
 </body>
 </html>
