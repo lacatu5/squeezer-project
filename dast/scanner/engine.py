@@ -68,8 +68,11 @@ class TemplateEngine:
             logger.debug(f"Authenticating with {self.target.authentication.type.value}")
             try:
                 self._auth_context = await self.authenticator.authenticate(
-                    self.target.authentication
+                    self.target.authentication,
+                    self.target.base_url,
                 )
+                if self._auth_context.error:
+                    raise ValueError(self._auth_context.error)
                 logger.debug("Authentication successful")
             except Exception as e:
                 logger.error(f"Authentication failed: {e}")

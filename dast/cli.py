@@ -8,8 +8,9 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from dast.crawler import KatanaCrawler
 from dast.config import AuthType, ScanReport, TargetConfig
+from dast.core.docker import get_docker_manager
+from dast.crawler import KatanaCrawler
 from dast.report import generate_html_report
 from dast.scaffolder import (
     get_cached_endpoints,
@@ -73,16 +74,38 @@ def get_project_root() -> Path:
 @cli.command("init")
 def init_app(
     app_name: str = typer.Argument(..., help="Name for the new app profile"),
-    target: str = typer.Argument(..., help="Target URL to crawl"),
+    target: str = typer.Argument(None, help="Target URL to crawl (not required with -lab)"),
     bearer: str = typer.Option(None, "-b", "--bearer", help="Bearer token for authenticated crawling"),
+    lab: str = typer.Option(None, "-lab", "--lab", help="Lab mode (e.g., juice-shop) - starts fresh Docker container"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
 ):
     async def _init():
         setup_logging(verbose=verbose)
         print_banner()
+        project_root = get_project_root()
 
-        console.print(f"[cyan]Initializing app profile: {app_name}[/cyan]")
-        console.print(f"[dim]Target: {target}[/dim]\n")
+        if lab:
+            console.print(f"[cyan]Initializing lab profile: {app_name}[/cyan]")
+            console.print(f"[dim]Lab: {lab}[/dim]\n")
+
+            docker_manager = get_docker_manager(project_root)
+            lab_result = await docker_manager.start_lab(lab)
+
+            if not lab_result["success"]:
+                console.print(f"[red]Failed to start lab: {lab_result.get('error')}[/red]")
+                raise typer.Exit(1)
+
+            target = lab_result["url"]
+            bearer = None
+
+            console.print(f"[green]Lab started at {target}[/green]")
+            console.print(f"[dim]Default user: {lab_result['username']}[/dim]\n")
+        else:
+            if not target:
+                console.print("[red]Target URL required when not using -lab[/red]")
+                raise typer.Exit(1)
+            console.print(f"[cyan]Initializing app profile: {app_name}[/cyan]")
+            console.print(f"[dim]Target: {target}[/dim]\n")
 
         crawl_cookies = {}
         if bearer:
@@ -109,6 +132,8 @@ def init_app(
             except Exception as e:
                 console.print(f"[red]Crawl failed: {e}[/red]")
                 console.print("[dim]Install Katana: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
+                if lab:
+                    await docker_manager.stop_lab()
                 raise typer.Exit(1)
 
         console.print(f"[green]Discovered {len(report.endpoints)} endpoints[/green]\n")
@@ -124,7 +149,7 @@ def init_app(
                 app_name=app_name,
                 target_url=target,
                 endpoints=report.endpoints,
-                output_dir=get_project_root(),
+                output_dir=project_root,
                 bearer_token=bearer,
             )
 
@@ -146,21 +171,28 @@ def init_app(
         console.print(f"\n[dim]Endpoints cached: {result['endpoints_discovered']}[/dim]")
         console.print(f"[dim]Templates created: {len(result['templates_created'])}[/dim]")
 
-        console.print("\n[bold]Next steps:[/bold]")
-        console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
-        console.print(f"  2. Run: [green]dast scan {target} --app {app_name}[/green]")
+        if lab:
+            console.print("\n[bold]Next steps:[/bold]")
+            console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
+            console.print(f"  2. Run: [green]dast scan {target} --app {app_name} -lab {lab}[/green]")
+            console.print(f"  Or with manual token: [green]dast scan {target} --app {app_name} --bearer <token>[/green]")
+        else:
+            console.print("\n[bold]Next steps:[/bold]")
+            console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
+            console.print(f"  2. Run: [green]dast scan {target} --app {app_name}[/green]")
 
     asyncio.run(_init())
 
 
 @cli.command("scan")
 def scan(
-    target: str = typer.Argument(..., help="Target URL to scan"),
+    target: str = typer.Argument(None, help="Target URL to scan (not required with -lab)"),
     bearer: str = typer.Option(None, "-b", "--bearer", help="Bearer token for authentication"),
     crawl: bool = typer.Option(False, "--crawl", help="Force re-crawl (ignores cached endpoints)"),
     generic: bool = typer.Option(True, "--generic/--no-generic", help="Include generic templates"),
     app: str = typer.Option(None, "--app", help="Use app-specific templates"),
     template: str = typer.Option(None, "-T", "--template", help="Test specific template file"),
+    lab: str = typer.Option(None, "-lab", "--lab", help="Lab mode (e.g., juice-shop) - starts fresh Docker container"),
     output: str = typer.Option(None, "-o", "--output", help="Output JSON file for results"),
     verbose: bool = typer.Option(False, "-v", "--verbose", help="Enable verbose logging"),
 ):
@@ -170,12 +202,42 @@ def scan(
         if not verbose:
             print_banner()
 
-        target_config = TargetConfig(name="Target", base_url=target)
         project_root = get_project_root()
+        docker_manager = None
+        lab_username = None
+        lab_password = None
+
+        if lab:
+            console.print(f"[cyan]Lab mode: {lab}[/cyan]\n")
+
+            docker_manager = get_docker_manager(project_root)
+            lab_result = await docker_manager.start_lab(lab)
+
+            if not lab_result["success"]:
+                console.print(f"[red]Failed to start lab: {lab_result.get('error')}[/red]")
+                raise typer.Exit(1)
+
+            target = lab_result["url"]
+            lab_username = lab_result["username"]
+            lab_password = lab_result["password"]
+
+            console.print(f"[green]Lab started at {target}[/green]")
+            console.print(f"[dim]Auto-login as: {lab_username}[/dim]\n")
+        else:
+            if not target:
+                console.print("[red]Target URL required when not using -lab[/red]")
+                raise typer.Exit(1)
+
+        target_config = TargetConfig(name="Target", base_url=target)
 
         if bearer:
             target_config.authentication.type = AuthType.BEARER
             target_config.authentication.token = bearer
+        elif lab:
+            target_config.authentication.type = AuthType.LAB
+            target_config.authentication.lab_name = lab
+            target_config.authentication.username = lab_username
+            target_config.authentication.password = lab_password
 
         cached_endpoints = None
         effective_app = app
@@ -213,6 +275,8 @@ def scan(
                 except Exception as e:
                     console.print(f"[red]Crawl failed: {e}[/red]")
                     console.print("[dim]Install Katana: go install github.com/projectdiscovery/katana/cmd/katana@latest[/dim]")
+                    if lab and docker_manager:
+                        await docker_manager.stop_lab()
                     raise typer.Exit(1)
 
             console.print(f"[cyan]Found {len(report.endpoints)} endpoints[/cyan]")
@@ -242,6 +306,8 @@ def scan(
 
         if not target_config.get_endpoints() and not template:
             console.print("[yellow]No scanable endpoints found[/yellow]")
+            if lab and docker_manager:
+                await docker_manager.stop_lab()
             raise typer.Exit(1)
 
         template_paths = []
@@ -250,6 +316,8 @@ def scan(
             template_path = Path(template).resolve()
             if not template_path.exists():
                 console.print(f"[red]Template file not found: {template}[/red]")
+                if lab and docker_manager:
+                    await docker_manager.stop_lab()
                 raise typer.Exit(1)
             template_paths = [template_path]
         else:
@@ -264,28 +332,37 @@ def scan(
 
         if not template_paths:
             console.print("[red]No templates found. Use --generic or --app[/red]")
+            if lab and docker_manager:
+                await docker_manager.stop_lab()
             raise typer.Exit(1)
 
         templates = load_templates(template_paths)
 
         if not templates:
             console.print("[red]No templates to execute[/red]")
+            if lab and docker_manager:
+                await docker_manager.stop_lab()
             raise typer.Exit(1)
 
-        report = await run_scan(
-            target_config,
-            templates,
-            validate_target=True,
-        )
+        try:
+            report = await run_scan(
+                target_config,
+                templates,
+                validate_target=True,
+            )
 
-        _print_report(report)
+            _print_report(report)
 
-        if output:
-            _save_results(report, output)
+            if output:
+                _save_results(report, output)
 
-        html_path = "report.html"
-        generate_html_report(report, html_path)
-        console.print(f"[green]HTML report: {html_path}[/green]")
+            html_path = "report.html"
+            generate_html_report(report, html_path)
+            console.print(f"[green]HTML report: {html_path}[/green]")
+        finally:
+            if lab and docker_manager:
+                console.print("\n[dim]Stopping lab container...[/dim]")
+                await docker_manager.stop_lab()
 
         raise typer.Exit(0 if report.findings else 1)
 
@@ -340,11 +417,15 @@ def main(ctx: typer.Context):
         console.print("\n[bold cyan]DAST MVP[/bold cyan] - Template-based DAST Framework\n")
         console.print("Usage:")
         console.print("  dast scan <target>           Scan a target URL")
+        console.print("  dast scan -lab <lab>         Lab mode with clean slate container")
         console.print("  dast init <app> <target>     Create new app profile")
+        console.print("  dast init <app> -lab <lab>   Create app profile in lab mode")
         console.print("  dast apps                    List available app profiles")
         console.print("\nExamples:")
-        console.print("  dast scan http://localhost:3000 --crawl --app juice-shop")
+        console.print("  dast scan http://localhost:3000 --app juice-shop")
+        console.print("  dast scan -lab juice-shop --app juice-shop")
         console.print("  dast init my-app http://example.com --bearer TOKEN")
+        console.print("  dast init juice-shop -lab juice-shop")
         raise typer.Exit(0)
 
 

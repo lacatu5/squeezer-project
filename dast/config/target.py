@@ -13,6 +13,7 @@ class AuthConfig(BaseModel):
     password: Optional[str] = None
     token: Optional[str] = None
     headers: Dict[str, str] = Field(default_factory=dict)
+    lab_name: Optional[str] = None
 
 
 class EndpointsConfig(BaseModel):

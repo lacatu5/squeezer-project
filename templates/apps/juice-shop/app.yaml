@@ -536,3 +536,6 @@ endpoints:
   type: api
 auth:
   type: bearer
+  lab_name: juice-shop
+  default_username: test@juice-sh.op
+  default_password: test123@

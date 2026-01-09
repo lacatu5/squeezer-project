@@ -48,6 +48,5 @@ class AuthType(str, Enum):
     """Authentication types."""
 
     NONE = "none"
-    BASIC = "basic"
     BEARER = "bearer"
     LAB = "lab"

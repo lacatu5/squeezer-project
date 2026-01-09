@@ -72,6 +72,7 @@ def _evidence_chart(evidence_data):
 _env.globals['severity_chart'] = _severity_chart
 _env.globals['owasp_chart'] = _owasp_chart
 _env.globals['evidence_chart'] = _evidence_chart
+_env.filters['split'] = lambda s, sep=None: s.split(sep) if s else []
 
 
 def generate_html_report(report: ScanReport, output_path: str) -> None:

@@ -1,0 +1,10 @@
+name: OWASP Juice Shop
+image: bkimminich/juice-shop:latest
+port: 3000
+default_username: test@juice-sh.op
+default_password: test123@
+seed_endpoint: /api/Users
+seed_method: POST
+seed_payload:
+  role: customer
+healthcheck_path: /
