@@ -1,5 +1,5 @@
 [run]
-source = dast
+source = squeezer
 omit =
     */tests/*
     */__pycache__/*

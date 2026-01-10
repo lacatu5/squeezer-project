@@ -1,4 +1,4 @@
-# DAST Scanner Architecture
+# Squeezer Scanner Architecture
 
 Strict rules:
 - Do not use any comment in the code

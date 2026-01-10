@@ -1,4 +1,4 @@
-# DAST MVP
+# Squeezer
 
 Minimal template-based Dynamic Application Security Testing (DAST) framework.
 
@@ -17,13 +17,13 @@ Minimal template-based Dynamic Application Security Testing (DAST) framework.
 pip install -e .
 
 # Scan a target
-dast scan http://localhost:3000 --config config/juice-shop.yaml
+squeezer scan http://localhost:3000 --config config/juice-shop.yaml
 
 # Run specific templates
-dast scan http://localhost:3000 --template templates/
+squeezer scan http://localhost:3000 --template templates/
 
 # List templates
-dast list
+squeezer list
 ```
 
 ## Configuration
@@ -92,15 +92,14 @@ requests:
 ## Project Structure
 
 ```
-dast-mvp/
-├── dast/
+squeezer/
+├── squeezer/
 │   ├── __init__.py
 │   ├── cli.py           # CLI entry point
-│   ├── config.py        # Config loading
+│   ├── config/          # Config loading
 │   ├── engine.py        # Template execution engine
 │   ├── matchers.py      # Response matchers
-│   ├── auth.py          # Authentication handler
-│   └── templates/       # Built-in templates
+│   └── auth.py          # Authentication handler
 ├── config/              # Example configs
 ├── templates/           # User templates
 └── tests/              # Tests

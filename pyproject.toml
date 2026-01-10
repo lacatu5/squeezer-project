@@ -1,5 +1,5 @@
 [project]
-name = "dast-mvp"
+name = "squeezer"
 version = "0.1.0"
 description = "Minimal template-based DAST framework with Katana crawler"
 readme = "README.md"
@@ -16,10 +16,10 @@ dependencies = [
 ]
 
 [project.scripts]
-dast = "dast.cli:app"
+squeezer = "squeezer.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["dast"]
+packages = ["squeezer"]
 
 [build-system]
 requires = ["hatchling"]
