@@ -1,3 +1,4 @@
+from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
@@ -5,17 +6,203 @@ from urllib.parse import urlparse
 import yaml
 from pydantic import BaseModel, Field
 
-from squeezer.config.common import (
-    AuthType,
-    EvidenceStrength,
-    OWASPCategory,
-    SeverityLevel,
-)
-from squeezer.config.target import AuthConfig, EndpointsConfig, TargetConfig
+
+class OWASPCategory(str, Enum):
+    A01_BROKEN_ACCESS_CONTROL = "A01:2025"
+    A02_SECURITY_MISCONFIGURATION = "A02:2025"
+    A03_SOFTWARE_SUPPLY_CHAIN = "A03:2025"
+    A04_CRYPTOGRAPHIC_FAILURES = "A04:2025"
+    A05_INJECTION = "A05:2025"
+    A06_INSECURE_DESIGN = "A06:2025"
+    A07_AUTHENTICATION_FAILURES = "A07:2025"
+    A08_INTEGRITY_FAILURES = "A08:2025"
+    A09_LOGGING_FAILURES = "A09:2025"
+    A10_EXCEPTION_CONDITIONS = "A10:2025"
+
+
+class SeverityLevel(str, Enum):
+    CRITICAL = "critical"
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    INFO = "info"
+
+
+class DetectionTier(str, Enum):
+    PASSIVE = "passive"
+    ACTIVE = "active"
+    AGGRESSIVE = "aggressive"
+
+
+class EvidenceStrength(str, Enum):
+    DIRECT = "direct_observation"
+    INFERENCE = "inference"
+    HEURISTIC = "heuristic"
+
+
+class AuthType(str, Enum):
+    NONE = "none"
+    BEARER = "bearer"
+    LAB = "lab"
+
+
+class AuthConfig(BaseModel):
+    type: AuthType = AuthType.NONE
+    username: Optional[str] = None
+    password: Optional[str] = None
+    token: Optional[str] = None
+    headers: Dict[str, str] = Field(default_factory=dict)
+    lab_name: Optional[str] = None
+
+
+class EndpointsConfig(BaseModel):
+    base: str = ""
+    custom: Optional[Dict[str, str]] = None
+
+    def get_custom(self) -> Dict[str, str]:
+        return self.custom or {}
+
+
+class TargetConfig(BaseModel):
+    name: str
+    base_url: str
+    authentication: AuthConfig = Field(default_factory=AuthConfig)
+    endpoints: EndpointsConfig = Field(default_factory=EndpointsConfig)
+    variables: Optional[Dict[str, Any]] = None
+    discovered_params: Optional[Dict[str, List[str]]] = None
+    timeout: float = 30.0
+    parallel: int = 5
+    request_delay: float = 0.0
+
+    def get_variables(self) -> Dict[str, Any]:
+        return self.variables or {}
+
+    def get_endpoints(self) -> Dict[str, str]:
+        return self.endpoints.get_custom()
+
+    def get_discovered_params(self) -> Dict[str, List[str]]:
+        return self.discovered_params or {}
+
+    @classmethod
+    def from_yaml(cls, path: Union[str, Path]) -> "TargetConfig":
+        path = Path(path)
+        with open(path) as f:
+            data = yaml.safe_load(f) or {}
+        return cls(**data)
+
+
+class ExtractorConfig(BaseModel):
+    name: str
+    selector: Optional[str] = None
+    regex: Optional[str] = None
+    group: int = 1
+
+
+class MatcherConfig(BaseModel):
+    type: str
+    condition: str = "and"
+    negative: bool = False
+    status: Optional[Union[int, List[int]]] = Field(default=None, alias="values")
+    words: Optional[List[str]] = None
+    part: str = "body"
+    case_sensitive: bool = False
+    regex: Optional[List[str]] = None
+    selector: Optional[str] = None
+    value: Optional[Any] = None
+    base_response: Optional[str] = None
+    diff_condition: str = "different"
+    threshold_ms: int = 1000
+
+    class Config:
+        populate_by_name = True
+        extra = "allow"
+
+
+class RequestConfig(BaseModel):
+    name: Optional[str] = None
+    method: str = "GET"
+    path: str = "/"
+    headers: Dict[str, str] = Field(default_factory=dict)
+    body: Optional[str] = None
+    json_body: Optional[Dict[str, Any]] = Field(default=None, alias="json")
+    cookies: Dict[str, str] = Field(default_factory=dict)
+    matchers: List[MatcherConfig] = Field(default_factory=list)
+    matchers_condition: str = Field(default="and")
+    extractors: List[ExtractorConfig] = Field(default_factory=list, exclude=True)
+    on_match: Optional[Dict[str, Any]] = None
+
+
+class TemplateInfo(BaseModel):
+    name: str
+    severity: Union[SeverityLevel, str] = SeverityLevel.MEDIUM
+    owasp_category: Optional[Union[OWASPCategory, str]] = None
+    description: Optional[str] = None
+    tags: List[str] = Field(default_factory=list)
+
+    def get_owasp_category(self) -> Optional[OWASPCategory]:
+        if self.owasp_category is not None:
+            if isinstance(self.owasp_category, OWASPCategory):
+                return self.owasp_category
+            category_str = str(self.owasp_category).strip()
+            if category_str.startswith("A0") and ":2025" in category_str:
+                for category in OWASPCategory:
+                    if category.value == category_str:
+                        return category
+            for category in OWASPCategory:
+                if category.name == category_str or category.name.replace("_", "") == category_str.replace("_", "").replace(":", "").upper():
+                    return category
+        return None
+
+
+class Template(BaseModel):
+    id: str
+    info: TemplateInfo
+    variables: Dict[str, Any] = Field(default_factory=dict)
+    requests: List[RequestConfig] = Field(default_factory=list)
+    generic: Optional["GenericTemplate"] = None
+
+    @classmethod
+    def from_yaml(cls, path: Union[str, Path]) -> "Template":
+        path = Path(path)
+        with open(path) as f:
+            data = yaml.safe_load(f)
+        if not data:
+            raise ValueError(f"Empty template: {path}")
+        return cls(**data)
+
+
+class DetectionTierConfig(BaseModel):
+    tier: Union[DetectionTier, str]
+    threshold_ms: int = 5000
+    matchers: List[MatcherConfig] = Field(default_factory=list)
+    matchers_condition: str = Field(default="and")
+
+    def get_tier(self) -> DetectionTier:
+        if isinstance(self.tier, str):
+            return DetectionTier(self.tier)
+        return self.tier
+
+    class Config:
+        use_enum_values = True
+
+
+class PayloadConfig(BaseModel):
+    name: str
+    value: str
+    description: Optional[str] = None
+
+
+class GenericTemplate(BaseModel):
+    endpoint: str
+    method: str = "GET"
+    content_type: str = "application/x-www-form-urlencoded"
+    payloads: List[Union[str, PayloadConfig]] = Field(default_factory=list)
+    headers: Dict[str, str] = Field(default_factory=dict)
+    matchers: List[MatcherConfig] = Field(default_factory=list)
+    detection_tiers: List[DetectionTierConfig] = Field(default_factory=list)
 
 
 class Finding(BaseModel):
-
     template_id: str
     vulnerability_type: str
     severity: SeverityLevel
@@ -25,6 +212,7 @@ class Finding(BaseModel):
     evidence: Dict[str, Any] = Field(default_factory=dict)
     message: str = ""
     remediation: str = ""
+    request_details: Optional[str] = None
     response_details: Optional[str] = None
     payload_count: int = 1
     endpoint_count: int = 1
@@ -32,74 +220,54 @@ class Finding(BaseModel):
 
 
 class ParameterInfo(BaseModel):
-    """Information about a discovered parameter (query, form, JSON, etc.)."""
-
     name: str
     type: str = "unknown"
 
 
 class EndpointInfo(BaseModel):
-    """Detailed information about a discovered endpoint."""
-
     url: str
     method: str = "GET"
     path: str = ""
     status_code: Optional[int] = None
     content_type: Optional[str] = None
-
     query_params: List[ParameterInfo] = Field(default_factory=list)
     headers: Dict[str, str] = Field(default_factory=dict)
     cookies: Dict[str, str] = Field(default_factory=dict)
-
     forms: List[Dict[str, Any]] = Field(default_factory=list)
-
     is_api: bool = False
 
 
 class CrawlerStatistics(BaseModel):
-    """Statistics collected during crawling."""
-
     start_time: str = ""
     end_time: str = ""
     duration_seconds: float = 0.0
-
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
-
     unique_urls: int = 0
     unique_domains: int = 0
-
     endpoints_by_method: Dict[str, int] = Field(default_factory=dict)
     endpoints_by_status: Dict[int, int] = Field(default_factory=dict)
-
     api_endpoints: int = 0
     html_pages: int = 0
     forms_discovered: int = 0
     input_fields_discovered: int = 0
-
     authentication_detected: List[str] = Field(default_factory=list)
 
 
 class CrawlerReport(BaseModel):
-    """Complete report from crawling a target."""
-
     target: str = ""
     base_url: str = ""
     timestamp: str = ""
-
     target_config: Optional[TargetConfig] = None
-
     endpoints: List[Union[EndpointInfo, Dict[str, Any]]] = Field(default_factory=list)
     statistics: Union[CrawlerStatistics, Dict[str, Any]] = Field(default_factory=dict)
-
     forms: List[Dict[str, Any]] = Field(default_factory=list)
     auth_data: Dict[str, Any] = Field(default_factory=dict)
 
     def get_forms(self) -> List[Dict[str, Any]]:
         if self.forms:
             return self.forms
-
         forms = []
         for endpoint in self.endpoints:
             if isinstance(endpoint, EndpointInfo):
@@ -111,7 +279,6 @@ class CrawlerReport(BaseModel):
     def get_auth_config(self) -> AuthConfig:
         if self.target_config and self.target_config.authentication:
             return self.target_config.authentication
-
         auth_type = self.auth_data.get("type", "none")
         if auth_type == "jwt":
             return AuthConfig(
@@ -125,13 +292,11 @@ class CrawlerReport(BaseModel):
                 type=AuthType.NONE,
                 headers={"Cookie": f"{cookie_name}={self.auth_data.get('jwt_token', '')}"},
             )
-
         return AuthConfig()
 
     def to_target_config(self, name: Optional[str] = None) -> TargetConfig:
         if self.target_config:
             return self.target_config
-
         custom_endpoints = {}
         for endpoint in self.endpoints:
             if isinstance(endpoint, EndpointInfo):
@@ -140,7 +305,6 @@ class CrawlerReport(BaseModel):
             else:
                 url = endpoint.get("url", "")
                 path = urlparse(url).path
-
             key = path.strip("/").replace("/", "_").replace("-", "_") or "root"
             original_key = key
             counter = 1
@@ -148,11 +312,9 @@ class CrawlerReport(BaseModel):
                 key = f"{original_key}_{counter}"
                 counter += 1
             custom_endpoints[key] = url
-
         base = self.base_url or self.target
         parsed = urlparse(base)
         target_name = name or f"agent_crawled_{parsed.netloc}"
-
         self.target_config = TargetConfig(
             name=target_name,
             base_url=base,
@@ -163,7 +325,6 @@ class CrawlerReport(BaseModel):
 
     @classmethod
     def from_yaml(cls, path: Union[str, Path]) -> "CrawlerReport":
-        """Load a crawler report from YAML."""
         path = Path(path)
         with open(path) as f:
             data = yaml.safe_load(f)
@@ -171,8 +332,6 @@ class CrawlerReport(BaseModel):
 
 
 class ScanReport(BaseModel):
-    """Complete scan report."""
-
     target: str
     templates_executed: int
     findings: List[Finding] = Field(default_factory=list)
@@ -278,27 +437,20 @@ class ScanReport(BaseModel):
         self.findings.append(finding)
 
     def group_similar_findings(self) -> List[Finding]:
-        from urllib.parse import urlparse
-        
         grouped = {}
         for finding in self.findings:
             parsed = urlparse(finding.url)
             base_path = parsed.path.split('?')[0]
             key = (finding.vulnerability_type, finding.template_id, base_path, finding.evidence_strength)
-            
             if key not in grouped:
                 grouped[key] = finding
             else:
                 grouped[key].payload_count += 1
-        
         first_pass = list(grouped.values())
-        
         consolidated = {}
         endpoint_data = {}
-        
         for finding in first_pass:
             vuln_type = finding.vulnerability_type
-            
             if vuln_type.startswith('DEBUG_') or vuln_type.startswith('GENERIC_NOSQLI') or vuln_type == 'GENERIC_SSRF' or vuln_type == 'INSECURE_DIRECT_OBJECT_REFERENCE':
                 if vuln_type.startswith('DEBUG_'):
                     group_key = 'DEBUG_ENDPOINTS'
@@ -308,9 +460,7 @@ class ScanReport(BaseModel):
                     group_key = 'GENERIC_SSRF'
                 else:
                     group_key = 'INSECURE_DIRECT_OBJECT_REFERENCE'
-                    
                 key = (group_key, finding.template_id, finding.evidence_strength)
-                
                 if key not in consolidated:
                     consolidated[key] = finding
                     if group_key == 'DEBUG_ENDPOINTS':
@@ -326,13 +476,11 @@ class ScanReport(BaseModel):
             else:
                 unique_key = (finding.vulnerability_type, finding.template_id, urlparse(finding.url).path, finding.evidence_strength)
                 consolidated[unique_key] = finding
-        
         for key in endpoint_data:
             if key in consolidated:
                 data = endpoint_data[key]
                 consolidated[key].endpoint_count = len(data['paths'])
                 consolidated[key].payload_count = data['payloads']
-        
         return list(consolidated.values())
 
     def add_error(self, error: str) -> None:

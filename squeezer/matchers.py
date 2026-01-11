@@ -1,5 +1,3 @@
-"""Response matchers for vulnerability detection."""
-
 import json
 import re
 from dataclasses import dataclass
@@ -7,13 +5,11 @@ from typing import Any, Dict, List, Optional
 
 from httpx import Response
 
-from squeezer.config import MatcherConfig, EvidenceStrength
+from squeezer.models import EvidenceStrength, MatcherConfig
 
 
 @dataclass
 class MatchResult:
-    """Result of a matcher evaluation."""
-
     matched: bool
     evidence: Dict[str, Any]
     message: str
@@ -22,19 +18,15 @@ class MatchResult:
 
 
 class Matcher:
-    """Base matcher class."""
-
     def __init__(self, config: MatcherConfig):
         self.config = config
         self.condition = config.condition.lower()
         self.negative = config.negative
 
     def matches(self, response: Response) -> MatchResult:
-        """Check if response matches. Override in subclass."""
         raise NotImplementedError
 
     def _apply_negative(self, result: MatchResult) -> MatchResult:
-        """Apply negative flag if set."""
         if self.negative:
             return MatchResult(
                 matched=not result.matched,
@@ -45,25 +37,18 @@ class Matcher:
 
 
 class StatusMatcher(Matcher):
-    """Match HTTP status codes."""
-
     def __init__(self, config: MatcherConfig):
         super().__init__(config)
         self.statuses: List[int] = []
-
         status_value = config.status or getattr(config, 'values', None)
         if status_value:
             if isinstance(status_value, int):
                 self.statuses = [status_value]
             elif isinstance(status_value, list):
-                self.statuses = [
-                    int(s) if isinstance(s, str) else s
-                    for s in status_value
-                ]
+                self.statuses = [int(s) if isinstance(s, str) else s for s in status_value]
 
     def matches(self, response: Response) -> MatchResult:
         status = response.status_code
-
         if self.condition in ("equals", "in", "and"):
             matched = status in self.statuses
         elif self.condition in ("not_equals", "not_in"):
@@ -78,9 +63,7 @@ class StatusMatcher(Matcher):
             matched = any(status <= s for s in self.statuses)
         else:
             matched = status in self.statuses
-
         strength = EvidenceStrength.DIRECT if matched else EvidenceStrength.HEURISTIC
-
         return self._apply_negative(MatchResult(
             matched=matched,
             evidence={"status": status, "expected": self.statuses},
@@ -90,8 +73,6 @@ class StatusMatcher(Matcher):
 
 
 class WordMatcher(Matcher):
-    """Match words in response body or headers."""
-
     def __init__(self, config: MatcherConfig):
         super().__init__(config)
         self.words = config.words or []
@@ -103,27 +84,23 @@ class WordMatcher(Matcher):
             content = str(response.headers)
         elif self.part == "all":
             content = f"{response.headers}\n{response.text}"
-        else:  
+        else:
             content = response.text
-
         if not self.case_sensitive:
             content = content.lower()
             search_words = [w.lower() for w in self.words]
         else:
             search_words = self.words
-
         found_words = []
         for word in search_words:
             if word in content:
                 found_words.append(word)
-
         if self.condition == "and":
             matched = len(found_words) == len(search_words)
         elif self.condition == "or":
             matched = len(found_words) > 0
-        else:  
+        else:
             matched = len(found_words) == len(search_words)
-
         return self._apply_negative(MatchResult(
             matched=matched,
             evidence={"found": found_words, "content_length": len(content)},
@@ -133,8 +110,6 @@ class WordMatcher(Matcher):
 
 
 class RegexMatcher(Matcher):
-    """Match regex patterns in response."""
-
     def __init__(self, config: MatcherConfig):
         super().__init__(config)
         self.patterns = config.regex or []
@@ -142,16 +117,13 @@ class RegexMatcher(Matcher):
     def matches(self, response: Response) -> MatchResult:
         content = response.text
         matches = []
-
         for pattern in self.patterns:
             try:
                 if re.search(pattern, content):
                     matches.append(pattern)
             except re.error:
                 pass
-
         matched = len(matches) > 0
-
         return self._apply_negative(MatchResult(
             matched=matched,
             evidence={"matches": matches},
@@ -161,23 +133,17 @@ class RegexMatcher(Matcher):
 
 
 class JsonMatcher(Matcher):
-    """Match values in JSON response using simple path notation."""
-
     def __init__(self, config: MatcherConfig):
         super().__init__(config)
         self.selector = config.selector or ""
         self.value = config.value
 
     def _extract_value(self, data: Any, path: str) -> Any:
-        """Extract value from JSON using dot notation."""
         if not path:
             return data
-
         path = path.lstrip("$.")
-
         parts = path.split(".")
         current = data
-
         for part in parts:
             if isinstance(current, dict):
                 current = current.get(part)
@@ -186,10 +152,8 @@ class JsonMatcher(Matcher):
                 current = current[idx] if 0 <= idx < len(current) else None
             else:
                 return None
-
             if current is None:
                 return None
-
         return current
 
     def matches(self, response: Response) -> MatchResult:
@@ -201,9 +165,7 @@ class JsonMatcher(Matcher):
                 evidence={"error": "Invalid JSON"},
                 message="Response is not valid JSON",
             )
-
         extracted = self._extract_value(data, self.selector)
-
         if self.condition == "exists":
             matched = extracted is not None
         elif self.condition == "equals":
@@ -224,7 +186,6 @@ class JsonMatcher(Matcher):
             matched = self.value in extracted if isinstance(extracted, (list, str)) else False
         else:
             matched = extracted is not None
-
         return self._apply_negative(MatchResult(
             matched=matched,
             evidence={"selector": self.selector, "extracted": extracted, "expected": self.value},
@@ -234,9 +195,7 @@ class JsonMatcher(Matcher):
 
 
 def create_matcher(config: MatcherConfig, **kwargs) -> Matcher:
-    """Create a matcher from configuration."""
     matcher_type = config.type.lower()
-
     if matcher_type == "status":
         return StatusMatcher(config)
     elif matcher_type == "word":
@@ -250,31 +209,18 @@ def create_matcher(config: MatcherConfig, **kwargs) -> Matcher:
 
 
 def evaluate_matchers(matchers: List[Matcher], response: Response, condition: str) -> MatchResult:
-    """Evaluate multiple matchers against a response.
-
-    Uses hybrid logic for better false positive reduction:
-    - Positive matchers (negative=false): Combined with OR if condition='or', AND if condition='and'
-    - Negative matchers (negative=true): Always combined with AND (all must pass, i.e., NOT match)
-
-    This allows templates to have multiple alternative positive indicators (OR)
-    while ensuring all negative filters apply (AND).
-    """
     if not matchers:
         return MatchResult(matched=False, evidence={}, message="No matchers")
-
     results = []
     positive_results = []
     negative_results = []
-
     for matcher in matchers:
         result = matcher.matches(response)
         results.append(result)
-
         if matcher.negative:
             negative_results.append(result)
         else:
             positive_results.append(result)
-
     if positive_results:
         if condition == "or":
             positive_matched = any(r.matched for r in positive_results)
@@ -282,19 +228,14 @@ def evaluate_matchers(matchers: List[Matcher], response: Response, condition: st
             positive_matched = all(r.matched for r in positive_results)
     else:
         positive_matched = True
-
     negative_matched = all(r.matched for r in negative_results) if negative_results else True
-
     matched = positive_matched and negative_matched
-
     evidence = {}
     for i, r in enumerate(results):
         evidence[f"matcher_{i}"] = r.evidence
-
     evidence["positive_matchers"] = f"{sum(r.matched for r in positive_results)}/{len(positive_results)}" if positive_results else "0/0"
     evidence["negative_matchers"] = f"{sum(r.matched for r in negative_results)}/{len(negative_results)}" if negative_results else "0/0"
     evidence["condition"] = condition
-
     strength = EvidenceStrength.HEURISTIC
     for r in positive_results:
         if r.matched:
@@ -303,7 +244,6 @@ def evaluate_matchers(matchers: List[Matcher], response: Response, condition: st
                 break
             elif r.evidence_strength == EvidenceStrength.INFERENCE:
                 strength = EvidenceStrength.INFERENCE
-
     return MatchResult(
         matched=matched,
         evidence=evidence,
@@ -311,3 +251,42 @@ def evaluate_matchers(matchers: List[Matcher], response: Response, condition: st
                 f"{sum(r.matched for r in negative_results)}/{len(negative_results)} negative passed",
         evidence_strength=strength,
     )
+
+
+class ConsistencyChecker:
+    @staticmethod
+    def are_consistent(responses: List[Response], threshold: float = 0.1) -> bool:
+        if not responses:
+            return False
+        status_codes = {r.status_code for r in responses}
+        if len(status_codes) > 1:
+            return False
+        lengths = [len(r.text) for r in responses]
+        avg_length = sum(lengths) / len(lengths)
+        if avg_length == 0:
+            return True
+        for length in lengths:
+            variance = abs(length - avg_length) / avg_length
+            if variance > threshold:
+                return False
+        return True
+
+
+class ConfidenceCalculator:
+    @staticmethod
+    def calculate(evidence_strength: EvidenceStrength, passed_matchers: int, is_consistent: bool = True) -> str:
+        if not is_consistent:
+            return "low"
+        if evidence_strength == EvidenceStrength.DIRECT:
+            if passed_matchers >= 2:
+                return "high"
+            return "medium"
+        if evidence_strength == EvidenceStrength.INFERENCE:
+            if passed_matchers >= 2 and is_consistent:
+                return "medium"
+            return "low"
+        if evidence_strength == EvidenceStrength.HEURISTIC:
+            if passed_matchers >= 3 and is_consistent:
+                return "medium"
+            return "low"
+        return "low"

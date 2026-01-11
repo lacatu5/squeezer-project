@@ -8,8 +8,8 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from squeezer.config import AuthType, ScanReport, TargetConfig
-from squeezer.core.docker import get_docker_manager
+from squeezer.models import AuthType, ScanReport, TargetConfig
+from squeezer.docker import get_docker_manager
 from squeezer.crawler import KatanaCrawler
 from squeezer.report import generate_html_report
 from squeezer.scaffolder import (

@@ -1,15 +1,4 @@
 {
-    "extensions": [
-        ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico",
-        ".woff", ".woff2", ".ttf", ".eot", ".otf",
-        ".mp4", ".mp3", ".wav", ".avi", ".mov", ".wmv", ".flv", ".mkv",
-        ".webp", ".bmp", ".tiff", ".tif",
-        ".map", ".txt", ".xml", ".swf", ".webm", ".webmanifest",
-        ".json", ".yaml", ".yml"
-    ],
-    "paths": [
-        "/assets/", "/static/", "/images/", "/img/", "/fonts/",
-        "/media/", "/_next/static/", "/__webpack__/", "/public/",
-        "/node_modules/", "/vendor/", "/.well-known/"
-    ]
+    "extensions": [".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".map"],
+    "paths": ["/assets/", "/static/", "/images/", "/fonts/", "/media/", "/css/", "/js/"]
 }

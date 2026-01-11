@@ -3,11 +3,13 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from squeezer.config import EvidenceStrength, ScanReport
+from squeezer.models import EvidenceStrength, ScanReport
 
+
+TEMPLATES_DIR = Path(__file__).parent / "templates"
 
 _env = Environment(
-    loader=FileSystemLoader(Path(__file__).parent / "templates"),
+    loader=FileSystemLoader(TEMPLATES_DIR),
     autoescape=select_autoescape(["html"]),
 )
 _env.filters['split'] = lambda s, sep=None: s.split(sep) if s else []
@@ -15,14 +17,12 @@ _env.filters['split'] = lambda s, sep=None: s.split(sep) if s else []
 
 def generate_html_report(report: ScanReport, output_path: str) -> None:
     grouped = report.group_similar_findings()
-
     severity = {
         "critical": report.critical_count,
         "high": report.high_count,
         "medium": report.medium_count,
         "low": report.low_count,
     }
-
     owasp = []
     for category, (_, vuln_count) in report.get_owasp_summary().items():
         if vuln_count > 0:
@@ -30,13 +30,11 @@ def generate_html_report(report: ScanReport, output_path: str) -> None:
                 "code": category.split(":")[0],
                 "count": vuln_count,
             })
-
     evidence = {
         "direct": sum(1 for f in grouped if f.evidence_strength == EvidenceStrength.DIRECT),
         "inference": sum(1 for f in grouped if f.evidence_strength == EvidenceStrength.INFERENCE),
         "heuristic": sum(1 for f in grouped if f.evidence_strength == EvidenceStrength.HEURISTIC),
     }
-
     all_tags = set()
     app_count = 0
     generic_count = 0
@@ -46,11 +44,8 @@ def generate_html_report(report: ScanReport, output_path: str) -> None:
             generic_count += 1
         else:
             app_count += 1
-
     tag_list = sorted(all_tags)
-
     owasp_codes = sorted(set(f.owasp_category.value.split(":")[0] for f in grouped))
-
     template = _env.get_template("report.html")
     html = template.render(
         target=report.target,
@@ -69,7 +64,6 @@ def generate_html_report(report: ScanReport, output_path: str) -> None:
         app_count=app_count,
         generic_count=generic_count,
     )
-
     output_file = Path(output_path)
     output_file.parent.mkdir(parents=True, exist_ok=True)
     output_file.write_text(html, encoding="utf-8")

@@ -1,6 +1,6 @@
 __version__ = "0.2.0"
 
-from squeezer.config import (
+from squeezer.models import (
     SeverityLevel,
     AuthType,
     ExtractorConfig,
@@ -24,7 +24,7 @@ from squeezer.scanner import (
 
 from squeezer.auth import Authenticator, AuthContext
 
-from squeezer.core.matchers import (
+from squeezer.matchers import (
     MatchResult,
     Matcher,
     StatusMatcher,
@@ -55,7 +55,6 @@ __all__ = [
     "run_scan",
     "Authenticator",
     "AuthContext",
-    "ExtractionResult",
     "MatchResult",
     "Matcher",
     "StatusMatcher",
