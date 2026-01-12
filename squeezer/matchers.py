@@ -174,16 +174,27 @@ class JsonMatcher(Matcher):
             matched = extracted != self.value
         elif self.condition == "gt":
             try:
-                matched = float(extracted) > float(self.value)
+                if extracted is None or self.value is None:
+                    matched = False
+                else:
+                    matched = float(extracted) > float(self.value)
             except (TypeError, ValueError):
                 matched = False
         elif self.condition == "lt":
             try:
-                matched = float(extracted) < float(self.value)
+                if extracted is None or self.value is None:
+                    matched = False
+                else:
+                    matched = float(extracted) < float(self.value)
             except (TypeError, ValueError):
                 matched = False
         elif self.condition == "contains":
-            matched = self.value in extracted if isinstance(extracted, (list, str)) else False
+            if isinstance(extracted, list):
+                matched = any(item == self.value for item in extracted)
+            elif isinstance(extracted, str) and self.value is not None:
+                matched = str(self.value) in extracted
+            else:
+                matched = False
         else:
             matched = extracted is not None
         return self._apply_negative(MatchResult(

@@ -25,7 +25,7 @@ class KatanaEndpoint:
     content_length: int = 0
     source: str = "unknown"
     timestamp: str = field(default_factory=lambda: datetime.utcnow().isoformat())
-    query_params: Dict[str, str] = field(default_factory=dict)
+    query_params: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -174,7 +174,7 @@ class KatanaCrawler:
             endpoints.append(endpoint)
         return endpoints
 
-    def _extract_query_params(self, url: str) -> Dict[str, str]:
+    def _extract_query_params(self, url: str) -> Dict[str, Any]:
         if "?" not in url:
             return {}
         parsed = urlparse(url)

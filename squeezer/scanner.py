@@ -24,10 +24,8 @@ from squeezer.models import (
 )
 from squeezer.utils import TargetValidator, logger, sanitize_url
 
-
 DEFAULT_MAX_RETRIES = 3
 DEFAULT_RETRY_DELAY = 0.1
-
 
 @dataclass
 class ExecutionContext:
@@ -106,7 +104,7 @@ async def _execute_request_with_retry(
     if len(responses) > 1:
         is_consistent = ConsistencyChecker.are_consistent(responses)
         return responses[0], is_consistent
-    return responses[0], True if responses else None
+    return responses[0], bool(responses)
 
 
 def prepare_headers(config: RequestConfig, context: ExecutionContext) -> Dict[str, str]:
