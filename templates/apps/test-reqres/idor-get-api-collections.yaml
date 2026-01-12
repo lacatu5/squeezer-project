@@ -1,0 +1,17 @@
+id: test-reqres-idor-get-api-collections
+info:
+  name: 'IDOR: /api/collections'
+  owasp_category: A01:2025
+  severity: high
+  tags:
+  - idor
+  - test-reqres
+requests:
+- path: /api/collections/1
+  method: GET
+  headers:
+    Authorization: '{{bearer_token}}'
+  matchers:
+  - type: status
+    status:
+    - 200

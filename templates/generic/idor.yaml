@@ -1,0 +1,146 @@
+id: generic-idor
+info:
+  name: Insecure Direct Object Reference (IDOR)
+  description: Tests for IDOR by sequential ID enumeration on API endpoints
+  owasp_category: A01:2021
+  severity: high
+  tags:
+    - idor
+    - access-control
+    - generic
+    - api
+
+requests:
+  - name: IDOR user enumeration - ID 1
+    method: GET
+    path: /api/users/1
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 403
+      - type: word
+        part: body
+        words:
+          - "id"
+          - "email"
+          - "name"
+          - "username"
+          - "user"
+        condition: or
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: IDOR_USER_ENUMERATION
+      message: API returns user data with sequential ID - possible IDOR vulnerability
+      remediation: Use non-sequential IDs (UUIDs) and implement proper access control
+
+  - name: IDOR access other user - ID 2
+    method: GET
+    path: /api/users/2
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - "id"
+          - "email"
+          - "name"
+        condition: or
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: IDOR_ACCESS_OTHER_USER
+      message: Can access other user resources by incrementing ID without authentication
+      remediation: Verify ownership of resources before access
+
+  - name: IDOR offset attack - ID 10
+    method: GET
+    path: /api/users/10
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - "id"
+          - "email"
+        condition: or
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: IDOR_OFFSET_ATTACK
+      message: ID offset attack successful - can enumerate users
+      remediation: Use non-sequential IDs and require authentication
+
+  - name: IDOR admin access - ID 0
+    method: GET
+    path: /api/users/0
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 403
+      - type: word
+        part: body
+        words:
+          - "admin"
+          - "root"
+          - "administrator"
+        case_sensitive: false
+        condition: or
+    matchers_condition: and
+    on_match:
+      vulnerability: IDOR_ADMIN_ACCESS
+      message: Admin user possibly accessible via ID 0
+      remediation: Implement proper role-based access control
+
+  - name: IDOR negative ID
+    method: GET
+    path: /api/users/-1
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 500
+    on_match:
+      vulnerability: IDOR_NEGATIVE_ID
+      message: API accepts negative ID - may expose database records
+      remediation: Validate ID format and range on server side
+
+  - name: IDOR admin endpoint enumeration
+    method: GET
+    path: /api/admin/users/1
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 403
+    on_match:
+      vulnerability: IDOR_ADMIN_ENDPOINT
+      message: Admin endpoint accessible - verify authentication requirements
+      remediation: Require admin role for /api/admin/* endpoints
+
+  - name: IDOR path traversal attempt
+    method: GET
+    path: /api/users/../admin
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 301
+          - 302
+    on_match:
+      vulnerability: IDOR_PATH_TRAVERSAL
+      message: Path traversal in user ID - possible access control bypass
+      remediation: Sanitize user input and reject path separators

@@ -1,0 +1,120 @@
+id: generic-cors-misconfig
+info:
+  name: CORS Misconfiguration
+  description: Tests for overly permissive CORS configurations
+  owasp_category: A05:2021
+  severity: medium
+  tags:
+    - cors
+    - misconfiguration
+    - generic
+
+requests:
+  - name: CORS arbitrary origin reflection
+    method: GET
+    path: /
+    headers:
+      Origin: "https://evil.com"
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: https://evil.com"
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-credentials: true"
+        case_sensitive: false
+    matchers_condition: or
+    on_match:
+      vulnerability: CORS_ARBITRARY_ORIGIN
+      message: CORS allows arbitrary origin - potential data theft via CSRF+XSS combo
+      remediation: Restrict CORS to trusted origins only
+
+  - name: CORS null origin reflection
+    method: GET
+    path: /
+    headers:
+      Origin: "null"
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: null"
+        case_sensitive: false
+    on_match:
+      vulnerability: CORS_NULL_ORIGIN
+      message: CORS allows null origin - potential sandbox bypass in iframes
+      remediation: Reject null origin in CORS configuration
+
+  - name: CORS wildcard with credentials
+    method: GET
+    path: /
+    headers:
+      Origin: "https://example.com"
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: *"
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-credentials: true"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_WILDCARD_WITH_CREDENTIALS
+      message: CORS wildcard with credentials - invalid but may be exploited
+      remediation: Use explicit origin list when credentials are enabled
+
+  - name: CORS preflight allows all methods
+    method: OPTIONS
+    path: /
+    headers:
+      Origin: "https://evil.com"
+      Access-Control-Request-Method: "DELETE"
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 204
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-methods: delete"
+          - "access-control-allow-methods: *"
+          - "access-control-allow-methods: GET, HEAD, POST, PUT, DELETE, OPTIONS"
+        condition: or
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_PREFLAX_PERMISSIVE
+      message: CORS preflight allows dangerous methods from any origin
+      remediation: Restrict allowed methods and origins
+
+  - name: CORS missing ACAC header
+    method: GET
+    path: /
+    headers:
+      Origin: "https://example.com"
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: https://example.com"
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-credentials"
+        case_sensitive: false
+        negative: true
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_MISSING_ACAC
+      message: CORS has specific origin but missing Access-Control-Allow-Credentials
+      remediation: Add Access-Control-Allow-Credentials if credentials are used

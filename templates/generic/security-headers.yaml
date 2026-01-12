@@ -1,0 +1,133 @@
+id: generic-security-headers
+info:
+  name: Missing Security Headers
+  description: Tests for absence of important security HTTP headers
+  owasp_category: A05:2021
+  severity: low
+  tags:
+    - headers
+    - security
+    - generic
+    - misconfiguration
+
+requests:
+  - name: Missing X-Frame-Options
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "x-frame-options"
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_X_FRAME_OPTIONS
+      message: X-Frame-Options header missing - clickjacking risk
+      remediation: Add X-Frame-Options: DENY or SAMEORIGIN
+
+  - name: Missing Content-Security-Policy
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "content-security-policy"
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_CSP
+      message: Content-Security-Policy header missing - XSS risk
+      remediation: Implement strict CSP header with default-src 'self'
+
+  - name: Missing Strict-Transport-Security
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "strict-transport-security"
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_HSTS
+      message: Strict-Transport-Security header missing - no HTTPS enforcement
+      remediation: Add Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+  - name: Missing X-Content-Type-Options
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "x-content-type-options"
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_X_CONTENT_TYPE_OPTIONS
+      message: X-Content-Type-Options header missing - MIME sniffing risk
+      remediation: Add X-Content-Type-Options: nosniff
+
+  - name: Missing X-XSS-Protection
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "x-xss-protection"
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_X_XSS_PROTECTION
+      message: X-XSS-Protection header missing (legacy browsers)
+      remediation: Add X-XSS-Protection: 1; mode=block
+
+  - name: Missing Referrer-Policy
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "referrer-policy"
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_REFERRER_POLICY
+      message: Referrer-Policy header missing - privacy risk
+      remediation: Add Referrer-Policy: strict-origin-when-cross-origin
+
+  - name: Missing Permissions-Policy
+    method: GET
+    path: /
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "permissions-policy"
+        case_sensitive: false
+        negative: true
+    on_match:
+      vulnerability: MISSING_PERMISSIONS_POLICY
+      message: Permissions-Policy header missing - browser feature control
+      remediation: Add Permissions-Policy to restrict browser features
+
+  - name: Server version disclosure
+    method: GET
+    path: /
+    matchers:
+      - type: regex
+        part: header
+        condition: or
+        regex:
+          - '^Server:\s+[A-Za-z0-9/\.]+\s+[0-9]'
+          - '^Server:\s+(nginx/[0-9]|Apache/[0-9]|cloudflare|Microsoft-IIS)'
+        case_sensitive: false
+    on_match:
+      vulnerability: SERVER_VERSION_DISCLOSED
+      message: Server software version disclosed
+      remediation: Configure server to send generic "Server" header

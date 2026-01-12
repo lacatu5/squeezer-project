@@ -1,0 +1,107 @@
+id: generic-sqli
+info:
+  name: SQL Injection (Error-Based)
+  description: Tests for SQL injection via query parameters on common endpoints
+  owasp_category: A03:2021
+  severity: critical
+  tags:
+    - sqli
+    - injection
+    - generic
+    - dast
+
+requests:
+  - name: SQLi via /get endpoint
+    method: GET
+    path: /get?id=1'
+    matchers:
+      - type: regex
+        condition: or
+        case_sensitive: false
+        part: body
+        regex:
+          - "SQL syntax.{0,200}?MySQL"
+          - "Warning.{0,200}?\\Wmysqli?_"
+          - "MySQLSyntaxErrorException"
+          - "check the manual that (corresponds|fits)"
+          - "Unknown column"
+          - "SQLSTATE\\[\\d+\\]: Syntax error"
+          - "PostgreSQL.{0,200}?ERROR"
+          - "PG::SyntaxError:"
+          - "ORA-\\d{5}"
+          - "Unclosed quotation mark"
+          - "SQLite error"
+    on_match:
+      vulnerability: SQL_INJECTION_GET_PARAM
+      message: SQL injection detected via query parameter
+      remediation: Use parameterized queries and input validation
+
+  - name: SQLi via search parameter
+    method: GET
+    path: /search?q=1' OR '1'='1
+    matchers:
+      - type: regex
+        condition: or
+        case_sensitive: false
+        part: body
+        regex:
+          - "SQL syntax.{0,200}?MySQL"
+          - "PostgreSQL.{0,200}?ERROR"
+          - "ORA-\\d{5}"
+          - "Unclosed quotation mark"
+    on_match:
+      vulnerability: SQL_INJECTION_SEARCH
+      message: SQL injection via search parameter
+      remediation: Use parameterized queries
+
+  - name: SQLi via user endpoint
+    method: GET
+    path: /api/users?id=1"
+    matchers:
+      - type: regex
+        condition: or
+        case_sensitive: false
+        part: body
+        regex:
+          - "SQL syntax.{0,200}?MySQL"
+          - "PostgreSQL.{0,200}?ERROR"
+          - "ORA-\\d{5}"
+    on_match:
+      vulnerability: SQL_INJECTION_DOUBLE_QUOTE
+      message: SQL injection via double quote
+      remediation: Use parameterized queries
+
+  - name: SQLi via login endpoint
+    method: GET
+    path: /api/login?user=admin'--
+    matchers:
+      - type: regex
+        condition: or
+        case_sensitive: false
+        part: body
+        regex:
+          - "SQL syntax.{0,200}?MySQL"
+          - "PostgreSQL.{0,200}?ERROR"
+          - "ORA-\\d{5}"
+          - "Unclosed quotation mark"
+    on_match:
+      vulnerability: SQL_INJECTION_LOGIN
+      message: SQL injection via login parameter
+      remediation: Use parameterized queries
+
+  - name: SQLi via collection endpoint
+    method: GET
+    path: /api/collections?id=1' UNION SELECT NULL--
+    matchers:
+      - type: regex
+        condition: or
+        case_sensitive: false
+        part: body
+        regex:
+          - "SQL syntax.{0,200}?MySQL"
+          - "PostgreSQL.{0,200}?ERROR"
+          - "ORA-\\d{5}"
+    on_match:
+      vulnerability: SQL_INJECTION_UNION
+      message: SQL injection via UNION SELECT
+      remediation: Use parameterized queries

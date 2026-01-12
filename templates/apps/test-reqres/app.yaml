@@ -1,0 +1,246 @@
+name: test-reqres
+target_url: https://reqres.in
+created_at: '2026-01-12T12:39:10.457290'
+endpoints:
+- url: https://reqres.in
+  path: ''
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/app/collections/orders/records?page=\
+  path: /app/collections/orders/records
+  method: GET
+  query: page=\
+  tags:
+  - commerce
+  type: page
+- url: https://reqres.in/api/app-users/login
+  path: /api/app-users/login
+  method: GET
+  query: ''
+  tags:
+  - authentication
+  - api
+  type: api
+- url: https://reqres.in/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js
+  path: /cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/app/collections/notes/records
+  path: /app/collections/notes/records
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/app/collections/profile/records
+  path: /app/collections/profile/records
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  type: page
+- url: https://reqres.in/app/collections/todos/records
+  path: /app/collections/todos/records
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/api/app-users/verify
+  path: /api/app-users/verify
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://reqres.in/documentation
+  path: /documentation
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://reqres.in/gtm.js
+  path: /gtm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/cdn-cgi/scripts/5c5dd728/cloudflare-static/'+e.replace(/
+  path: /cdn-cgi/scripts/5c5dd728/cloudflare-static/'+e.replace(/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/api/collections
+  path: /api/collections
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://reqres.in/blog/frontend-only-auth
+  path: /blog/frontend-only-auth
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://reqres.in/blog/ship-mvp-without-backend
+  path: /blog/ship-mvp-without-backend
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/api/
+  path: /api/
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://app.reqres.in/getting-started
+  path: /getting-started
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://app.reqres.in/upgrade
+  path: /upgrade
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://app.reqres.in/projects
+  path: /projects
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://app.reqres.in
+  path: ''
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/cdn-cgi/l/email-protection
+  path: /cdn-cgi/l/email-protection
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/blog/qa-automation-with-reqres
+  path: /blog/qa-automation-with-reqres
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://app.reqres.in/examples/notes-app
+  path: /examples/notes-app
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://app.reqres.in/?next=/projects
+  path: /
+  method: GET
+  query: next=/projects
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/landing
+  path: /landing
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/blog/gtm.js
+  path: /blog/gtm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/api/users?page=2&quot
+  path: /api/users
+  method: GET
+  query: page=2&quot
+  tags:
+  - user-data
+  - api
+  type: api
+- url: https://reqres.in/api/collections/todos/records&quot
+  path: /api/collections/todos/records&quot
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://app.reqres.in/sitemap.xml
+  path: /sitemap.xml
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://app.reqres.in/api-keys
+  path: /api-keys
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://app.reqres.in/documentation
+  path: /documentation
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://reqres.in/blog
+  path: /blog
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/
+  path: /
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/blog/when-jsonplaceholder-isnt-enough
+  path: /blog/when-jsonplaceholder-isnt-enough
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://reqres.in/blog/stop-faking-apis
+  path: /blog/stop-faking-apis
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+auth:
+  type: none

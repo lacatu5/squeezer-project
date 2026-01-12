@@ -1,0 +1,199 @@
+id: generic-open-redirect
+info:
+  name: Open URL Redirect
+  description: Tests for open redirect vulnerabilities via URL parameter injection
+  owasp_category: A01:2021
+  severity: medium
+  tags:
+    - redirect
+    - phishing
+    - generic
+    - dast
+
+requests:
+  - name: Open redirect via url parameter
+    method: GET
+    path: /redirect?url=https://evil.com
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "https://evil.com"
+          - "http://evil.com"
+          - "//evil.com"
+        condition: or
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_URL_PARAM
+      message: Open redirect via url parameter - phishing risk
+      remediation: Validate redirect URLs against whitelist; use relative redirects
+
+  - name: Open redirect via next parameter
+    method: GET
+    path: /login?next=https://evil.com
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "evil.com"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_NEXT_PARAM
+      message: Open redirect via next parameter after login
+      remediation: Use CSRF tokens; validate redirect URLs
+
+  - name: Open redirect via return parameter
+    method: GET
+    path: /logout?return=https://evil.com
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "evil.com"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_RETURN_PARAM
+      message: Open redirect via return parameter
+      remediation: Whitelist allowed redirect domains
+
+  - name: Open redirect via redirect parameter
+    method: GET
+    path: /auth?redirect=https://evil.com/account
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "evil.com"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_AUTH_PARAM
+      message: Open redirect via auth redirect parameter
+      remediation: Validate redirect URLs in authentication flow
+
+  - name: Open redirect via target parameter
+    method: GET
+    path: /link?target=//evil.com
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "//evil.com"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_TARGET_PARAM
+      message: Open redirect via protocol-relative URL
+      remediation: Reject protocol-relative URLs in redirect parameters
+
+  - name: Open redirect via data URI
+    method: GET
+    path: /redirect?url=data:text/html,<script>alert(1)</script>
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "data:"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_DATA_URI
+      message: Open redirect via data: URI - XSS possible
+      remediation: Restrict redirect URLs to http/https only
+
+  - name: Open redirect via javascript URI
+    method: GET
+    path: /redirect?url=javascript:alert(1)
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "javascript:"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_JAVASCRIPT_URI
+      message: Open redirect via javascript: URI - XSS possible
+      remediation: Validate redirect URL scheme
+
+  - name: Open redirect via path traversal
+    method: GET
+    path: //evil.com/@test
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 301
+          - 302
+          - 303
+          - 307
+          - 308
+      - type: word
+        part: header
+        words:
+          - "evil.com"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: OPEN_REDIRECT_PATH_TRAVERSAL
+      message: Open redirect via path-based redirect bypass
+      remediation: Normalize paths before redirecting

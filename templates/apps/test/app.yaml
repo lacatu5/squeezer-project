@@ -1,566 +1,4428 @@
 name: test
-target_url: http://localhost:3000
-created_at: '2026-01-12T11:47:15.245152'
+target_url: https://esenziaclub.com/es
+created_at: '2026-01-12T12:30:16.524816'
 endpoints:
-- url: http://localhost:3000
+- url: https://esenziaclub.com/es
+  path: /es
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/s/trekkie.storefront.05c509f133afcfb9f2a8aef7ef881fd109f9b92e.min.js
+  path: /cdn/s/trekkie.storefront.05c509f133afcfb9f2a8aef7ef881fd109f9b92e.min.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/api/v1/setting.json
+  path: /api/v1/setting.json
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/cdn/shop/t/43/compiled_assets/scripts.js
+  path: /cdn/shop/t/43/compiled_assets/scripts.js
+  method: GET
+  query: ''
+  tags:
+  - resource-id
+  type: page
+- url: https://esenziaclub.com/%5C/s3.eu-west-1.amazonaws.com%5C/production-klarna-il-shopify-osm%5C/0b7fe7c4a98ef8166eeafee767bc667686567a25%5C/esenzia-shop.myshopify.com-1764874785584.js
+  path: /%5C/s3.eu-west-1.amazonaws.com%5C/production-klarna-il-shopify-osm%5C/0b7fe7c4a98ef8166eeafee767bc667686567a25%5C/esenzia-shop.myshopify.com-1764874785584.js
+  method: GET
+  query: ''
+  tags:
+  - resource-id
+  type: page
+- url: https://esenziaclub.com/%5C/bigblueprod-fast-tags.web.app%5C/shopify%5C/2.js
+  path: /%5C/bigblueprod-fast-tags.web.app%5C/shopify%5C/2.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/%5C/bigblueprod-fast-tags.web.app%5C/shopify%5C/main.js
+  path: /%5C/bigblueprod-fast-tags.web.app%5C/shopify%5C/main.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/%5C/app.kiwisizing.com%5C/web%5C/js%5C/dist%5C/kiwiSizing%5C/plugin%5C/SizingPlugin.prod.js
+  path: /%5C/app.kiwisizing.com%5C/web%5C/js%5C/dist%5C/kiwiSizing%5C/plugin%5C/SizingPlugin.prod.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/api/collect
+  path: /api/collect
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/%5C/image-optimizer.salessquad.co.uk%5C/scripts%5C/tiny_img_not_found_notifier_342212862039763de0c35916c71f2a1f.js
+  path: /%5C/image-optimizer.salessquad.co.uk%5C/scripts%5C/tiny_img_not_found_notifier_342212862039763de0c35916c71f2a1f.js
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/%5C%5C/bigblueprod-fast-tags.web.app%5C%5C/shopify%5C%5C/2.js
+  path: /%5C%5C/bigblueprod-fast-tags.web.app%5C%5C/shopify%5C%5C/2.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/%5C%5C/bigblueprod-fast-tags.web.app%5C%5C/shopify%5C%5C/main.js
+  path: /%5C%5C/bigblueprod-fast-tags.web.app%5C%5C/shopify%5C%5C/main.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/%5C%5C/app.kiwisizing.com%5C%5C/web%5C%5C/js%5C%5C/dist%5C%5C/kiwiSizing%5C%5C/plugin%5C%5C/SizingPlugin.prod.js
+  path: /%5C%5C/app.kiwisizing.com%5C%5C/web%5C%5C/js%5C%5C/dist%5C%5C/kiwiSizing%5C%5C/plugin%5C%5C/SizingPlugin.prod.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cart/add
+  path: /cart/add
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/api/unstable/graphql.json
+  path: /api/unstable/graphql.json
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/%5C%5C%5C/bigblueprod-fast-tags.web.app%5C%5C%5C/shopify%5C%5C%5C/2.js
+  path: /%5C%5C%5C/bigblueprod-fast-tags.web.app%5C%5C%5C/shopify%5C%5C%5C/2.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/%5C%5C/image-optimizer.salessquad.co.uk%5C%5C/scripts%5C%5C/tiny_img_not_found_notifier_342212862039763de0c35916c71f2a1f.js
+  path: /%5C%5C/image-optimizer.salessquad.co.uk%5C%5C/scripts%5C%5C/tiny_img_not_found_notifier_342212862039763de0c35916c71f2a1f.js
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/%5C%5C/s3.eu-west-1.amazonaws.com%5C%5C/production-klarna-il-shopify-osm%5C%5C/0b7fe7c4a98ef8166eeafee767bc667686567a25%5C%5C/esenzia-shop.myshopify.com-1764874785584.js
+  path: /%5C%5C/s3.eu-west-1.amazonaws.com%5C%5C/production-klarna-il-shopify-osm%5C%5C/0b7fe7c4a98ef8166eeafee767bc667686567a25%5C%5C/esenzia-shop.myshopify.com-1764874785584.js
+  method: GET
+  query: ''
+  tags:
+  - resource-id
+  type: page
+- url: https://esenziaclub.com/%5C%5C%5C/bigblueprod-fast-tags.web.app%5C%5C%5C/shopify%5C%5C%5C/main.js
+  path: /%5C%5C%5C/bigblueprod-fast-tags.web.app%5C%5C%5C/shopify%5C%5C%5C/main.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/s/consent-tracking-api.js
+  path: /cdn/s/consent-tracking-api.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/shopify_pay/accelerated_checkout
+  path: /shopify_pay/accelerated_checkout
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/%5C%5C%5C/image-optimizer.salessquad.co.uk%5C%5C%5C/scripts%5C%5C%5C/tiny_img_not_found_notifier_342212862039763de0c35916c71f2a1f.js
+  path: /%5C%5C%5C/image-optimizer.salessquad.co.uk%5C%5C%5C/scripts%5C%5C%5C/tiny_img_not_found_notifier_342212862039763de0c35916c71f2a1f.js
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/%5C%5C%5C/app.kiwisizing.com%5C%5C%5C/web%5C%5C%5C/js%5C%5C%5C/dist%5C%5C%5C/kiwiSizing%5C%5C%5C/plugin%5C%5C%5C/SizingPlugin.prod.js
+  path: /%5C%5C%5C/app.kiwisizing.com%5C%5C%5C/web%5C%5C%5C/js%5C%5C%5C/dist%5C%5C%5C/kiwiSizing%5C%5C%5C/plugin%5C%5C%5C/SizingPlugin.prod.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  path: /modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/%5C/d1liekpayvooaz.cloudfront.net%5C/apps%5C/customizery%5C/customizery.js
+  path: /%5C/d1liekpayvooaz.cloudfront.net%5C/apps%5C/customizery%5C/customizery.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  path: /modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/%5C%5C/d1liekpayvooaz.cloudfront.net%5C%5C/apps%5C%5C/customizery%5C%5C/customizery.js
+  path: /%5C%5C/d1liekpayvooaz.cloudfront.net%5C%5C/apps%5C%5C/customizery%5C%5C/customizery.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/%5C%5C%5C/d1liekpayvooaz.cloudfront.net%5C%5C%5C/apps%5C%5C%5C/customizery%5C%5C%5C/customizery.js
+  path: /%5C%5C%5C/d1liekpayvooaz.cloudfront.net%5C%5C%5C/apps%5C%5C%5C/customizery%5C%5C%5C/customizery.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.payment-terms_BwGKVUye.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  path: /modules/v2/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/chunk.modal_k166FdQy.esm.js
+  path: /modules/v2/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: admin
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  path: /modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /modules%5C/v2%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  path: /modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  path: /modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.avatar_BTnouDA3.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  path: /modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/chunk.modal_k166FdQy.esm.js
+  path: /modules%5C%5C/v2%5C%5C/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: admin
+- url: https://esenziaclub.com/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/chunk.common_BL03_Ulh.esm.js
+  path: /modules/v2/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/checkouts/internal/preloads.js
+  path: /checkouts/internal/preloads.js
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  path: /modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.shop-button_-iSkltkT.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  path: /modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /modules%5C%5C/v2%5C%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules%5C%5C/v2%5C%5C/chunk.common_BL03_Ulh.esm.js
+  path: /modules%5C%5C/v2%5C%5C/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pay/sdk-authorize
+  path: /pay/sdk-authorize
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/pay/sdk-session
+  path: /pay/sdk-session
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/cart.js
+  path: /cart.js
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cart/add.js
+  path: /cart/add.js
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/shop-js/
+  path: /shop-js/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pay/transactions/new/email
+  path: /pay/transactions/new/email
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/search/suggest
+  path: /es/search/suggest
+  method: GET
+  query: ''
+  tags:
+  - search
+  type: page
+- url: https://esenziaclub.com/apps/restockrocket-production
+  path: /apps/restockrocket-production
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/v1/produce
+  path: /v1/produce
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/cdn
+  path: /cdn
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/
+  path: /es/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/localization
+  path: /es/localization
+  method: POST
+  query: ''
+  tags:
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/portable-wallets/latest/portable-wallets.es.js
+  path: /cdn/shopifycloud/portable-wallets/latest/portable-wallets.es.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/contact
+  path: /es/contact
+  method: POST
+  query: ''
+  tags:
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/es/search?q=B%c3%basqueda&options[prefix]=last
+  path: /es/search
+  method: GET
+  query: q=B%c3%basqueda&options[prefix]=last
+  tags:
+  - search
+  type: page
+- url: https://esenziaclub.com/es/cart/change
+  path: /es/cart/change
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/es/cart/add
+  path: /es/cart/add
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/wallets/config/optimus
+  path: /wallets/config/optimus
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/wallets/config/amazon_pay
+  path: /wallets/config/amazon_pay
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/graphql.json
+  path: /graphql.json
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: api
+- url: https://esenziaclub.com/cdn/shopifycloud/portable-wallets/latest/g
+  path: /cdn/shopifycloud/portable-wallets/latest/g
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/portable-wallets/latest/i
+  path: /cdn/shopifycloud/portable-wallets/latest/i
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/api/
+  path: /api/
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/%5C/graphql.json?__cf_chl_f_tk=A3CRKNXreQDfi_EIpTdDH.4AeqopzZj.cSKxAPwee3Q-1768217398-1.0.1.1-MqfFPNjstnU5iNZyEPV.vUH_1vFs95uOe0WYs7PXB6g
+  path: /%5C/graphql.json
+  method: GET
+  query: __cf_chl_f_tk=A3CRKNXreQDfi_EIpTdDH.4AeqopzZj.cSKxAPwee3Q-1768217398-1.0.1.1-MqfFPNjstnU5iNZyEPV.vUH_1vFs95uOe0WYs7PXB6g
+  tags:
+  - general
+  type: api
+- url: https://esenziaclub.com/cdn/shopifycloud/portable-wallets/latest/Chrome/
+  path: /cdn/shopifycloud/portable-wallets/latest/Chrome/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/v1/logs
+  path: /v1/logs
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/v1/metrics
+  path: /v1/metrics
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/cdn/wpm/
+  path: /cdn/wpm/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/cart/update
+  path: /es/cart/update
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cart/change
+  path: /cart/change
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/api/modules/v2/client.payment-terms_BFsudFhJ.en.esm.js
+  path: /api/modules/v2/client.payment-terms_BFsudFhJ.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.shop-login_DA8-MZ-E.en.esm.js
+  path: /api/modules/v2/client.shop-login_DA8-MZ-E.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.lead-capture_o2hOda6W.en.esm.js
+  path: /api/modules/v2/client.lead-capture_o2hOda6W.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/es/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  path: /es/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /es/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /es/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/api/modules/v2/client.shop-follow-button_B6YY9G4U.en.esm.js
+  path: /api/modules/v2/client.shop-follow-button_B6YY9G4U.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.init-shop-for-new-customer-accounts_BIu2e6le.en.esm.js
+  path: /api/modules/v2/client.init-shop-for-new-customer-accounts_BIu2e6le.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/es/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /es/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/api/modules/v2/client.init-customer-accounts-sign-up_pIEGEpjr.en.esm.js
+  path: /api/modules/v2/client.init-customer-accounts-sign-up_pIEGEpjr.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/es/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /es/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /es/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.lead-capture_DVJbTYOS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /es/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/api/modules/v2/client.checkout-modal_NoX7b1qq.en.esm.js
+  path: /api/modules/v2/client.checkout-modal_NoX7b1qq.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  path: /es/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /es/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /es/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cart/clear
+  path: /cart/clear
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /es/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  path: /es/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/cart/update
+  path: /cart/update
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/chunk.modal_k166FdQy.esm.js
+  path: /es/modules/v2/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.pay-button_DuQAeylH.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /es/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /es/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /es/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: admin
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /es/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/localization
+  path: /localization
+  method: POST
+  query: ''
+  tags:
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: admin
+- url: https://esenziaclub.com/modules/v2/client.payment-terms_BFsudFhJ.en.esm.js
+  path: /modules/v2/client.payment-terms_BFsudFhJ.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-login_DA8-MZ-E.en.esm.js
+  path: /modules/v2/client.shop-login_DA8-MZ-E.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.lead-capture_o2hOda6W.en.esm.js
+  path: /modules/v2/client.lead-capture_o2hOda6W.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  path: /es%5C/modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-follow-button_B6YY9G4U.en.esm.js
+  path: /modules/v2/client.shop-follow-button_B6YY9G4U.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.checkout-modal_NoX7b1qq.en.esm.js
+  path: /modules/v2/client.checkout-modal_NoX7b1qq.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.avatar_BTnouDA3.en.esm.js
+  path: /modules/v2/client.avatar_BTnouDA3.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-customer-accounts-sign-up_pIEGEpjr.en.esm.js
+  path: /modules/v2/client.init-customer-accounts-sign-up_pIEGEpjr.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-customer-accounts_BNYsaOzg.en.esm.js
+  path: /modules/v2/client.init-customer-accounts_BNYsaOzg.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.pay-button_Cw45D1uM.en.esm.js
+  path: /modules/v2/client.pay-button_Cw45D1uM.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-login-button_DrVPCwAQ.en.esm.js
+  path: /modules/v2/client.shop-login-button_DrVPCwAQ.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/modules/v2/client.init-shop-cart-sync_CG-L-Qzi.en.esm.js
+  path: /modules/v2/client.init-shop-cart-sync_CG-L-Qzi.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/chunk.modal_dvVUSHam.esm.js
+  path: /modules/v2/chunk.modal_dvVUSHam.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-toast-manager_BmSBWum3.en.esm.js
+  path: /modules/v2/client.shop-toast-manager_BmSBWum3.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: admin
+- url: https://esenziaclub.com/modules/v2/client.shop-cash-offers_DkchToOx.en.esm.js
+  path: /modules/v2/client.shop-cash-offers_DkchToOx.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-windoid_C5PxDKWE.en.esm.js
+  path: /modules/v2/client.init-windoid_C5PxDKWE.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-shop-email-lookup-coordinator_D-37GF_a.en.esm.js
+  path: /modules/v2/client.init-shop-email-lookup-coordinator_D-37GF_a.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-fed-cm_DGh7x7ZX.en.esm.js
+  path: /modules/v2/client.init-fed-cm_DGh7x7ZX.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.init-shop-for-new-customer-accounts_BIu2e6le.en.esm.js
+  path: /modules/v2/client.init-shop-for-new-customer-accounts_BIu2e6le.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/chunk.common_B8yXDTDb.esm.js
+  path: /modules/v2/chunk.common_B8yXDTDb.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-button_aOcg-RjH.en.esm.js
+  path: /modules/v2/client.shop-button_aOcg-RjH.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/modules/v2/client.shop-cart-sync_C7TtgCZT.en.esm.js
+  path: /modules/v2/client.shop-cart-sync_C7TtgCZT.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /es/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  path: /es/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/chunk.common_BL03_Ulh.esm.js
+  path: /es/modules/v2/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /es/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/todos-los-pantalones
+  path: /es/collections/todos-los-pantalones
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  path: /es%5C/modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /es%5C/modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/api/modules/v2/client.init-shop-cart-sync_CG-L-Qzi.en.esm.js
+  path: /api/modules/v2/client.init-shop-cart-sync_CG-L-Qzi.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.shop-login-button_DrVPCwAQ.en.esm.js
+  path: /api/modules/v2/client.shop-login-button_DrVPCwAQ.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.pay-button_Cw45D1uM.en.esm.js
+  path: /api/modules/v2/client.pay-button_Cw45D1uM.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.init-customer-accounts_BNYsaOzg.en.esm.js
+  path: /api/modules/v2/client.init-customer-accounts_BNYsaOzg.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.avatar_BTnouDA3.en.esm.js
+  path: /api/modules/v2/client.avatar_BTnouDA3.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.shop-cash-offers_DkchToOx.en.esm.js
+  path: /api/modules/v2/client.shop-cash-offers_DkchToOx.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/chunk.modal_dvVUSHam.esm.js
+  path: /api/modules/v2/chunk.modal_dvVUSHam.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.shop-toast-manager_BmSBWum3.en.esm.js
+  path: /api/modules/v2/client.shop-toast-manager_BmSBWum3.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/search/suggest
+  path: /search/suggest
+  method: GET
+  query: ''
+  tags:
+  - search
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/portable-wallets/latest/portable-wallets.en.js
+  path: /cdn/shopifycloud/portable-wallets/latest/portable-wallets.en.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/cart
+  path: /fr/cart
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/contact
+  path: /contact
+  method: POST
+  query: ''
+  tags:
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/search?q=Search&options[prefix]=last
+  path: /search
+  method: GET
+  query: q=Search&options[prefix]=last
+  tags:
+  - search
+  type: page
+- url: https://esenziaclub.com/api/modules/v2/client.init-windoid_C5PxDKWE.en.esm.js
+  path: /api/modules/v2/client.init-windoid_C5PxDKWE.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/chunk.common_B8yXDTDb.esm.js
+  path: /api/modules/v2/chunk.common_B8yXDTDb.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.init-shop-email-lookup-coordinator_D-37GF_a.en.esm.js
+  path: /api/modules/v2/client.init-shop-email-lookup-coordinator_D-37GF_a.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/fr/modules/v2/client.payment-terms_lApMSROo.fr.esm.js
+  path: /fr/modules/v2/client.payment-terms_lApMSROo.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/api/modules/v2/client.shop-cart-sync_C7TtgCZT.en.esm.js
+  path: /api/modules/v2/client.shop-cart-sync_C7TtgCZT.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/api/modules/v2/client.init-fed-cm_DGh7x7ZX.en.esm.js
+  path: /api/modules/v2/client.init-fed-cm_DGh7x7ZX.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/fr/modules/v2/client.shop-login_CWNADuYK.fr.esm.js
+  path: /fr/modules/v2/client.shop-login_CWNADuYK.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/api/modules/v2/client.shop-button_aOcg-RjH.en.esm.js
+  path: /api/modules/v2/client.shop-button_aOcg-RjH.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/fr/modules/v2/client.shop-follow-button_CtXs7a4z.fr.esm.js
+  path: /fr/modules/v2/client.shop-follow-button_CtXs7a4z.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.init-customer-accounts-sign-up_BIioaIvW.fr.esm.js
+  path: /fr/modules/v2/client.init-customer-accounts-sign-up_BIioaIvW.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.init-shop-for-new-customer-accounts_BV0T_L-M.fr.esm.js
+  path: /fr/modules/v2/client.init-shop-for-new-customer-accounts_BV0T_L-M.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.init-customer-accounts_C4rKB4Wv.fr.esm.js
+  path: /fr/modules/v2/client.init-customer-accounts_C4rKB4Wv.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.checkout-modal_DSzg7Z_p.fr.esm.js
+  path: /fr/modules/v2/client.checkout-modal_DSzg7Z_p.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.pay-button_C7IagFlV.fr.esm.js
+  path: /fr/modules/v2/client.pay-button_C7IagFlV.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.init-shop-cart-sync_CFsGrWZK.fr.esm.js
+  path: /fr/modules/v2/client.init-shop-cart-sync_CFsGrWZK.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.shop-login-button_DPIQspAu.fr.esm.js
+  path: /fr/modules/v2/client.shop-login-button_DPIQspAu.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/fr/modules/v2/client.avatar_BTnouDA3.fr.esm.js
+  path: /fr/modules/v2/client.avatar_BTnouDA3.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/chunk.modal_CXHyvXrS.esm.js
+  path: /fr/modules/v2/chunk.modal_CXHyvXrS.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.shop-cash-offers_36WmkPJ1.fr.esm.js
+  path: /fr/modules/v2/client.shop-cash-offers_36WmkPJ1.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.shop-toast-manager_Co1kGayl.fr.esm.js
+  path: /fr/modules/v2/client.shop-toast-manager_Co1kGayl.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: admin
+- url: https://esenziaclub.com/fr/modules/v2/client.init-fed-cm_By8yn2rb.fr.esm.js
+  path: /fr/modules/v2/client.init-fed-cm_By8yn2rb.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.init-windoid_Cm45jgHG.fr.esm.js
+  path: /fr/modules/v2/client.init-windoid_Cm45jgHG.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.init-shop-email-lookup-coordinator_zht9UDj2.fr.esm.js
+  path: /fr/modules/v2/client.init-shop-email-lookup-coordinator_zht9UDj2.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.shop-button_Bi0hVxYn.fr.esm.js
+  path: /fr/modules/v2/client.shop-button_Bi0hVxYn.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/chunk.common_BmZGYhCT.esm.js
+  path: /fr/modules/v2/chunk.common_BmZGYhCT.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.shop-cart-sync_0yO_7ili.fr.esm.js
+  path: /fr/modules/v2/client.shop-cart-sync_0yO_7ili.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/search/suggest
+  path: /fr/search/suggest
+  method: GET
+  query: ''
+  tags:
+  - search
+  type: page
+- url: https://esenziaclub.com/fr/modules/v2/client.lead-capture_gscac75q.fr.esm.js
+  path: /fr/modules/v2/client.lead-capture_gscac75q.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/
+  path: /fr/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/localization
+  path: /fr/localization
+  method: POST
+  query: ''
+  tags:
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/fr/search?q=Recherche&options[prefix]=last
+  path: /fr/search
+  method: GET
+  query: q=Recherche&options[prefix]=last
+  tags:
+  - search
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/shop-js/modules/v2/client.init-shop-cart-sync_CFsGrWZK.fr.esm.js
+  path: /cdn/shopifycloud/shop-js/modules/v2/client.init-shop-cart-sync_CFsGrWZK.fr.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/cart/change
+  path: /fr/cart/change
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/shop-js/modules/v2/chunk.common_BmZGYhCT.esm.js
+  path: /cdn/shopifycloud/shop-js/modules/v2/chunk.common_BmZGYhCT.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/cart/add
+  path: /fr/cart/add
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/portable-wallets/latest/portable-wallets.fr.js
+  path: /cdn/shopifycloud/portable-wallets/latest/portable-wallets.fr.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/contact
+  path: /fr/contact
+  method: POST
+  query: ''
+  tags:
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/fr/pages/conditions-generales-de-vente
+  path: /fr/pages/conditions-generales-de-vente
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/avis-juridique
+  path: /fr/pages/avis-juridique
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/politique-de-confidentialite
+  path: /fr/pages/politique-de-confidentialite
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/edge-of-the-road
+  path: /fr/pages/edge-of-the-road
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/politique-de-cookies
+  path: /fr/pages/politique-de-cookies
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/fugaces
+  path: /fr/pages/fugaces
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/spotlight
+  path: /fr/pages/spotlight
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cart
+  path: /cart
+  method: POST
+  query: ''
+  tags:
+  - commerce
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/fr/pages/siempre-viva
+  path: /fr/pages/siempre-viva
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/allegro
+  path: /fr/pages/allegro
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/la-costa
+  path: /fr/pages/la-costa
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/knitted
+  path: /fr/pages/knitted
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/worlwide
+  path: /fr/pages/worlwide
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/l-oeuf
+  path: /fr/pages/l-oeuf
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/00uno
+  path: /fr/pages/00uno
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/cruzcampo
+  path: /fr/pages/cruzcampo
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/account/login
+  path: /fr/account/login
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - authentication
+  type: auth
+- url: https://esenziaclub.com/fr/products/carte-cadeau
+  path: /fr/products/carte-cadeau
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/fr/collections/cruzcampo-x-esenzia
+  path: /fr/collections/cruzcampo-x-esenzia
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/cart/update
+  path: /fr/cart/update
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/fr/pages/esenzia-community
+  path: /fr/pages/esenzia-community
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/worldwide
+  path: /fr/collections/worldwide
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/accessoires
+  path: /fr/collections/accessoires
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/best-seller-nuevo
+  path: /fr/collections/best-seller-nuevo
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/all
+  path: /fr/collections/all
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/caps
+  path: /fr/collections/caps
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/worldwide-sweatshirts
+  path: /fr/collections/worldwide-sweatshirts
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/tote-bags
+  path: /fr/collections/tote-bags
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/luggage
+  path: /fr/collections/luggage
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/esenzia-community-1
+  path: /fr/pages/esenzia-community-1
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/nouvelles-villes-polaires
+  path: /fr/collections/nouvelles-villes-polaires
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/swimwear
+  path: /fr/collections/swimwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/nouveau-polar-classique
+  path: /fr/collections/nouveau-polar-classique
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/longsleeves
+  path: /fr/collections/longsleeves
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/nouvelles-chemises-et-poles
+  path: /fr/collections/nouvelles-chemises-et-poles
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/outwear
+  path: /fr/collections/outwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/pants
+  path: /fr/collections/pants
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/knitwear
+  path: /fr/collections/knitwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/tshirts-1
+  path: /fr/collections/tshirts-1
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/sweats-a-capuche-1
+  path: /fr/collections/sweats-a-capuche-1
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/sweats-a-capuche
+  path: /fr/collections/sweats-a-capuche
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/pages/boutique
+  path: /fr/pages/boutique
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/back-in-stock
+  path: /fr/collections/back-in-stock
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/winter-sales
+  path: /fr/collections/winter-sales
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/shop-js/modules/v2/chunk.common_B8yXDTDb.esm.js
+  path: /cdn/shopifycloud/shop-js/modules/v2/chunk.common_B8yXDTDb.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/shop-js/modules/v2/client.init-shop-cart-sync_CG-L-Qzi.en.esm.js
+  path: /cdn/shopifycloud/shop-js/modules/v2/client.init-shop-cart-sync_CG-L-Qzi.en.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/fr/policies/shipping-policy
+  path: /fr/policies/shipping-policy
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/collections/todos-los-pantalones
+  path: /fr/collections/todos-los-pantalones
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/404
+  path: /404
+  method: GET
+  query: ''
+  tags:
+  - resource-id
+  type: page
+- url: https://esenziaclub.com/pages/condiciones-generales-de-contratacion
+  path: /pages/condiciones-generales-de-contratacion
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/aviso-legal
+  path: /pages/aviso-legal
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/politica-de-cookies
+  path: /pages/politica-de-cookies
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/politica-de-privacidad
+  path: /pages/politica-de-privacidad
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/allegro
+  path: /pages/allegro
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/spotlight
+  path: /pages/spotlight
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/siempre-viva
+  path: /pages/siempre-viva
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/fugaces
+  path: /pages/fugaces
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/la-costa
+  path: /pages/la-costa
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/l-oeuf
+  path: /pages/l-oeuf
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/knitted
+  path: /pages/knitted
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/00uno
+  path: /pages/00uno
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/worlwide
+  path: /pages/worlwide
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/cruzcampo
+  path: /pages/cruzcampo
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/api/collections/todos-los-pantalones
+  path: /api/collections/todos-los-pantalones
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://esenziaclub.com/account/login
+  path: /account/login
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - authentication
+  type: auth
+- url: https://esenziaclub.com/products/tarjeta-regalo-3
+  path: /products/tarjeta-regalo-3
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/esenzia-community-1
+  path: /pages/esenzia-community-1
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/best-sellers
+  path: /collections/best-sellers
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/cruzcampo-x-esenzia
+  path: /collections/cruzcampo-x-esenzia
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/accesorios
+  path: /collections/accesorios
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/esenzia-community
+  path: /pages/esenzia-community
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/all
+  path: /collections/all
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/luggage
+  path: /collections/luggage
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/tote-bags
+  path: /collections/tote-bags
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/caps
+  path: /collections/caps
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/worldwide-sweatshirts
+  path: /collections/worldwide-sweatshirts
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/polares-clasicos
+  path: /collections/polares-clasicos
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/polares-ciudades
+  path: /collections/polares-ciudades
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/swimwear
+  path: /collections/swimwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/edge-of-the-road
+  path: /pages/edge-of-the-road
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/polos
+  path: /collections/polos
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/longsleeves
+  path: /collections/longsleeves
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/zh-CN.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/zh-CN.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/zh-TW.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/zh-TW.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/collections/knitwear
+  path: /collections/knitwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/outwear
+  path: /collections/outwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/vi.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/vi.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/
+  path: /cdn/shopifycloud/checkout-web/generated/translations/
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/collections/hoodies
+  path: /collections/hoodies
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/back-in-stock
+  path: /collections/back-in-stock
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pages/tienda-fisica
+  path: /pages/tienda-fisica
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/crewnecks
+  path: /collections/crewnecks
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/policies/shipping-policy
+  path: /policies/shipping-policy
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/winter-sales
+  path: /collections/winter-sales
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/th.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/th.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/tr.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/tr.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/sv.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/sv.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/sk.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/sk.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/pt-PT.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/pt-PT.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/sl.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/sl.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/ro.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/ro.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/pl.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/pl.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/ru.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/ru.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/pt-BR.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/pt-BR.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/nb.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/nb.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/ms.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/ms.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/ko.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/ko.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/lt.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/lt.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/nl.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/nl.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/ja.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/ja.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/id.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/id.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/hu.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/hu.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/hr.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/hr.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/hi.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/hi.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/fr.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/fr.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/it.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/it.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/en.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/en.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/es.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/es.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/fi.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/fi.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/graphql%5C.json
+  path: /graphql%5C.json
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: api
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/da.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/da.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/cs.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/cs.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/el.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/el.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/de.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/de.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/checkout-web/generated/translations/bg.json
+  path: /cdn/shopifycloud/checkout-web/generated/translations/bg.json
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/policies/
+  path: /policies/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pay/users/graphql
+  path: /pay/users/graphql
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  type: api
+- url: https://esenziaclub.com/sim/
+  path: /sim/
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/unstable/produce_batch
+  path: /unstable/produce_batch
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pay/authentication/sign_up/create_unverified_user
+  path: /pay/authentication/sign_up/create_unverified_user
+  method: GET
+  query: ''
+  tags:
+  - authentication
+  type: auth
+- url: https://esenziaclub.com/cdn/wpm
+  path: /cdn/wpm
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pay/session
+  path: /pay/session
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/pay/remember-me
+  path: /pay/remember-me
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/shop-js
+  path: /cdn/shopifycloud/shop-js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/pay/session/create_and_redirect
+  path: /pay/session/create_and_redirect
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/cdn/shopifycloud/perf-kit/shopify-perf-kit-3.0.3.min.js
+  path: /cdn/shopifycloud/perf-kit/shopify-perf-kit-3.0.3.min.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/shop-js/modules/v2/chunk.common_BL03_Ulh.esm.js
+  path: /cdn/shopifycloud/shop-js/modules/v2/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/cdn/shopifycloud/shop-js/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /cdn/shopifycloud/shop-js/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/services/login_with_shop/fedcm/callback
+  path: /services/login_with_shop/fedcm/callback
+  method: GET
+  query: ''
+  tags:
+  - authentication
+  type: auth
+- url: https://esenziaclub.com/services/login_with_shop/fedcm/provider
+  path: /services/login_with_shop/fedcm/provider
+  method: GET
+  query: ''
+  tags:
+  - authentication
+  type: auth
+- url: https://esenziaclub.com/cdn/shop/files/IMG_6345.heic?v=1762967468&width=550
+  path: /cdn/shop/files/IMG_6345.heic
+  method: GET
+  query: v=1762967468&width=550
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/IMG_3862.heic?v=1762968572&width=550
+  path: /cdn/shop/files/IMG_3862.heic
+  method: GET
+  query: v=1762968572&width=550
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/IMG_09772.heic?v=1762968502&width=550
+  path: /cdn/shop/files/IMG_09772.heic
+  method: GET
+  query: v=1762968502&width=550
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/IMG_0539.heic?v=1762969480&width=550
+  path: /cdn/shop/files/IMG_0539.heic
+  method: GET
+  query: v=1762969480&width=550
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/i
+  path: /cdn/shop/files/i
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/M
+  path: /cdn/shop/files/M
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/es/cart
+  path: /es/cart
+  method: POST
+  query: ''
+  tags:
+  - commerce
+  - write-operation
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files//
+  path: /cdn/shop/files//
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/
+  path: /cdn/shop/files/
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files//q
+  path: /cdn/shop/files//q
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/R
+  path: /cdn/shop/files/R
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/IMG_08392.heic?v=1762968134&width=550
+  path: /cdn/shop/files/IMG_08392.heic
+  method: GET
+  query: v=1762968134&width=550
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files//=
+  path: /cdn/shop/files//=
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/checkout.js
+  path: /checkout.js
+  method: GET
+  query: ''
+  tags:
+  - commerce
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/g
+  path: /cdn/shop/files/g
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com
   path: ''
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/runtime.js
-  path: /runtime.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/polyfills.js
-  path: /polyfills.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/main.js
-  path: /main.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/vendor.js
-  path: /vendor.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/%5Cu0275fac.js
-  path: /%5Cu0275fac.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/%5Cu0275mod.js
-  path: /%5Cu0275mod.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/application/vnd.ms-word.do
-  path: /application/vnd.ms-word.do
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/%5Cu0275inj.js
-  path: /%5Cu0275inj.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/application/vnd.openxmlformats-officedocument.wordprocessingml.do
-  path: /application/vnd.openxmlformats-officedocument.wordprocessingml.do
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/@ng/component?c=
-  path: /@ng/component
-  method: GET
-  query: c=
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/redirect?to=http
-  path: /redirect
-  method: GET
-  query: to=http
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/snippets/verdict
-  path: /snippets/verdict
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/%5C/index.html
-  path: /%5C/index.html
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/rest/web3
-  path: /rest/web3
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/Highlight.js
-  path: /Highlight.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/snippets/fixes
-  path: /snippets/fixes
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/%5Cu0275prov.js
-  path: /%5Cu0275prov.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/track-result/new
-  path: /track-result/new
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/index.js
-  path: /juice-shop/node_modules/express/lib/router/index.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/route.js
-  path: /juice-shop/node_modules/express/lib/router/route.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/node_modules/morgan/index.js
-  path: /juice-shop/node_modules/morgan/index.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/build/routes/verify.js
-  path: /juice-shop/build/routes/verify.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/layer.js
-  path: /juice-shop/node_modules/express/lib/router/layer.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/build/routes/angular.js
-  path: /juice-shop/build/routes/angular.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/rest/wallet/balance
-  path: /rest/wallet/balance
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Cards
-  path: /api/Cards
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/juice-shop/build/routes/redirect.js
-  path: /juice-shop/build/routes/redirect.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/rest/image-captcha/
-  path: /rest/image-captcha/
+- url: https://esenziaclub.com/cdn/shop/files//y
+  path: /cdn/shop/files//y
   method: GET
   query: ''
   tags:
   - file-handling
-  - api
-  type: api
-- url: http://localhost:3000/rest/order-history
-  path: /rest/order-history
+  type: page
+- url: https://esenziaclub.com/cdn/shop/files/o
+  path: /cdn/shop/files/o
   method: GET
   query: ''
+  tags:
+  - file-handling
+  type: page
+- url: https://esenziaclub.com/fr
+  path: /fr
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/
+  path: /
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/aviso-legal
+  path: /es/pages/aviso-legal
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/politica-de-cookies
+  path: /es/pages/politica-de-cookies
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-ciudades-1-4-gris-plomo
+  path: /es/products/polar-ciudades-1-4-gris-plomo
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/politica-de-privacidad
+  path: /es/pages/politica-de-privacidad
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-clasico-1-4-azul-marino
+  path: /es/products/polar-clasico-1-4-azul-marino
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/white-d10s-tee
+  path: /es/products/white-d10s-tee
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/honey-iconic-knit-sweater
+  path: /es/products/honey-iconic-knit-sweater
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/cobalt-signature-hoodie
+  path: /es/products/cobalt-signature-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/malrollo-tee
+  path: /es/products/malrollo-tee
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/la-cortaita
+  path: /es/products/la-cortaita
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-ciudades-zinc
+  path: /es/products/polar-ciudades-zinc
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/blue-oil-beyond-hoodie
+  path: /es/products/blue-oil-beyond-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/la-ultima
+  path: /es/products/la-ultima
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/lava-timanfaya-tee
+  path: /es/products/lava-timanfaya-tee
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/crimson-city-zipper
+  path: /es/products/crimson-city-zipper
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-clasico-1-4-burdeos
+  path: /es/products/polar-clasico-1-4-burdeos
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/qceum
+  path: /es/products/qceum
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/midnight-iconic-knit-sweater
+  path: /es/products/midnight-iconic-knit-sweater
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/red-essential-jacket
+  path: /es/products/red-essential-jacket
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/green-striped-knit-sweater
+  path: /es/products/green-striped-knit-sweater
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/steel-blue-craft-hoodie
+  path: /es/products/steel-blue-craft-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/green-beyond-hoodie
+  path: /es/products/green-beyond-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/silver-city-half-zip
+  path: /es/products/silver-city-half-zip
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/blue-story-longsleeve
+  path: /es/products/blue-story-longsleeve
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/chalk-white-spark-crewneck
+  path: /es/products/chalk-white-spark-crewneck
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/mint-city-hoodie
+  path: /es/products/mint-city-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-clasico-1-4-blanco-roto
+  path: /es/products/polar-clasico-1-4-blanco-roto
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-clasico-1-4-verde
+  path: /es/products/polar-clasico-1-4-verde
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/checkouts/cn/hWN7WJrFJ0Kypld5UzgWkMnz/en-es?_r=AQAB8dFFfCvcqVzMn29rq6NfDVfwoyNkOGPsiWSM8NpeAJM&auto_redirect=false&edge_redirect=true&skip_shop_pay=true
+  path: /checkouts/cn/hWN7WJrFJ0Kypld5UzgWkMnz/en-es
+  method: GET
+  query: _r=AQAB8dFFfCvcqVzMn29rq6NfDVfwoyNkOGPsiWSM8NpeAJM&auto_redirect=false&edge_redirect=true&skip_shop_pay=true
   tags:
   - commerce
-  - api
-  type: api
-- url: http://localhost:3000/rest/user
-  path: /rest/user
-  method: GET
-  query: ''
-  tags:
-  - user-data
-  - api
-  type: api
-- url: http://localhost:3000/api/Addresss
-  path: /api/Addresss
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Recycles
-  path: /api/Recycles
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Complaints
-  path: /api/Complaints
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/chatbot
-  path: /rest/chatbot
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/address/create
-  path: /address/create
+  type: page
+- url: https://esenziaclub.com/es/products/polar-clasico-blanco-roto
+  path: /es/products/polar-clasico-blanco-roto
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/address/edit/
-  path: /address/edit/
+- url: https://esenziaclub.com/es/products/ocean-city-hoodie
+  path: /es/products/ocean-city-hoodie
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/rest/products
-  path: /rest/products
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/2fa/enter
-  path: /2fa/enter
+- url: https://esenziaclub.com/es/products/polar-ciudades-burdeos
+  path: /es/products/polar-ciudades-burdeos
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/api/SecurityAnswers
-  path: /api/SecurityAnswers
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/juice-shop/build/routes/orderHistory.js
-  path: /juice-shop/build/routes/orderHistory.js
-  method: GET
-  query: ''
-  tags:
-  - commerce
-  type: page
-- url: http://localhost:3000/rest/track-order
-  path: /rest/track-order
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/address/select
-  path: /address/select
+- url: https://esenziaclub.com/es/products/lemon-city-hoodie
+  path: /es/products/lemon-city-hoodie
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/address/saved
-  path: /address/saved
+- url: https://esenziaclub.com/es/products/polar-clasico-verde
+  path: /es/products/polar-clasico-verde
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/api/BasketItems
-  path: /api/BasketItems
+- url: https://esenziaclub.com/es/products/charcoal-gray-city-zipper
+  path: /es/products/charcoal-gray-city-zipper
   method: GET
   query: ''
   tags:
-  - commerce
-  - api
-  type: api
-- url: http://localhost:3000/rest/admin
-  path: /rest/admin
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-ciudades-1-4-azul-marino
+  path: /es/products/polar-ciudades-1-4-azul-marino
   method: GET
   query: ''
   tags:
-  - admin
-  - api
-  type: api
-- url: http://localhost:3000/rest/deluxe-membership
-  path: /rest/deluxe-membership
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/orange-city-hoodie
+  path: /es/products/orange-city-hoodie
   method: GET
   query: ''
   tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/saveLoginIp
-  path: /rest/saveLoginIp
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/polar-ciudades-azul-marino
+  path: /es/products/polar-ciudades-azul-marino
   method: GET
   query: ''
   tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/user/whoami
-  path: /rest/user/whoami
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/la-gambrinus
+  path: /es/products/la-gambrinus
   method: GET
   query: ''
   tags:
-  - user-data
-  - api
-  type: api
-- url: http://localhost:3000/rest/user/reset-password
-  path: /rest/user/reset-password
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/peach-neutral-knit-sweater
+  path: /es/products/peach-neutral-knit-sweater
   method: GET
   query: ''
   tags:
-  - user-data
-  - api
-  type: api
-- url: http://localhost:3000/rest/user/change-password?current=
-  path: /rest/user/change-password
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/vainille-path-zipper
+  path: /es/products/vainille-path-zipper
   method: GET
-  query: current=
+  query: ''
   tags:
-  - user-data
-  - api
-  type: api
-- url: http://localhost:3000/rest/user/login
-  path: /rest/user/login
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/red-university-hoodie
+  path: /es/products/red-university-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/scarlet-iconic-knit-sweater
+  path: /es/products/scarlet-iconic-knit-sweater
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/blue-striped-knit-sweater
+  path: /es/products/blue-striped-knit-sweater
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/black-fabric-tee
+  path: /es/products/black-fabric-tee
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/peach-always-hoodie
+  path: /es/products/peach-always-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/navy-path-zipper
+  path: /es/products/navy-path-zipper
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/light-outlast-crewneck
+  path: /es/products/light-outlast-crewneck
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/grape-starfish-longsleeve-copia
+  path: /es/products/grape-starfish-longsleeve-copia
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/green-spark-crewneck
+  path: /es/products/green-spark-crewneck
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/brown-fabric-hoodie
+  path: /es/products/brown-fabric-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/gummy-story-crewneck
+  path: /es/products/gummy-story-crewneck
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/twilight-rise-hoodie
+  path: /es/products/twilight-rise-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/grey-fabric-hoodie
+  path: /es/products/grey-fabric-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/dark-blue-university-hoodie
+  path: /es/products/dark-blue-university-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/midnight-stamp-hoodie
+  path: /es/products/midnight-stamp-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/brick-signature-hoodie
+  path: /es/products/brick-signature-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/dark-always-hoodie
+  path: /es/products/dark-always-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/ivory-iconic-knit-sweater
+  path: /es/products/ivory-iconic-knit-sweater
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/dust-wine-spark-crewneck
+  path: /es/products/dust-wine-spark-crewneck
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/lemon-oval-hoodie
+  path: /es/products/lemon-oval-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/red-cherry-meteorite-hoodie
+  path: /es/products/red-cherry-meteorite-hoodie
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/todos-los-pantalones
+  path: /collections/todos-los-pantalones
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/all-camisetas
+  path: /collections/all-camisetas
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/todos-los-banadores
+  path: /collections/todos-los-banadores
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/edge-of-the-road
+  path: /es/pages/edge-of-the-road
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/allegro
+  path: /es/pages/allegro
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/spotlight
+  path: /es/pages/spotlight
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/fugaces
+  path: /es/pages/fugaces
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/siempre-viva
+  path: /es/pages/siempre-viva
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/la-costa
+  path: /es/pages/la-costa
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/knitted
+  path: /es/pages/knitted
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/l-oeuf
+  path: /es/pages/l-oeuf
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/worlwide
+  path: /es/pages/worlwide
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/00uno
+  path: /es/pages/00uno
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/cruzcampo
+  path: /es/pages/cruzcampo
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/bestseller-nuevo%20
+  path: /collections/bestseller-nuevo%20
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/account/login
+  path: /es/account/login
   method: GET
   query: ''
   tags:
   - user-data
   - authentication
-  - api
-  type: api
-- url: http://localhost:3000/rest/user/authentication-details/
-  path: /rest/user/authentication-details/
-  method: GET
-  query: ''
-  tags:
-  - user-data
-  - authentication
-  - api
-  type: api
-- url: http://localhost:3000/api/Users
-  path: /api/Users
-  method: GET
-  query: ''
-  tags:
-  - user-data
-  - api
-  type: api
-- url: http://localhost:3000/rest/country-mapping
-  path: /rest/country-mapping
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/continue-code-fixIt/apply/
-  path: /rest/continue-code-fixIt/apply/
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/continue-code-findIt/apply/
-  path: /rest/continue-code-findIt/apply/
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/continue-code/apply/
-  path: /rest/continue-code/apply/
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/captcha
-  path: /rest/captcha
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/continue-code-fixIt
-  path: /rest/continue-code-fixIt
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/continue-code
-  path: /rest/continue-code
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Deliverys
-  path: /api/Deliverys
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/user/security-question?email=
-  path: /rest/user/security-question
-  method: GET
-  query: email=
-  tags:
-  - user-data
-  - api
-  type: api
-- url: http://localhost:3000/rest/memories
-  path: /rest/memories
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Quantitys
-  path: /api/Quantitys
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/repeat-notification
-  path: /rest/repeat-notification
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/SecurityQuestions
-  path: /api/SecurityQuestions
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Products
-  path: /api/Products
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Hints
-  path: /api/Hints
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/zone.js
-  path: /zone.js
+  type: auth
+- url: https://esenziaclub.com/collections/worldwide
+  path: /collections/worldwide
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/Zone.js
-  path: /Zone.js
+- url: https://esenziaclub.com/es/collections/cruzcampo-x-esenzia
+  path: /es/collections/cruzcampo-x-esenzia
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/Edge/
-  path: /Edge/
+- url: https://esenziaclub.com/collections/bestseller-nuevo
+  path: /collections/bestseller-nuevo
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/Trident/
-  path: /Trident/
+- url: https://esenziaclub.com/es/pages/esenzia-community-1
+  path: /es/pages/esenzia-community-1
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/rest/continue-code-findIt
-  path: /rest/continue-code-findIt
+- url: https://esenziaclub.com/es/products/tarjeta-regalo-3
+  path: /es/products/tarjeta-regalo-3
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/esenzia-community
+  path: /es/pages/esenzia-community
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/best-sellers
+  path: /es/collections/best-sellers
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/condiciones-generales-de-contratacion
+  path: /es/pages/condiciones-generales-de-contratacion
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/worldwide
+  path: /es/collections/worldwide
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/accesorios
+  path: /es/collections/accesorios
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/all
+  path: /es/collections/all
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/caps
+  path: /es/collections/caps
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/polares-ciudades
+  path: /es/collections/polares-ciudades
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/worldwide-sweatshirts
+  path: /es/collections/worldwide-sweatshirts
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/polares-clasicos
+  path: /es/collections/polares-clasicos
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/luggage
+  path: /es/collections/luggage
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /es/pages/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
   method: GET
   query: ''
   tags:
   - api
-  type: api
-- url: http://localhost:3000/api/Feedbacks
-  path: /api/Feedbacks
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  path: /es/pages/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
   method: GET
   query: ''
   tags:
   - api
-  type: api
-- url: http://localhost:3000/api/Challenges
-  path: /api/Challenges
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /es/pages/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
   method: GET
   query: ''
   tags:
   - api
-  type: api
-- url: http://localhost:3000/api/%5C%22/ftp/legal.md%5C%22
-  path: /api/%5C%22/ftp/legal.md%5C%22
+  type: auth
+- url: https://esenziaclub.com/es/pages/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /es/pages/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
   method: GET
   query: ''
   tags:
   - api
-  type: api
-- url: http://localhost:3000/api/%5C%22/
-  path: /api/%5C%22/
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /es/pages/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
   method: GET
   query: ''
   tags:
   - api
-  type: api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /es/pages/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /es/pages/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /es/pages/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  path: /es/pages/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /es/pages/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es/pages/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  path: /es/pages/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.lead-capture_DVJbTYOS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.pay-button_DuQAeylH.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /es/pages/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/chunk.modal_k166FdQy.esm.js
+  path: /es/pages/modules/v2/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /es/pages/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /es/pages/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /es/pages/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: admin
+- url: https://esenziaclub.com/es/pages/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /es/pages/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /es/pages/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  path: /es/pages/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/chunk.common_BL03_Ulh.esm.js
+  path: /es/pages/modules/v2/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/pages/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /es/pages/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/tote-bags
+  path: /es/collections/tote-bags
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: admin
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/pages%5C/modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /es%5C/pages%5C/modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/collections/todos-los-pantalones
+  path: /es/pages/collections/todos-los-pantalones
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /es/collections/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /es/collections/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es/collections/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  path: /es/collections/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /es/collections/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /es/collections/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  path: /es/collections/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.lead-capture_DVJbTYOS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /es/collections/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: auth
+- url: https://esenziaclub.com/es/collections/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /es/collections/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  path: /es/collections/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /es/collections/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.pay-button_DuQAeylH.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /es/collections/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/chunk.modal_k166FdQy.esm.js
+  path: /es/collections/modules/v2/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /es/collections/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /es/collections/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /es/collections/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /es/collections/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /es/collections/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: admin
+- url: https://esenziaclub.com/es/collections/modules/v2/chunk.common_BL03_Ulh.esm.js
+  path: /es/collections/modules/v2/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /es/collections/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  path: /es/collections/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/collections/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /es/collections/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: admin
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/tote-bags.atom
+  path: /es/collections/tote-bags.atom
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/blue-tote-bag
+  path: /es/products/blue-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es%5C/collections%5C/modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /es%5C/collections%5C/modules%5C/v2%5C/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/green-tote-bag
+  path: /es/products/green-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/tote-bags.oembed
+  path: /es/collections/tote-bags.oembed
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/pink-sand-tote-bag
+  path: /es/products/pink-sand-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/lavender-tone-tote-bag
+  path: /es/products/lavender-tone-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/white-sand-tote-bag
+  path: /es/products/white-sand-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/collections/todos-los-pantalones
+  path: /es/collections/collections/todos-los-pantalones
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/outwear
+  path: /es/collections/outwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/polos
+  path: /es/collections/polos
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/swimwear
+  path: /es/collections/swimwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/pants
+  path: /es/collections/pants
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/longsleeves
+  path: /es/collections/longsleeves
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/knitwear
+  path: /es/collections/knitwear
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/crewnecks
+  path: /es/collections/crewnecks
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/t-shirt
+  path: /es/collections/t-shirt
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/pages/tienda-fisica
+  path: /es/pages/tienda-fisica
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/winter-sales
+  path: /es/collections/winter-sales
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/hoodies
+  path: /es/collections/hoodies
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/collections/back-in-stock
+  path: /es/collections/back-in-stock
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/new-arrivals
+  path: /collections/new-arrivals
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/policies/shipping-policy
+  path: /es/policies/shipping-policy
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/all-hoodies
+  path: /collections/all-hoodies
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/t-shirt
+  path: /collections/t-shirt
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/collections/pants
+  path: /collections/pants
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/solar-tone-tote-bag
+  path: /es/products/solar-tone-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  path: /es/products/modules/v2/client.payment-terms_BwGKVUye.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  path: /es/products/modules/v2/client.shop-follow-button_jdRgMSvt.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  path: /es/products/modules/v2/client.init-shop-for-new-customer-accounts_BOon2QXw.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  path: /es/products/modules/v2/client.lead-capture_DVJbTYOS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  path: /es/products/modules/v2/client.checkout-modal_C-FTO6dD.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  path: /es/products/modules/v2/client.init-customer-accounts_BShqnM1Z.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  path: /es/products/modules/v2/client.pay-button_DuQAeylH.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  path: /es/products/modules/v2/client.init-customer-accounts-sign-up_7eCxXzfp.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  path: /es/products/modules/v2/client.shop-login-button_DWfKMsZB.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es/products/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  path: /es/products/modules/v2/client.avatar_BTnouDA3.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  path: /es/products/modules/v2/client.init-shop-cart-sync_C3W1cIGX.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  path: /es/products/modules/v2/client.shop-toast-manager_CEppbFbK.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: admin
+- url: https://esenziaclub.com/es/products/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  path: /es/products/modules/v2/client.shop-cash-offers_B4Mh_Qj_.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/chunk.modal_k166FdQy.esm.js
+  path: /es/products/modules/v2/chunk.modal_k166FdQy.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  path: /es/products/modules/v2/client.shop-login_Bf2BQUuy.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: auth
+- url: https://esenziaclub.com/es/products/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  path: /es/products/modules/v2/client.init-fed-cm_Cn87pZzS.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  path: /es/products/modules/v2/client.init-windoid_DXvCy2lC.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  path: /es/products/modules/v2/client.shop-button_-iSkltkT.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/chunk.common_BL03_Ulh.esm.js
+  path: /es/products/modules/v2/chunk.common_BL03_Ulh.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  path: /es/products/modules/v2/client.init-shop-email-lookup-coordinator_D8ViAsts.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  path: /es/products/modules/v2/client.shop-cart-sync_KhxY6AWc.es.esm.js
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: page
+- url: https://esenziaclub.com/es/products/solar-tone-tote-bag.oembed
+  path: /es/products/solar-tone-tote-bag.oembed
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/fr/products/solar-tone-tote-bag
+  path: /fr/products/solar-tone-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/products/solar-tone-tote-bag
+  path: /products/solar-tone-tote-bag
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/collections/todos-los-pantalones
+  path: /es/products/collections/todos-los-pantalones
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/es/products/mochila-clasica-encerada-beige
+  path: /es/products/mochila-clasica-encerada-beige
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://esenziaclub.com/a/pl-swatches
+  path: /a/pl-swatches
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
 auth:
-  type: bearer
+  type: none

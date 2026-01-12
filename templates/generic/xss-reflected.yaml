@@ -1,0 +1,114 @@
+id: generic-xss-reflected
+info:
+  name: Reflected Cross-Site Scripting
+  description: Tests for reflected XSS in query parameters and paths
+  owasp_category: A03:2021
+  severity: medium
+  tags:
+    - xss
+    - rxss
+    - generic
+    - dast
+
+requests:
+  - name: XSS in query parameter
+    method: GET
+    path: /search?q=<script>alert(1)</script>
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "<script>alert(1)</script>"
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: REFLECTED_XSS_QUERY_PARAM
+      message: Reflected XSS in query parameter - unsanitized input reflected in HTML
+      remediation: Encode user input before reflecting in HTML responses
+
+  - name: XSS in path parameter
+    method: GET
+    path: /<img src=x onerror=alert(1)>
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "<img src=x onerror=alert(1)>"
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: REFLECTED_XSS_PATH
+      message: Reflected XSS in path parameter
+      remediation: Encode user input before reflecting in HTML responses
+
+  - name: XSS with double quote
+    method: GET
+    path: /search?q="><script>alert(1)</script>
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "\"><script>alert(1)</script>"
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: REFLECTED_XSS_ATTRIBUTE
+      message: Reflected XSS in HTML attribute context
+      remediation: Use HTML entity encoding for attribute values
+
+  - name: XSS with single quote
+    method: GET
+    path: /search?q='><script>alert(1)</script>
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "'><script>alert(1)</script>"
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: REFLECTED_XSS_SINGLE_QUOTE
+      message: Reflected XSS via single quote injection
+      remediation: Use HTML entity encoding for all user input
+
+  - name: XSS with JavaScript URI
+    method: GET
+    path: /search?q=javascript:alert(1)
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "javascript:alert(1)"
+          - "javascript%3Aalert(1)"
+        condition: or
+        case_sensitive: false
+      - type: word
+        part: header
+        words:
+          - "text/html"
+        case_sensitive: false
+    matchers_condition: and
+    on_match:
+      vulnerability: REFLECTED_XSS_JAVASCRIPT_URI
+      message: Reflected XSS via javascript: URI
+      remediation: Validate and sanitize URLs in user input

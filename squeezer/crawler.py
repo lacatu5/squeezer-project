@@ -156,11 +156,22 @@ class KatanaCrawler:
 
     def _parse_katana_output(self, output: str) -> List[KatanaEndpoint]:
         endpoints = []
+        skipped = 0
         for line in output.strip().splitlines():
-            data = json.loads(line)
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                data = json.loads(line)
+            except (json.JSONDecodeError, ValueError) as e:
+                skipped += 1
+                continue
             request = data.get("request", {})
             response = data.get("response", {})
             url = request.get("endpoint", "")
+            if not url:
+                skipped += 1
+                continue
             query_params = self._extract_query_params(url)
             endpoint = KatanaEndpoint(
                 url=url,
@@ -172,6 +183,8 @@ class KatanaCrawler:
                 query_params=query_params,
             )
             endpoints.append(endpoint)
+        if skipped > 0:
+            print(f"[dim]Skipped {skipped} malformed lines from Katana output[/dim]")
         return endpoints
 
     def _extract_query_params(self, url: str) -> Dict[str, Any]:
@@ -184,15 +197,54 @@ class KatanaCrawler:
     def _deduplicate_endpoints(self, endpoints: List[KatanaEndpoint]) -> List[KatanaEndpoint]:
         seen = set()
         unique = []
+        skipped_static = 0
+        skipped_encoded = 0
+
         for ep in endpoints:
             parsed_url = urlparse(ep.url)
+            url_lower = ep.url.lower()
+            path = parsed_url.path.lower()
+
             if self.filter_static:
-                url_lower = ep.url.lower()
+                # Skip URL-encoded paths that indicate external URLs embedded in JS
+                if '%5c' in url_lower or '%2f' in url_lower or '%3a' in url_lower:
+                    skipped_encoded += 1
+                    continue
+
+                # Skip CDN paths
+                if path.startswith('/cdn/') or '/cdn/' in path:
+                    skipped_static += 1
+                    continue
+
+                # Skip static paths
                 if any(x in url_lower for x in _STATIC_PATHS):
+                    skipped_static += 1
                     continue
-                path = parsed_url.path.lower()
+
+                # Skip static file extensions
                 if any(path.endswith(f'.{ext}') for ext in _STATIC_EXTENSIONS):
+                    skipped_static += 1
                     continue
+
+                # Skip common CDN and external domains
+                cdn_domains = [
+                    'amazonaws.com', 'cloudfront.net', 'cloudflare.com',
+                    'googleapis.com', 'gstatic.com', 'facebook.com',
+                    'doubleclick.net', 'googletagmanager.com', 'googlesyndication.com',
+                    'kiwisizing.com', 'web.app', 'firebaseapp.com'
+                ]
+                if any(cdn in url_lower for cdn in cdn_domains):
+                    skipped_static += 1
+                    continue
+
+                # Skip module chunks (ESM files)
+                if '/client.' in path and '.js' in path:
+                    skipped_static += 1
+                    continue
+                if '/chunk.' in path and '.js' in path:
+                    skipped_static += 1
+                    continue
+
             url = ep.url.split("#")[0]
             url_without_query = url.split("?")[0]
             path = parsed_url.path
@@ -203,6 +255,9 @@ class KatanaCrawler:
             if url_without_query not in seen:
                 seen.add(url_without_query)
                 unique.append(ep)
+
+        if skipped_static > 0 or skipped_encoded > 0:
+            print(f"[dim]Filtered: {skipped_static} static, {skipped_encoded} encoded URLs[/dim]")
         return unique
 
     async def crawl(self) -> SimpleCrawlerReport:

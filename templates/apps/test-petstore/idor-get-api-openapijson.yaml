@@ -1,0 +1,17 @@
+id: test-petstore-idor-get-api-openapijson
+info:
+  name: 'IDOR: /api/openapi.json'
+  owasp_category: A01:2025
+  severity: high
+  tags:
+  - idor
+  - test-petstore
+requests:
+- path: /api/openapi.json/1
+  method: GET
+  headers:
+    Authorization: '{{bearer_token}}'
+  matchers:
+  - type: status
+    status:
+    - 200
