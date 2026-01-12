@@ -1,8 +1,8 @@
 id: generic-xss-reflected
 info:
   name: Reflected Cross-Site Scripting
-  description: Tests for reflected XSS on all discovered endpoints
-  owasp_category: A03:2021
+  description: Tests for reflected XSS on all discovered API endpoints
+  owasp_category: A05:2025
   severity: medium
   tags:
     - xss
@@ -13,7 +13,7 @@ info:
 requests:
   - name: XSS script tag
     method: GET
-    path: @params@?value=<script>alert(1)</script>
+    path: "@api@?q=<script>alert(1)</script>"
     matchers:
       - type: word
         part: body
@@ -22,12 +22,12 @@ requests:
         case_sensitive: false
     on_match:
       vulnerability: REFLECTED_XSS_SCRIPT
-      message: Reflected XSS - script tag not encoded
-      remediation: Encode user input before reflecting in HTML
+      message: "Reflected XSS via script tag"
+      remediation: "Encode user input"
 
   - name: XSS img onerror
     method: GET
-    path: @params@?q=<img src=x onerror=alert(1)>
+    path: "@api@?search=<img src=x onerror=alert(1)>"
     matchers:
       - type: word
         part: body
@@ -36,12 +36,12 @@ requests:
         case_sensitive: false
     on_match:
       vulnerability: REFLECTED_XSS_IMG
-      message: Reflected XSS via img onerror
-      remediation: Encode user input in HTML responses
+      message: "Reflected XSS via img tag"
+      remediation: "Encode user input"
 
   - name: XSS attribute breaker
     method: GET
-    path: @params@?value="><script>alert(1)</script>
+    path: "@api@?id=\"><script>alert(1)</script>"
     matchers:
       - type: word
         part: body
@@ -50,21 +50,5 @@ requests:
         case_sensitive: false
     on_match:
       vulnerability: REFLECTED_XSS_ATTR
-      message: Reflected XSS in HTML attribute context
-      remediation: Use HTML entity encoding for attributes
-
-  - name: XSS javascript uri
-    method: GET
-    path: @params@?url=javascript:alert(1)
-    matchers:
-      - type: word
-        part: body
-        words:
-          - "javascript:alert(1)"
-          - "javascript%3Aalert(1)"
-        condition: or
-        case_sensitive: false
-    on_match:
-      vulnerability: REFLECTED_XSS_JS_URI
-      message: Reflected XSS via javascript: URI
-      remediation: Validate and sanitize URLs in user input
+      message: "Reflected XSS in attribute"
+      remediation: "HTML encode output"

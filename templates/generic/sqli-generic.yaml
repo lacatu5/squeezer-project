@@ -2,7 +2,7 @@ id: generic-sqli
 info:
   name: SQL Injection (Error-Based)
   description: Tests for SQL injection on all discovered API endpoints
-  owasp_category: A03:2021
+  owasp_category: A05:2025
   severity: critical
   tags:
     - sqli
@@ -13,7 +13,7 @@ info:
 requests:
   - name: SQLi single quote
     method: GET
-    path: @params@?value=1'
+    path: "@api@?id=1'"
     matchers:
       - type: regex
         condition: or
@@ -33,12 +33,12 @@ requests:
           - "SQLite error"
     on_match:
       vulnerability: SQL_INJECTION_SINGLE_QUOTE
-      message: SQL injection detected via single quote
-      remediation: Use parameterized queries and input validation
+      message: "SQL injection detected via single quote"
+      remediation: "Use parameterized queries"
 
   - name: SQLi double quote
     method: GET
-    path: @params@?value=1"
+    path: "@api@?id=1"
     matchers:
       - type: regex
         condition: or
@@ -51,12 +51,12 @@ requests:
           - "Unclosed quotation mark"
     on_match:
       vulnerability: SQL_INJECTION_DOUBLE_QUOTE
-      message: SQL injection via double quote
-      remediation: Use parameterized queries
+      message: "SQL injection via double quote"
+      remediation: "Use parameterized queries"
 
   - name: SQLi OR bypass
     method: GET
-    path: @params@?value=1' OR '1'='1
+    path: "@api@?id=1' OR '1'='1"
     matchers:
       - type: regex
         condition: or
@@ -68,22 +68,5 @@ requests:
           - "ORA-\\d{5}"
     on_match:
       vulnerability: SQL_INJECTION_OR_BYPASS
-      message: SQL injection via OR bypass attempt
-      remediation: Use parameterized queries
-
-  - name: SQLi UNION
-    method: GET
-    path: @params@?value=1' UNION SELECT NULL--
-    matchers:
-      - type: regex
-        condition: or
-        case_sensitive: false
-        part: body
-        regex:
-          - "SQL syntax.{0,200}?MySQL"
-          - "PostgreSQL.{0,200}?ERROR"
-          - "ORA-\\d{5}"
-    on_match:
-      vulnerability: SQL_INJECTION_UNION
-      message: SQL injection via UNION SELECT
-      remediation: Use parameterized queries
+      message: "SQL injection via OR bypass"
+      remediation: "Use parameterized queries"

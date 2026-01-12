@@ -1,8 +1,8 @@
 id: generic-open-redirect
 info:
   name: Open URL Redirect
-  description: Tests for open redirect on all endpoints
-  owasp_category: A01:2021
+  description: Tests for open redirect on API endpoints
+  owasp_category: A05:2025
   severity: medium
   tags:
     - redirect
@@ -13,7 +13,7 @@ info:
 requests:
   - name: Open redirect url param
     method: GET
-    path: @params@?url=https://evil.com
+    path: "@api@?url=https://evil.com"
     matchers:
       - type: status
         condition: in
@@ -31,12 +31,12 @@ requests:
     matchers_condition: and
     on_match:
       vulnerability: OPEN_REDIRECT_URL
-      message: Open redirect via url parameter
-      remediation: Validate redirect URLs against whitelist
+      message: "Open redirect via url param"
+      remediation: "Whitelist redirect URLs"
 
   - name: Open redirect next param
     method: GET
-    path: @params@?next=https://evil.com
+    path: "@api@?next=https://evil.com"
     matchers:
       - type: status
         condition: in
@@ -54,28 +54,5 @@ requests:
     matchers_condition: and
     on_match:
       vulnerability: OPEN_REDIRECT_NEXT
-      message: Open redirect via next parameter
-      remediation: Use CSRF tokens with redirects
-
-  - name: Open redirect target param
-    method: GET
-    path: @params@?target=//evil.com
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 301
-          - 302
-          - 303
-          - 307
-          - 308
-      - type: word
-        part: header
-        words:
-          - "//evil.com"
-        case_sensitive: false
-    matchers_condition: and
-    on_match:
-      vulnerability: OPEN_REDIRECT_TARGET
-      message: Open redirect via protocol-relative URL
-      remediation: Reject protocol-relative URLs
+      message: "Open redirect via next param"
+      remediation: "Validate redirect URLs"

@@ -1,128 +1,64 @@
 id: generic-info-disclosure
 info:
   name: Information Disclosure
-  description: Tests for sensitive information disclosure in headers and error responses
-  owasp_category: A02:2025
+  description: Detects version disclosure and debugging info
+  owasp_category: A05:2025
   severity: low
   tags:
     - info-disclosure
-    - misconfiguration
     - generic
 
 requests:
-  - name: Server version disclosure
+  - name: Server version in headers
     method: GET
-    path: /
+    path: "/"
     matchers:
       - type: regex
-        condition: or
-        regex:
-          - '^Server:\s+[A-Za-z0-9/\.]+'
-          - '^X-Powered-By:\s+[A-Za-z0-9/\.]+'
-          - '^X-AspNet-Version:\s+'
-          - '^X-AspNetMvc-Version:\s+'
         part: header
-    on_match:
-      vulnerability: INFO_DISCLOSURE_HEADERS
-      message: Server technology version disclosed via HTTP headers
-      remediation: Remove unnecessary headers and use generic server tokens
-
-  - name: Stack trace disclosure
-    method: GET
-    path: /nonexistent-random-path-404
-    matchers:
-      - type: regex
-        condition: or
         regex:
-          - 'at\s+\w+\('
-          - 'Stack trace'
-          - 'javax\.servlet\.'
-          - 'System\.Web\.'
-          - 'TypeError:'
-          - 'ReferenceError:'
-          - 'PHP (Fatal error|Warning|Notice)'
-          - '\.java:\d+'
-          - 'Caused by:'
-        part: body
-    on_match:
-      vulnerability: STACK_TRACE_DISCLOSURE
-      message: Stack trace or detailed error messages exposed
-      remediation: Use generic error messages in production
-
-  - name: Debug endpoint
-    method: GET
-    path: /debug
-    matchers:
+          - "(?i)server: (apache|nginx|iis|tomcat)/[0-9.]+"
       - type: status
-        condition: in
         status:
           - 200
-      - type: word
-        words:
-          - "debug"
-          - "profiler"
-          - "actuator"
-          - "health"
-          - "metrics"
-          - "env"
-          - "beans"
-          - "configprops"
-        condition: or
     matchers_condition: and
     on_match:
-      vulnerability: DEBUG_ENDPOINTS
-      message: Debug/Actuator endpoints exposed
-      remediation: Disable debug endpoints in production
+      vulnerability: SERVER_VERSION_EXPOSED
+      message: "Server version exposed"
+      remediation: "Hide server version"
 
-  - name: Backup file exposure
+  - name: PHP version exposed
     method: GET
-    path: /backup.zip
+    path: "/"
     matchers:
       - type: regex
-        condition: or
-        regex:
-          - 'application/(zip|x-zip-compressed)'
-          - '^PK\x03\x04'
         part: header
-    on_match:
-      vulnerability: BACKUP_FILE_EXPOSED
-      message: Backup file exposed
-      remediation: Remove backup files from web root
-
-  - name: Environment file exposure
-    method: GET
-    path: /.env
-    matchers:
-      - type: regex
-        condition: or
         regex:
-          - 'DB_PASSWORD='
-          - 'SECRET_KEY='
-          - 'API_KEY='
-          - 'DATABASE_URL='
-          - 'AWS_'
-          - 'JWT_SECRET='
-          - 'MYSQL_'
-          - 'POSTGRES_'
-          - 'REDIS_'
+          - "(?i)x-powered-by:.*php/[0-9.]+"
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
     on_match:
-      vulnerability: ENV_FILE_EXPOSED
-      message: Environment file exposed - credentials may be leaked
-      remediation: Never store .env files in web-accessible directories
+      vulnerability: PHP_VERSION_EXPOSED
+      message: "PHP version exposed"
+      remediation: "Disable expose_php"
 
-  - name: Directory listing
+  - name: Stack trace exposure
     method: GET
-    path: /assets/
+    path: "/404notfound-test"
     matchers:
-      - type: regex
+      - type: word
+        part: body
+        words:
+          - "Traceback"
+          - "Stack trace"
+          - "at line"
         condition: or
-        regex:
-          - '<title>.*index of'
-          - '<title>.*directory listing'
-          - 'Parent Directory</a>'
-          - '<a href=".*">.*</a>\s*[0-9]{1,2}:[0-9]{2}'
-        case_sensitive: false
+      - type: status
+        status:
+          - 500
+    matchers_condition: and
     on_match:
-      vulnerability: DIRECTORY_LISTING
-      message: Directory listing enabled
-      remediation: Disable directory listing in web server configuration
+      vulnerability: STACK_TRACE_EXPOSED
+      message: "Stack traces exposed"
+      remediation: "Use custom error pages"

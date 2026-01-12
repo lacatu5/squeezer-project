@@ -1,8 +1,8 @@
 id: generic-ssrf
 info:
   name: Server-Side Request Forgery (SSRF)
-  description: Tests for SSRF on endpoints that accept URL parameters
-  owasp_category: A10:2021
+  description: Tests for SSRF on API endpoints
+  owasp_category: A05:2025
   severity: high
   tags:
     - ssrf
@@ -11,9 +11,9 @@ info:
     - api
 
 requests:
-  - name: SSRF cloud metadata
+  - name: SSRF metadata
     method: GET
-    path: @params@?url=http://169.254.169.254/latest/meta-data/iam
+    path: "@api@?url=http://169.254.169.254/latest/meta-data/iam"
     matchers:
       - type: status
         condition: in
@@ -25,57 +25,24 @@ requests:
         words:
           - "ami"
           - "iam"
-          - "instance-id"
-          - "Code"
         condition: or
         case_sensitive: false
     matchers_condition: or
     on_match:
       vulnerability: SSRF_METADATA
-      message: SSRF to cloud metadata endpoint possible
-      remediation: Validate URLs; block private IP ranges
+      message: "SSRF to cloud metadata"
+      remediation: "Block private IPs"
 
   - name: SSRF localhost
     method: GET
-    path: @params@?url=http://localhost/admin
+    path: "@api@?url=http://localhost/admin"
     matchers:
       - type: status
         condition: in
         status:
           - 200
           - 404
-      - type: word
-        part: body
-        words:
-          - "admin"
-          - "dashboard"
-          - "localhost"
-        condition: or
-        case_sensitive: false
-    matchers_condition: or
     on_match:
       vulnerability: SSRF_LOCALHOST
-      message: SSRF via localhost - internal access possible
-      remediation: Block requests to localhost and private IPs
-
-  - name: SSRF file protocol
-    method: GET
-    path: @params@?url=file:///etc/passwd
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 200
-          - 403
-      - type: word
-        part: body
-        words:
-          - "root:"
-          - "bin:"
-        condition: or
-        case_sensitive: false
-    matchers_condition: or
-    on_match:
-      vulnerability: SSRF_FILE_PROTOCOL
-      message: SSRF via file:// protocol - local file read
-      remediation: Restrict allowed protocols to http/https only
+      message: "SSRF via localhost"
+      remediation: "Block localhost"

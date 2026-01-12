@@ -1,0 +1,124 @@
+id: generic-exposed-files
+info:
+  name: Exposed Sensitive Files
+  description: Detects commonly exposed configuration and backup files
+  owasp_category: A05:2025
+  severity: medium
+  tags:
+    - exposure
+    - files
+    - generic
+
+requests:
+  - name: Git config exposure
+    method: GET
+    path: "/.git/config"
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "[core]"
+          - "[remote"
+        condition: or
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: GIT_CONFIG_EXPOSED
+      message: "Git configuration file exposed"
+      remediation: "Block access to .git directory"
+
+  - name: Environment file exposure
+    method: GET
+    path: "/.env"
+    matchers:
+      - type: regex
+        part: body
+        regex:
+          - "(?i)(api[_-]?key|secret|password|token|auth|db[_-]?pass)"
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: ENV_FILE_EXPOSED
+      message: "Environment configuration file exposed"
+      remediation: "Remove .env from web root"
+
+  - name: Backup file exposure
+    method: GET
+    path: "/backup.sql"
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "CREATE TABLE"
+          - "INSERT INTO"
+          - "DROP TABLE"
+        condition: or
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: BACKUP_FILE_EXPOSED
+      message: "Database backup file accessible"
+      remediation: "Remove backup files from web root"
+
+  - name: Composer auth exposure
+    method: GET
+    path: "/.composer-auth.json"
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "github-oauth"
+          - "gitlab-oauth"
+        condition: or
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: COMPOSER_AUTH_EXPOSED
+      message: "Composer authentication file exposed"
+      remediation: "Remove .composer-auth.json from web root"
+
+  - name: Package.json exposure
+    method: GET
+    path: "/package.json"
+    matchers:
+      - type: word
+        part: body
+        words:
+          - '"name":'
+          - '"dependencies":'
+        condition: and
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: PACKAGE_JSON_EXPOSED
+      message: "Package.json exposed - reveals dependencies"
+      remediation: "Block access to package.json"
+
+  - name: Docker compose exposure
+    method: GET
+    path: "/docker-compose.yml"
+    matchers:
+      - type: word
+        part: body
+        words:
+          - "version:"
+          - "services:"
+        condition: and
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: DOCKER_COMPOSE_EXPOSED
+      message: "Docker Compose configuration exposed"
+      remediation: "Remove docker-compose.yml from web root"

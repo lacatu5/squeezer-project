@@ -1,8 +1,8 @@
 id: generic-idor
 info:
   name: Insecure Direct Object Reference (IDOR)
-  description: Tests for IDOR by enumerating IDs on API endpoints
-  owasp_category: A01:2021
+  description: Tests for IDOR on API endpoints
+  owasp_category: A05:2025
   severity: high
   tags:
     - idor
@@ -11,9 +11,9 @@ info:
     - api
 
 requests:
-  - name: IDOR check - try ID 1
+  - name: IDOR enumerate ID 1
     method: GET
-    path: @api@
+    path: "@api@/1"
     matchers:
       - type: status
         condition: in
@@ -27,18 +27,17 @@ requests:
           - "email"
           - "name"
           - "data"
-          - "user"
         condition: or
         case_sensitive: false
     matchers_condition: and
     on_match:
       vulnerability: IDOR_ACCESSIBLE
-      message: API endpoint accessible - verify access controls
-      remediation: Implement authentication and authorization checks
+      message: "API endpoint accessible without auth"
+      remediation: "Implement authentication"
 
-  - name: IDOR sequential ID
+  - name: IDOR enumerate ID 2
     method: GET
-    path: @api@/1
+    path: "@api@/2"
     matchers:
       - type: status
         condition: in
@@ -53,20 +52,6 @@ requests:
         case_sensitive: false
     matchers_condition: and
     on_match:
-      vulnerability: IDOR_SEQUENTIAL_ID
-      message: Sequential ID access possible - verify ownership
-      remediation: Use non-sequential IDs and verify resource ownership
-
-  - name: IDOR negative ID
-    method: GET
-    path: @api@/-1
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 200
-          - 500
-    on_match:
-      vulnerability: IDOR_NEGATIVE_ID
-      message: API accepts negative ID - validate input range
-      remediation: Validate ID format and range on server side
+      vulnerability: IDOR_SEQUENTIAL
+      message: "Sequential ID access works"
+      remediation: "Use UUIDs and verify ownership"

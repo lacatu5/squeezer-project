@@ -349,58 +349,45 @@ class TemplateEngine:
 
         for req in template.requests:
             # Check if this request should be expanded against endpoints
-            path = req.path or ""
+            original_path = req.path or ""
+            path = original_path.strip('"')
 
             # @all@ - expand to all discovered endpoints
             if path == "@all@":
                 for endpoint_url in discovered_endpoints.keys():
-                    # Parse the endpoint to get the path
                     from urllib.parse import urlparse
                     parsed = urlparse(endpoint_url)
                     expanded_path = parsed.path or "/"
-
-                    # Preserve query params from original request if any
-                    if '?' in path:
-                        query_part = path.split('?')[1]
+                    if '?' in original_path:
+                        query_part = original_path.split('?')[1]
                         expanded_path = f"{expanded_path}?{query_part}"
-
                     expanded_req = req.model_copy(update={"path": expanded_path})
                     expanded_req.name = f"{req.name} - {expanded_path}"
                     requests.append(expanded_req)
             # @api@ - expand only to API endpoints (paths containing /api/)
-            elif path == "@api@":
+            elif path.startswith("@api@"):
+                import urllib.parse
+                # Extract suffix like /1 or ?id=value
+                suffix = path[5:].lstrip()  # Remove @api@
+                query_suffix = ""
+                path_suffix = ""
+
+                if '?' in suffix:
+                    path_part, query_part = suffix.split('?', 1)
+                    path_suffix = path_part
+                    query_suffix = f"?{query_part}"
+                elif suffix:
+                    path_suffix = suffix
+
                 for endpoint_url in discovered_endpoints.keys():
-                    from urllib.parse import urlparse
-                    parsed = urlparse(endpoint_url)
+                    parsed = urllib.parse.urlparse(endpoint_url)
                     if '/api/' in parsed.path or parsed.path.startswith('/api'):
-                        expanded_path = parsed.path
-                        if '?' in path:
-                            query_part = path.split('?')[1]
-                            expanded_path = f"{expanded_path}?{query_part}"
+                        base_path = parsed.path.rstrip('/')
+                        expanded_path = base_path + path_suffix + query_suffix
                         expanded_req = req.model_copy(update={"path": expanded_path})
                         expanded_req.name = f"{req.name} - {expanded_path}"
                         requests.append(expanded_req)
-                # If no API endpoints found, at least add the root API check
-                if not requests and any(req.path.startswith('/api') for req in template.requests if req.path):
-                    requests.append(req)
-            # @params@ - add query params to discovered endpoints
-            elif path.startswith("@params@"):
-                base_path = path.replace("@params@", "")
-                default_payload = "'"
-                for endpoint_url, params in self.target.endpoints.custom.items():
-                    from urllib.parse import urlparse, parse_qs
-                    parsed = urlparse(endpoint_url)
-                    if parsed.query:
-                        # Add discovered params to injection payload
-                        existing_params = list(parse_qs(parsed.query).keys())
-                        if existing_params:
-                            first_param = existing_params[0]
-                            payload_value = base_path.split('=')[1] if '=' in base_path else default_payload
-                            expanded_path = f"{parsed.path}?{first_param}={payload_value}"
-                            expanded_req = req.model_copy(update={"path": expanded_path})
-                            expanded_req.name = f"{req.name} - {first_param}"
-                            requests.append(expanded_req)
-                            break
+                # If no API endpoints found, try root path
                 if not requests:
                     requests.append(req)
             else:

@@ -1,0 +1,79 @@
+id: generic-cors-misconfig
+info:
+  name: CORS Misconfiguration
+  description: Detects overly permissive CORS policies
+  owasp_category: A05:2025
+  severity: medium
+  tags:
+    - cors
+    - misconfig
+    - generic
+
+requests:
+  - name: CORS wildcard with credentials
+    method: GET
+    path: "/"
+    headers:
+      Origin: https://evil.com
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin"
+          - "*"
+          - "access-control-allow-credentials"
+          - "true"
+        condition: and
+        case_sensitive: false
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_WILDCARD_WITH_CREDS
+      message: "CORS allows any origin with credentials"
+      remediation: "Use specific origins, not wildcard with credentials"
+
+  - name: CORS reflects origin
+    method: GET
+    path: "/"
+    headers:
+      Origin: https://evil.com
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin"
+          - "https://evil.com"
+        condition: and
+        case_sensitive: false
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_ORIGIN_REFLECTION
+      message: "CORS reflects arbitrary origin"
+      remediation: "Validate origin against whitelist"
+
+  - name: CORS allows null origin
+    method: GET
+    path: "/"
+    headers:
+      Origin: null
+    matchers:
+      - type:access-control-allow-origin"
+          - "null"
+        condition: and
+        case_sensitive: false
+        part: header
+        words:
+          - "Access-Control-Allow-Origin: null"
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_NULL_ORIGIN
+      message: "CORS allows null origin"
+      remediation: "Reject null origin"
