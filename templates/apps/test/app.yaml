@@ -1,6 +1,6 @@
 name: test
 target_url: http://localhost:3000
-created_at: '2026-01-12T03:55:10.541696'
+created_at: '2026-01-12T11:47:15.245152'
 endpoints:
 - url: http://localhost:3000
   path: ''
@@ -37,22 +37,8 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/redirect?to=http
-  path: /redirect
-  method: GET
-  query: to=http
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/%5Cu0275inj.js
-  path: /%5Cu0275inj.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/application/vnd.ms-word.do
-  path: /application/vnd.ms-word.do
+- url: http://localhost:3000/%5Cu0275fac.js
+  path: /%5Cu0275fac.js
   method: GET
   query: ''
   tags:
@@ -65,8 +51,15 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/%5C/index.html
-  path: /%5C/index.html
+- url: http://localhost:3000/application/vnd.ms-word.do
+  path: /application/vnd.ms-word.do
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/%5Cu0275inj.js
+  path: /%5Cu0275inj.js
   method: GET
   query: ''
   tags:
@@ -86,8 +79,22 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/%5Cu0275fac.js
-  path: /%5Cu0275fac.js
+- url: http://localhost:3000/redirect?to=http
+  path: /redirect
+  method: GET
+  query: to=http
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/snippets/verdict
+  path: /snippets/verdict
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/%5C/index.html
+  path: /%5C/index.html
   method: GET
   query: ''
   tags:
@@ -107,6 +114,13 @@ endpoints:
   tags:
   - general
   type: page
+- url: http://localhost:3000/snippets/fixes
+  path: /snippets/fixes
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
 - url: http://localhost:3000/%5Cu0275prov.js
   path: /%5Cu0275prov.js
   method: GET
@@ -114,22 +128,8 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/snippets/verdict
-  path: /snippets/verdict
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/node_modules/morgan/index.js
-  path: /juice-shop/node_modules/morgan/index.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/build/routes/verify.js
-  path: /juice-shop/build/routes/verify.js
+- url: http://localhost:3000/track-result/new
+  path: /track-result/new
   method: GET
   query: ''
   tags:
@@ -149,8 +149,15 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/snippets/fixes
-  path: /snippets/fixes
+- url: http://localhost:3000/juice-shop/node_modules/morgan/index.js
+  path: /juice-shop/node_modules/morgan/index.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/juice-shop/build/routes/verify.js
+  path: /juice-shop/build/routes/verify.js
   method: GET
   query: ''
   tags:
@@ -163,6 +170,20 @@ endpoints:
   tags:
   - general
   type: page
+- url: http://localhost:3000/juice-shop/build/routes/angular.js
+  path: /juice-shop/build/routes/angular.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/rest/wallet/balance
+  path: /rest/wallet/balance
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
 - url: http://localhost:3000/api/Cards
   path: /api/Cards
   method: GET
@@ -177,21 +198,6 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/rest/order-history
-  path: /rest/order-history
-  method: GET
-  query: ''
-  tags:
-  - commerce
-  - api
-  type: api
-- url: http://localhost:3000/rest/wallet/balance
-  path: /rest/wallet/balance
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
 - url: http://localhost:3000/rest/image-captcha/
   path: /rest/image-captcha/
   method: GET
@@ -200,13 +206,14 @@ endpoints:
   - file-handling
   - api
   type: api
-- url: http://localhost:3000/juice-shop/build/routes/angular.js
-  path: /juice-shop/build/routes/angular.js
+- url: http://localhost:3000/rest/order-history
+  path: /rest/order-history
   method: GET
   query: ''
   tags:
-  - general
-  type: page
+  - commerce
+  - api
+  type: api
 - url: http://localhost:3000/rest/user
   path: /rest/user
   method: GET
@@ -222,13 +229,6 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/track-result/new
-  path: /track-result/new
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
 - url: http://localhost:3000/api/Recycles
   path: /api/Recycles
   method: GET
@@ -264,22 +264,8 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/juice-shop/build/routes/orderHistory.js
-  path: /juice-shop/build/routes/orderHistory.js
-  method: GET
-  query: ''
-  tags:
-  - commerce
-  type: page
 - url: http://localhost:3000/rest/products
   path: /rest/products
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/SecurityAnswers
-  path: /api/SecurityAnswers
   method: GET
   query: ''
   tags:
@@ -291,6 +277,20 @@ endpoints:
   query: ''
   tags:
   - general
+  type: page
+- url: http://localhost:3000/api/SecurityAnswers
+  path: /api/SecurityAnswers
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/juice-shop/build/routes/orderHistory.js
+  path: /juice-shop/build/routes/orderHistory.js
+  method: GET
+  query: ''
+  tags:
+  - commerce
   type: page
 - url: http://localhost:3000/rest/track-order
   path: /rest/track-order
@@ -421,29 +421,8 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/api/Deliverys
-  path: /api/Deliverys
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
 - url: http://localhost:3000/rest/captcha
   path: /rest/captcha
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/continue-code
-  path: /rest/continue-code
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/rest/repeat-notification
-  path: /rest/repeat-notification
   method: GET
   query: ''
   tags:
@@ -456,8 +435,58 @@ endpoints:
   tags:
   - api
   type: api
+- url: http://localhost:3000/rest/continue-code
+  path: /rest/continue-code
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Deliverys
+  path: /api/Deliverys
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/user/security-question?email=
+  path: /rest/user/security-question
+  method: GET
+  query: email=
+  tags:
+  - user-data
+  - api
+  type: api
 - url: http://localhost:3000/rest/memories
   path: /rest/memories
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Quantitys
+  path: /api/Quantitys
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/rest/repeat-notification
+  path: /rest/repeat-notification
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/SecurityQuestions
+  path: /api/SecurityQuestions
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: http://localhost:3000/api/Products
+  path: /api/Products
   method: GET
   query: ''
   tags:
@@ -491,42 +520,6 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/rest/user/security-question?email=
-  path: /rest/user/security-question
-  method: GET
-  query: email=
-  tags:
-  - user-data
-  - api
-  type: api
-- url: http://localhost:3000/rest/continue-code-findIt
-  path: /rest/continue-code-findIt
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Quantitys
-  path: /api/Quantitys
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/SecurityQuestions
-  path: /api/SecurityQuestions
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
-- url: http://localhost:3000/api/Products
-  path: /api/Products
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
 - url: http://localhost:3000/Trident/
   path: /Trident/
   method: GET
@@ -534,6 +527,13 @@ endpoints:
   tags:
   - general
   type: page
+- url: http://localhost:3000/rest/continue-code-findIt
+  path: /rest/continue-code-findIt
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
 - url: http://localhost:3000/api/Feedbacks
   path: /api/Feedbacks
   method: GET
@@ -548,15 +548,15 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/api/%5C%22/
-  path: /api/%5C%22/
+- url: http://localhost:3000/api/%5C%22/ftp/legal.md%5C%22
+  path: /api/%5C%22/ftp/legal.md%5C%22
   method: GET
   query: ''
   tags:
   - api
   type: api
-- url: http://localhost:3000/api/%5C%22/ftp/legal.md%5C%22
-  path: /api/%5C%22/ftp/legal.md%5C%22
+- url: http://localhost:3000/api/%5C%22/
+  path: /api/%5C%22/
   method: GET
   query: ''
   tags:
