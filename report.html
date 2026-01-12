@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Squeezer Scan Report - https://reqres.in</title>
+    <title>Squeezer Scan Report - https://petstore.swagger.io</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace; background: #1e1e1e; color: #cccccc; line-height: 1.5; font-size: 13px; }
@@ -88,7 +88,7 @@
         
 <header>
     <h1>Squeezer Scan Report</h1>
-    <div class="subtitle">https://reqres.in • Scanned at 2026-01-12 13:57:30</div>
+    <div class="subtitle">https://petstore.swagger.io • Scanned at 2026-01-12 14:04:21</div>
 </header>
 
         
@@ -98,7 +98,7 @@
         <div class="card-title">Critical</div>
     </div>
     <div class="card">
-        <div class="card-value high">1</div>
+        <div class="card-value high">0</div>
         <div class="card-title">High</div>
     </div>
     <div class="card">
@@ -110,11 +110,11 @@
         <div class="card-title">Low</div>
     </div>
     <div class="card">
-        <div class="card-value">12</div>
+        <div class="card-value">3</div>
         <div class="card-title">Templates</div>
     </div>
     <div class="card">
-        <div class="card-value">6.1s</div>
+        <div class="card-value">2.6s</div>
         <div class="card-title">Duration</div>
     </div>
 </div>
@@ -159,8 +159,8 @@
   </div>
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff8800">1</div>
-    <div class="bar-fill" style="height: 70px; background: #ff8800;"></div>
+    <div class="bar-value" style="color: #ff8800">0</div>
+    <div class="bar-fill" style="height: 4px; background: #ff8800;"></div>
     <div class="bar-label">High</div>
   </div>
   
@@ -190,19 +190,7 @@
       
       
     
-      
-      
-        
-      
-      
-    
     <div class="chart-container ">
-  
-  <div class="bar">
-    <div class="bar-value" style="color: #ff4444">1</div>
-    <div class="bar-fill" style="height: 70px; background: #ff4444;"></div>
-    <div class="bar-label">A01</div>
-  </div>
   
   <div class="bar">
     <div class="bar-value" style="color: #ff8800">2</div>
@@ -240,8 +228,8 @@
   <div class="chart-container ">
   
   <div class="bar">
-    <div class="bar-value" style="color: #00cc66">2</div>
-    <div class="bar-fill" style="height: 93px; background: #00cc66;"></div>
+    <div class="bar-value" style="color: #00cc66">1</div>
+    <div class="bar-fill" style="height: 70px; background: #00cc66;"></div>
     <div class="bar-label">Direct</div>
   </div>
   
@@ -253,7 +241,7 @@
   
   <div class="bar">
     <div class="bar-value" style="color: #00aaff">1</div>
-    <div class="bar-fill" style="height: 47px; background: #00aaff;"></div>
+    <div class="bar-fill" style="height: 70px; background: #00aaff;"></div>
     <div class="bar-label">Heur</div>
   </div>
   
@@ -268,7 +256,7 @@
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (0)</button>
-            <button class="filter-btn" data-filter-type="severity" data-filter="high">High (1)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="high">High (0)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med (2)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="low">Low (0)</button>
         </div>
@@ -278,7 +266,7 @@
         <span class="filter-label">Type</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
-            <button class="filter-btn" data-filter-type="scope" data-filter="app">App (1)</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="app">App (0)</button>
             <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic (2)</button>
         </div>
     </div>
@@ -288,8 +276,6 @@
         <span class="filter-label">OWASP</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="owasp" data-filter="all">All</button>
-            
-            <button class="filter-btn" data-filter-type="owasp" data-filter="A01">A01</button>
             
             <button class="filter-btn" data-filter-type="owasp" data-filter="A06">A06</button>
             
@@ -307,13 +293,9 @@
             
             <button class="filter-btn" data-filter-type="tag" data-filter="generic">generic</button>
             
-            <button class="filter-btn" data-filter-type="tag" data-filter="idor">idor</button>
-            
             <button class="filter-btn" data-filter-type="tag" data-filter="misconfiguration">misconfiguration</button>
             
             <button class="filter-btn" data-filter-type="tag" data-filter="rate-limit">rate-limit</button>
-            
-            <button class="filter-btn" data-filter-type="tag" data-filter="test-reqres">test-reqres</button>
             
         </div>
     </div>
@@ -323,7 +305,7 @@
         <span class="filter-label">Evidence</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="evidence" data-filter="all">All</button>
-            <button class="filter-btn" data-filter-type="evidence" data-filter="direct">Direct (2)</button>
+            <button class="filter-btn" data-filter-type="evidence" data-filter="direct">Direct (1)</button>
             <button class="filter-btn" data-filter-type="evidence" data-filter="inference">Inf (0)</button>
             <button class="filter-btn" data-filter-type="evidence" data-filter="heuristic">Heur (1)</button>
         </div>
@@ -354,7 +336,7 @@
     </div>
     <div class="finding-body">
       <div class="finding-title">MISSING_RATE_LIMIT_HEADERS</div>
-      <div class="finding-url">https://reqres.in/</div>
+      <div class="finding-url">https://petstore.swagger.io/</div>
       <div class="finding-message">No rate limit headers present - potential DoS vulnerability</div>
 
       
@@ -384,7 +366,7 @@
         
         <div class="evidence-item">
           <div class="evidence-key">matcher_evidence</div>
-          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;found&#39;: [], &#39;content_length&#39;: 1337}, &#39;positive_matchers&#39;: &#39;0/0&#39;, &#39;negative_matchers&#39;: &#39;1/1&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
+          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;found&#39;: [], &#39;content_length&#39;: 694}, &#39;positive_matchers&#39;: &#39;0/0&#39;, &#39;negative_matchers&#39;: &#39;1/1&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
         </div>
         
         
@@ -424,7 +406,7 @@
     </div>
     <div class="finding-body">
       <div class="finding-title">NO_RATE_LIMITING</div>
-      <div class="finding-url">https://reqres.in/</div>
+      <div class="finding-url">https://petstore.swagger.io/</div>
       <div class="finding-message">No rate limiting detected - endpoint accepts excessive requests</div>
 
       
@@ -474,74 +456,6 @@
     </div>
   </div>
         
-            
-  
-  
-  
-  <div class="finding-card high"
-       data-severity="high"
-       data-owasp="A01"
-       data-evidence="direct_observation"
-       data-scope="app"
-       data-tags="idor,test-reqres">
-    <div class="finding-header">
-      <span class="owasp-badge owasp-a01">A01</span>
-      <span class="badge high">high</span>
-      <span class="badge direct_observation">Direct Observation</span>
-      
-      
-      <span style="font-size: 10px; color: #858585; margin-left: auto;">test-reqres-idor-get-api-users</span>
-    </div>
-    <div class="finding-body">
-      <div class="finding-title">test_reqres_idor_get_api_users</div>
-      <div class="finding-url">https://reqres.in/api/users/1</div>
-      <div class="finding-message">IDOR: /api/users</div>
-
-      
-      <div class="raw-data">
-        
-        <div class="raw-data-header" onclick="toggleRawData(this)">
-          <span class="raw-data-title">Request</span>
-          <span class="raw-data-toggle">+</span>
-        </div>
-        <div class="raw-data-content collapsed"><span class="request-line">GET /api/users/1</span></div>
-        
-        
-      </div>
-      
-
-      
-      <h3 class="section-title">Evidence</h3>
-      <div class="evidence-grid">
-        
-        
-        <div class="evidence-item">
-          <div class="evidence-key">status_code</div>
-          <div class="evidence-value">200</div>
-        </div>
-        
-        
-        
-        <div class="evidence-item">
-          <div class="evidence-key">matcher_evidence</div>
-          <div class="evidence-value">{&#39;matcher_0&#39;: {&#39;status&#39;: 200, &#39;expected&#39;: [200]}, &#39;positive_matchers&#39;: &#39;1/1&#39;, &#39;negative_matchers&#39;: &#39;0/0&#39;, &#39;condition&#39;: &#39;and&#39;}</div>
-        </div>
-        
-        
-        
-        <div class="evidence-item">
-          <div class="evidence-key">confidence</div>
-          <div class="evidence-value">medium</div>
-        </div>
-        
-        
-      </div>
-      
-
-      
-    </div>
-  </div>
-        
     
 </div>
 
@@ -549,7 +463,7 @@
 
         
 <footer>
-    Generated by Squeezer • 2026-01-12 13:57:30 • 3 total findings (3 unique)
+    Generated by Squeezer • 2026-01-12 14:04:21 • 2 total findings (2 unique)
 </footer>
 
     </div>

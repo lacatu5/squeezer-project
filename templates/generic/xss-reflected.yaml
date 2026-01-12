@@ -1,7 +1,7 @@
 id: generic-xss-reflected
 info:
   name: Reflected Cross-Site Scripting
-  description: Tests for reflected XSS in query parameters and paths
+  description: Tests for reflected XSS on all discovered endpoints
   owasp_category: A03:2021
   severity: medium
   tags:
@@ -11,89 +11,51 @@ info:
     - dast
 
 requests:
-  - name: XSS in query parameter
+  - name: XSS script tag
     method: GET
-    path: /search?q=<script>alert(1)</script>
+    path: @params@?value=<script>alert(1)</script>
     matchers:
       - type: word
         part: body
         words:
           - "<script>alert(1)</script>"
         case_sensitive: false
-      - type: word
-        part: header
-        words:
-          - "text/html"
-        case_sensitive: false
-    matchers_condition: and
     on_match:
-      vulnerability: REFLECTED_XSS_QUERY_PARAM
-      message: Reflected XSS in query parameter - unsanitized input reflected in HTML
-      remediation: Encode user input before reflecting in HTML responses
+      vulnerability: REFLECTED_XSS_SCRIPT
+      message: Reflected XSS - script tag not encoded
+      remediation: Encode user input before reflecting in HTML
 
-  - name: XSS in path parameter
+  - name: XSS img onerror
     method: GET
-    path: /<img src=x onerror=alert(1)>
+    path: @params@?q=<img src=x onerror=alert(1)>
     matchers:
       - type: word
         part: body
         words:
           - "<img src=x onerror=alert(1)>"
         case_sensitive: false
-      - type: word
-        part: header
-        words:
-          - "text/html"
-        case_sensitive: false
-    matchers_condition: and
     on_match:
-      vulnerability: REFLECTED_XSS_PATH
-      message: Reflected XSS in path parameter
-      remediation: Encode user input before reflecting in HTML responses
+      vulnerability: REFLECTED_XSS_IMG
+      message: Reflected XSS via img onerror
+      remediation: Encode user input in HTML responses
 
-  - name: XSS with double quote
+  - name: XSS attribute breaker
     method: GET
-    path: /search?q="><script>alert(1)</script>
+    path: @params@?value="><script>alert(1)</script>
     matchers:
       - type: word
         part: body
         words:
           - "\"><script>alert(1)</script>"
         case_sensitive: false
-      - type: word
-        part: header
-        words:
-          - "text/html"
-        case_sensitive: false
-    matchers_condition: and
     on_match:
-      vulnerability: REFLECTED_XSS_ATTRIBUTE
+      vulnerability: REFLECTED_XSS_ATTR
       message: Reflected XSS in HTML attribute context
-      remediation: Use HTML entity encoding for attribute values
+      remediation: Use HTML entity encoding for attributes
 
-  - name: XSS with single quote
+  - name: XSS javascript uri
     method: GET
-    path: /search?q='><script>alert(1)</script>
-    matchers:
-      - type: word
-        part: body
-        words:
-          - "'><script>alert(1)</script>"
-        case_sensitive: false
-      - type: word
-        part: header
-        words:
-          - "text/html"
-        case_sensitive: false
-    matchers_condition: and
-    on_match:
-      vulnerability: REFLECTED_XSS_SINGLE_QUOTE
-      message: Reflected XSS via single quote injection
-      remediation: Use HTML entity encoding for all user input
-
-  - name: XSS with JavaScript URI
-    method: GET
-    path: /search?q=javascript:alert(1)
+    path: @params@?url=javascript:alert(1)
     matchers:
       - type: word
         part: body
@@ -102,13 +64,7 @@ requests:
           - "javascript%3Aalert(1)"
         condition: or
         case_sensitive: false
-      - type: word
-        part: header
-        words:
-          - "text/html"
-        case_sensitive: false
-    matchers_condition: and
     on_match:
-      vulnerability: REFLECTED_XSS_JAVASCRIPT_URI
+      vulnerability: REFLECTED_XSS_JS_URI
       message: Reflected XSS via javascript: URI
       remediation: Validate and sanitize URLs in user input

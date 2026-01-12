@@ -1,7 +1,7 @@
 id: generic-sqli
 info:
   name: SQL Injection (Error-Based)
-  description: Tests for SQL injection via query parameters on common endpoints
+  description: Tests for SQL injection on all discovered API endpoints
   owasp_category: A03:2021
   severity: critical
   tags:
@@ -11,9 +11,9 @@ info:
     - dast
 
 requests:
-  - name: SQLi via /get endpoint
+  - name: SQLi single quote
     method: GET
-    path: /get?id=1'
+    path: @params@?value=1'
     matchers:
       - type: regex
         condition: or
@@ -32,13 +32,13 @@ requests:
           - "Unclosed quotation mark"
           - "SQLite error"
     on_match:
-      vulnerability: SQL_INJECTION_GET_PARAM
-      message: SQL injection detected via query parameter
+      vulnerability: SQL_INJECTION_SINGLE_QUOTE
+      message: SQL injection detected via single quote
       remediation: Use parameterized queries and input validation
 
-  - name: SQLi via search parameter
+  - name: SQLi double quote
     method: GET
-    path: /search?q=1' OR '1'='1
+    path: @params@?value=1"
     matchers:
       - type: regex
         condition: or
@@ -49,31 +49,14 @@ requests:
           - "PostgreSQL.{0,200}?ERROR"
           - "ORA-\\d{5}"
           - "Unclosed quotation mark"
-    on_match:
-      vulnerability: SQL_INJECTION_SEARCH
-      message: SQL injection via search parameter
-      remediation: Use parameterized queries
-
-  - name: SQLi via user endpoint
-    method: GET
-    path: /api/users?id=1"
-    matchers:
-      - type: regex
-        condition: or
-        case_sensitive: false
-        part: body
-        regex:
-          - "SQL syntax.{0,200}?MySQL"
-          - "PostgreSQL.{0,200}?ERROR"
-          - "ORA-\\d{5}"
     on_match:
       vulnerability: SQL_INJECTION_DOUBLE_QUOTE
       message: SQL injection via double quote
       remediation: Use parameterized queries
 
-  - name: SQLi via login endpoint
+  - name: SQLi OR bypass
     method: GET
-    path: /api/login?user=admin'--
+    path: @params@?value=1' OR '1'='1
     matchers:
       - type: regex
         condition: or
@@ -83,15 +66,14 @@ requests:
           - "SQL syntax.{0,200}?MySQL"
           - "PostgreSQL.{0,200}?ERROR"
           - "ORA-\\d{5}"
-          - "Unclosed quotation mark"
     on_match:
-      vulnerability: SQL_INJECTION_LOGIN
-      message: SQL injection via login parameter
+      vulnerability: SQL_INJECTION_OR_BYPASS
+      message: SQL injection via OR bypass attempt
       remediation: Use parameterized queries
 
-  - name: SQLi via collection endpoint
+  - name: SQLi UNION
     method: GET
-    path: /api/collections?id=1' UNION SELECT NULL--
+    path: @params@?value=1' UNION SELECT NULL--
     matchers:
       - type: regex
         condition: or

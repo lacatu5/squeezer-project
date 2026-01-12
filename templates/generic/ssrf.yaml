@@ -1,7 +1,7 @@
 id: generic-ssrf
 info:
   name: Server-Side Request Forgery (SSRF)
-  description: Tests for SSRF via URL parameter injection
+  description: Tests for SSRF on endpoints that accept URL parameters
   owasp_category: A10:2021
   severity: high
   tags:
@@ -11,9 +11,9 @@ info:
     - api
 
 requests:
-  - name: SSRF via metadata endpoint
+  - name: SSRF cloud metadata
     method: GET
-    path: /api/fetch?url=http://169.254.169.254/latest/meta-data/iam/security-credentials
+    path: @params@?url=http://169.254.169.254/latest/meta-data/iam
     matchers:
       - type: status
         condition: in
@@ -24,20 +24,20 @@ requests:
         part: body
         words:
           - "ami"
+          - "iam"
           - "instance-id"
-          - "security-credentials"
           - "Code"
         condition: or
         case_sensitive: false
     matchers_condition: or
     on_match:
-      vulnerability: SSRF_CLOUD_METADATA
-      message: SSRF to cloud metadata endpoint detected - potential credential theft
-      remediation: Validate and whitelist allowed URLs; block private IP ranges
+      vulnerability: SSRF_METADATA
+      message: SSRF to cloud metadata endpoint possible
+      remediation: Validate URLs; block private IP ranges
 
-  - name: SSRF via localhost
+  - name: SSRF localhost
     method: GET
-    path: /api/fetch?url=http://localhost/admin
+    path: @params@?url=http://localhost/admin
     matchers:
       - type: status
         condition: in
@@ -49,85 +49,18 @@ requests:
         words:
           - "admin"
           - "dashboard"
-          - "config"
-          - "management"
+          - "localhost"
         condition: or
         case_sensitive: false
-    matchers_condition: and
+    matchers_condition: or
     on_match:
       vulnerability: SSRF_LOCALHOST
-      message: SSRF via localhost - internal service access possible
-      remediation: Block requests to localhost, 127.0.0.1, and private IP ranges
+      message: SSRF via localhost - internal access possible
+      remediation: Block requests to localhost and private IPs
 
-  - name: SSRF via 127.0.0.1
+  - name: SSRF file protocol
     method: GET
-    path: /api/fetch?url=http://127.0.0.1:8080
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 200
-          - 403
-          - 404
-    on_match:
-      vulnerability: SSRF_PRIVATE_IP
-      message: SSRF via private IP - internal port scanning possible
-      remediation: Validate URLs against whitelist; reject private IPs
-
-  - name: SSRF via URL encoding bypass
-    method: GET
-    path: /api/fetch?url=http://%31%32%37%2e%30%2e%30%2e%31
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 200
-          - 404
-    on_match:
-      vulnerability: SSRF_URL_ENCODING_BYPASS
-      message: SSRF via URL-encoded IP - filter bypass possible
-      remediation: Decode and validate URLs before making requests
-
-  - name: SSRF via IPv6 localhost
-    method: GET
-    path: /api/fetch?url=http://[::1]/admin
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 200
-          - 404
-    on_match:
-      vulnerability: SSRF_IPV6_LOOPBACK
-      message: SSRF via IPv6 loopback address
-      remediation: Block all IPv6 loopback addresses
-
-  - name: Blind SSRF via oast
-    method: GET
-    path: /api/fetch?url=http://{{rand_base(8)}}.oast.online
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 200
-      - type: word
-        part: body
-        words:
-          - "success"
-          - "fetched"
-          - "loaded"
-          - "complete"
-        condition: or
-        case_sensitive: false
-    matchers_condition: and
-    on_match:
-      vulnerability: SSRF_BLIND
-      message: Blind SSRF possible - request initiated to external domain
-      remediation: Use asynchronous validation with timeout; implement URL whitelisting
-
-  - name: SSRF via file protocol
-    method: GET
-    path: /api/fetch?url=file:///etc/passwd
+    path: @params@?url=file:///etc/passwd
     matchers:
       - type: status
         condition: in
@@ -139,34 +72,10 @@ requests:
         words:
           - "root:"
           - "bin:"
-          - "daemon:"
         condition: or
         case_sensitive: false
     matchers_condition: or
     on_match:
       vulnerability: SSRF_FILE_PROTOCOL
-      message: SSRF via file:// protocol - local file read possible
+      message: SSRF via file:// protocol - local file read
       remediation: Restrict allowed protocols to http/https only
-
-  - name: SSRF via internal DNS rebinding
-    method: GET
-    path: /api/fetch?url=http://metadata.google.internal
-    matchers:
-      - type: status
-        condition: in
-        status:
-          - 200
-          - 404
-      - type: word
-        part: body
-        words:
-          - "computeMetadata"
-          - "google"
-          - "project"
-        condition: or
-        case_sensitive: false
-    matchers_condition: or
-    on_match:
-      vulnerability: SSRF_GCP_METADATA
-      message: SSRF to GCP metadata endpoint
-      remediation: Block internal DNS domains used by cloud providers
