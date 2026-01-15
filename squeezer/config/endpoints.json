@@ -1,0 +1,8 @@
+{
+  "synonyms": {
+    "cart": ["cart", "basket", "checkout", "order"],
+    "user": ["user", "users", "User", "account", "profile"],
+    "product": ["product", "products", "item", "items"],
+    "register": ["users", "register", "sign-up", "signup", "create"]
+  }
+}

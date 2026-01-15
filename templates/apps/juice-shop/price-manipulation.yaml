@@ -10,20 +10,6 @@ info:
     - input-validation
 
 requests:
-  - name: Checkout with modified total without auth
-    method: POST
-    path: /rest/basket/1/checkout
-    headers:
-      Content-Type: application/json
-    body: '{"couponData": "bnVsbA==", "orderDetails": {"totalPrice": 0.01}}'
-    matchers:
-      - type: status
-        values: [200, 201]
-    on_match:
-      vulnerability: PRICE_MANIPULATION
-      message: Checkout allows payment manipulation without authentication - critical business logic flaw
-      remediation: Always require authentication and calculate totals server-side
-
   - name: Checkout with modified total with auth
     method: POST
     path: /rest/basket/1/checkout

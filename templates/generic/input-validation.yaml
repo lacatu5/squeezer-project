@@ -1,0 +1,90 @@
+id: generic-input-validation
+info:
+  name: Input Validation - Empty/Null Values
+  description: Tests if endpoints accept empty or null values in required fields
+  owasp_category: A07:2025
+  severity: medium
+  tags:
+    - authentication
+    - input-validation
+    - authentication-bypass
+    - generic
+
+requests:
+  - name: Empty required field
+    method: POST
+    path: "@api@/users@"
+    headers:
+      Content-Type: application/json
+    body: '{"email":"","password":"Test1234!"}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+    on_match:
+      vulnerability: EMPTY_FIELD_ACCEPTED
+      message: Endpoint accepts empty required field value
+      remediation: Require non-empty values with proper format validation
+
+  - name: Null required field
+    method: POST
+    path: "@api@/users@"
+    headers:
+      Content-Type: application/json
+    body: '{"email":null,"password":"Test1234!"}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - '"data":{'
+          - success
+        condition: or
+    on_match:
+      vulnerability: NULL_FIELD_ACCEPTED
+      message: Endpoint accepts null required field value
+      remediation: Reject null values in required fields
+
+  - name: Empty password
+    method: POST
+    path: "@api@/users@"
+    headers:
+      Content-Type: application/json
+    body: '{"email":"test{{rand_int()}}@test.com","password":""}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - '"status":"success"'
+          - '"data":{'
+        condition: or
+    on_match:
+      vulnerability: WEAK_PASSWORD_POLICY
+      message: Endpoint accepts empty password
+      remediation: Enforce minimum password length and complexity
+
+  - name: Register endpoint empty field
+    method: POST
+    path: "@api@/register@"
+    headers:
+      Content-Type: application/json
+    body: '{"email":"","username":"test","password":"Test1234!"}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+    on_match:
+      vulnerability: EMPTY_FIELD_ACCEPTED
+      message: Register endpoint accepts empty field
+      remediation: Validate all required fields server-side

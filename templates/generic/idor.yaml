@@ -1,8 +1,8 @@
 id: generic-idor
 info:
   name: Insecure Direct Object Reference (IDOR)
-  description: Tests for IDOR on API endpoints
-  owasp_category: A05:2025
+  description: Tests for IDOR vulnerabilities on API endpoints via sequential ID enumeration
+  owasp_category: A01:2025
   severity: high
   tags:
     - idor
@@ -14,6 +14,7 @@ requests:
   - name: IDOR enumerate ID 1
     method: GET
     path: "@api@/1"
+    matchers_condition: and
     matchers:
       - type: status
         condition: in
@@ -23,21 +24,23 @@ requests:
       - type: word
         part: body
         words:
-          - "id"
-          - "email"
-          - "name"
-          - "data"
+          - '"id":'
+          - '"email"'
+          - '"name"'
+          - '"data":{'
+          - "products"
+          - "items"
         condition: or
         case_sensitive: false
-    matchers_condition: and
     on_match:
       vulnerability: IDOR_ACCESSIBLE
-      message: "API endpoint accessible without auth"
-      remediation: "Implement authentication"
+      message: Sequential ID 1 returns data - IDOR vulnerability possible
+      remediation: Implement authentication and ownership verification; use non-sequential IDs
 
   - name: IDOR enumerate ID 2
     method: GET
     path: "@api@/2"
+    matchers_condition: and
     matchers:
       - type: status
         condition: in
@@ -46,12 +49,57 @@ requests:
       - type: word
         part: body
         words:
-          - "id"
-          - "data"
+          - '"id":'
+          - '"data":{'
+          - "products"
+          - "items"
         condition: or
         case_sensitive: false
-    matchers_condition: and
     on_match:
       vulnerability: IDOR_SEQUENTIAL
-      message: "Sequential ID access works"
-      remediation: "Use UUIDs and verify ownership"
+      message: Sequential ID 2 also accessible - enumeration confirmed
+      remediation: Use UUIDs or random identifiers; verify resource ownership
+
+  - name: IDOR enumerate ID 0
+    method: GET
+    path: "@api@/0"
+    matchers_condition: and
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 403
+      - type: word
+        part: body
+        words:
+          - '"id":'
+          - '"data":{'
+        condition: or
+        case_sensitive: false
+    on_match:
+      vulnerability: IDOR_ZERO_ID
+      message: ID 0 accessible - zero-based ID enumeration works
+      remediation: Validate ID ranges; use UUIDs
+
+  - name: IDOR cart/basket test
+    method: GET
+    path: "@api@/cart@/1"
+    matchers:
+      - type: status
+        values: [200]
+    on_match:
+      vulnerability: IDOR_CART
+      message: Cart/basket endpoint accessible with ID 1 without authentication
+      remediation: Verify cart ownership on every request
+
+  - name: IDOR items endpoint
+    method: GET
+    path: "@api@/items@"
+    matchers:
+      - type: status
+        values: [200]
+    on_match:
+      vulnerability: UNAUTHORIZED_ACCESS
+      message: Items endpoint accessible without authentication
+      remediation: Require authentication to access item data

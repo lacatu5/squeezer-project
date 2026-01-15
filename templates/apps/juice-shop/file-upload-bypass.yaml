@@ -11,21 +11,6 @@ info:
     - misconfiguration
 
 requests:
-  - path: /file-upload
-    method: POST
-    headers:
-      Content-Type: multipart/form-data
-    matchers:
-      - type: status
-        status:
-          - 200
-          - 204
-          - 410
-    on_match:
-      vulnerability: FILE_UPLOAD_BYPASS
-      message: File upload endpoint accepts requests without proper validation
-      remediation: Implement strict file type validation; whitelist allowed extensions only
-
   - path: /api/Complaints
     method: POST
     headers:
@@ -44,21 +29,3 @@ requests:
       vulnerability: PATH_TRAVERSAL
       message: Complaints endpoint accepts path traversal in file parameter - may access arbitrary files
       remediation: Validate file paths; use basename() to extract filename only
-
-  - path: /profile/image/upload
-    method: POST
-    matchers_condition: and
-    matchers:
-      - type: status
-        status:
-          - 200
-          - 204
-      - type: word
-        words:
-          - '"status":"success"'
-          - 'profileImage'
-        condition: or
-    on_match:
-      vulnerability: UNRESTRICTED_FILE_UPLOAD
-      message: Profile image upload accepts files without proper validation
-      remediation: Validate MIME type server-side; implement file content inspection not just extension

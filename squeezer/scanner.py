@@ -7,6 +7,7 @@ import uuid
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import urlparse
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
@@ -21,6 +22,7 @@ from squeezer.models import (
     SeverityLevel,
     TargetConfig,
     Template,
+    load_autodiscovery_patterns,
 )
 from squeezer.utils import TargetValidator, logger, sanitize_url
 
@@ -156,6 +158,7 @@ def create_finding(
         sev = severity_map.get(sev_lower, SeverityLevel.MEDIUM)
     return Finding(
         template_id=template.id,
+        template_file=template.file_path,
         vulnerability_type=on_match.get("vulnerability") or template.id.replace("-", "_"),
         severity=sev,
         owasp_category=owasp_category,
@@ -318,6 +321,9 @@ class TemplateEngine:
         discovered_params = self.target.get_discovered_params()
         if discovered_params:
             variables["discovered_params"] = discovered_params
+        if self._auth_context:
+            if self._auth_context.token:
+                variables["bearer_token"] = self._auth_context.token
         context = ExecutionContext(
             variables=variables,
             endpoints=self.target.get_endpoints(),
@@ -344,18 +350,53 @@ class TemplateEngine:
 
     def _expand_template(self, template: Template) -> List[RequestConfig]:
         """Expand template requests against discovered endpoints."""
-        requests = []
+        all_requests = []
         discovered_endpoints = self.target.endpoints.custom or {}
+        autodiscovery_patterns = load_autodiscovery_patterns()
+
+        from squeezer.endpoint_matcher import EndpointMatcher
+        matcher = EndpointMatcher()
+
+        def expand_autodiscover(req: RequestConfig) -> List[RequestConfig]:
+            text = str(req.json_body) if req.json_body is not None else (req.body or "")
+
+            match = re.search(r'\{\{autodiscover:(\w+)\}\}', text)
+            if not match:
+                return [req]
+
+            pattern_type = match.group(1)
+            field_names = autodiscovery_patterns.get(pattern_type, [])
+
+            if not field_names:
+                return [req]
+
+            expanded = []
+            for field_name in field_names:
+                new_req = req.model_copy()
+                new_req.name = f"{req.name} ({field_name})"
+
+                if req.json_body:
+                    json_str = json.dumps(req.json_body)
+                    json_str = json_str.replace(f"{{{{autodiscover:{pattern_type}}}}}", field_name)
+                    try:
+                        new_req.json_body = json.loads(json_str)
+                    except json.JSONDecodeError:
+                        pass
+
+                if req.body:
+                    new_req.body = req.body.replace(f"{{{{autodiscover:{pattern_type}}}}}", field_name)
+
+                expanded.append(new_req)
+
+            return expanded
 
         for req in template.requests:
-            # Check if this request should be expanded against endpoints
             original_path = req.path or ""
             path = original_path.strip('"')
+            expanded_requests = []
 
-            # @all@ - expand to all discovered endpoints
             if path == "@all@":
                 for endpoint_url in discovered_endpoints.keys():
-                    from urllib.parse import urlparse
                     parsed = urlparse(endpoint_url)
                     expanded_path = parsed.path or "/"
                     if '?' in original_path:
@@ -363,38 +404,86 @@ class TemplateEngine:
                         expanded_path = f"{expanded_path}?{query_part}"
                     expanded_req = req.model_copy(update={"path": expanded_path})
                     expanded_req.name = f"{req.name} - {expanded_path}"
-                    requests.append(expanded_req)
-            # @api@ - expand only to API endpoints (paths containing /api/)
+                    expanded_requests.extend(expand_autodiscover(expanded_req))
+
             elif path.startswith("@api@"):
-                import urllib.parse
-                # Extract suffix like /1 or ?id=value
-                suffix = path[5:].lstrip()  # Remove @api@
+                suffix = path[5:].lstrip()
                 query_suffix = ""
                 path_suffix = ""
+                id_suffix = ""
 
                 if '?' in suffix:
                     path_part, query_part = suffix.split('?', 1)
-                    path_suffix = path_part
+                    suffix = path_part
                     query_suffix = f"?{query_part}"
-                elif suffix:
+
+                # Check for pattern@id format like cart@/1 or users@/2
+                if '@' in suffix:
+                    pattern_part, _, id_part = suffix.partition('@')
+                    path_suffix = pattern_part
+                    id_suffix = id_part or ''
+                else:
                     path_suffix = suffix
 
+                path_suffix_clean = path_suffix.strip("@")
+
+                # Check if suffix is numeric (ID enumeration) - append to all API endpoints
+                is_numeric_suffix = path_suffix_clean.lstrip('/').isdigit() if path_suffix_clean else False
+
+                matched = False
                 for endpoint_url in discovered_endpoints.keys():
-                    parsed = urllib.parse.urlparse(endpoint_url)
-                    if '/api/' in parsed.path or parsed.path.startswith('/api'):
-                        base_path = parsed.path.rstrip('/')
-                        expanded_path = base_path + path_suffix + query_suffix
+                    parsed = urlparse(endpoint_url)
+                    base_path = parsed.path.rstrip('/')
+
+                    if is_numeric_suffix or not path_suffix_clean:
+                        # Numeric suffix or no suffix - append to all API endpoints
+                        if '/api/' in parsed.path or parsed.path.startswith('/api'):
+                            matched = True
+                            expanded_path = base_path + path_suffix + query_suffix
+                            expanded_req = req.model_copy(update={"path": expanded_path})
+                            expanded_req.name = f"{req.name} - {expanded_path}"
+                            expanded_requests.extend(expand_autodiscover(expanded_req))
+                    elif matcher.match_suffix(endpoint_url, path_suffix_clean):
+                        # Named suffix - only match endpoints with that suffix
+                        matched = True
+                        expanded_path = base_path + id_suffix + query_suffix
                         expanded_req = req.model_copy(update={"path": expanded_path})
                         expanded_req.name = f"{req.name} - {expanded_path}"
-                        requests.append(expanded_req)
-                # If no API endpoints found, try root path
-                if not requests:
-                    requests.append(req)
-            else:
-                # Normal static path - use as-is
-                requests.append(req)
+                        expanded_requests.extend(expand_autodiscover(expanded_req))
 
-        return requests if requests else template.requests
+                if not matched and path_suffix_clean and not is_numeric_suffix:
+                    # Try synonym matching
+                    for synonym in matcher.expand_with_synonyms(path_suffix_clean):
+                        for endpoint_url in discovered_endpoints.keys():
+                            parsed = urlparse(endpoint_url)
+                            base_path = parsed.path.rstrip('/')
+
+                            if synonym.lower() in parsed.path.lower():
+                                matched = True
+                                expanded_path = base_path + id_suffix + query_suffix
+                                expanded_req = req.model_copy(update={"path": expanded_path})
+                                expanded_req.name = f"{req.name} - {expanded_path}"
+                                expanded_requests.extend(expand_autodiscover(expanded_req))
+
+                if not matched:
+                    # Fallback: append to all API endpoints
+                    for endpoint_url in discovered_endpoints.keys():
+                        parsed = urlparse(endpoint_url)
+                        if '/api/' in parsed.path or parsed.path.startswith('/api'):
+                            expanded_path = parsed.path.rstrip('/') + path_suffix + id_suffix + query_suffix
+                            expanded_req = req.model_copy(update={"path": expanded_path})
+                            expanded_req.name = f"{req.name} - {expanded_path}"
+                            expanded_requests.extend(expand_autodiscover(expanded_req))
+
+                if not expanded_requests:
+                    expanded_requests.extend(expand_autodiscover(req))
+
+            else:
+                expanded_requests.extend(expand_autodiscover(req))
+
+            all_requests.extend(expanded_requests)
+
+        return all_requests if all_requests else template.requests
 
     async def _execute_request(self, config: RequestConfig, context: ExecutionContext, template: Template):
         await self._acquire_slot()

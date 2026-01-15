@@ -32,22 +32,3 @@ requests:
       vulnerability: SENSITIVE_DATA_EXPOSURE
       message: Data export endpoint exposes all user PII including orders, email, reviews, and memories without additional verification
       remediation: Require re-authentication before data export and implement rate limiting
-
-  - path: /rest/products/search
-    method: GET
-    query:
-      q: "'||'"
-    matchers_condition: and
-    matchers:
-      - type: status
-        status:
-          - 200
-      - type: word
-        words:
-          - 'Apple'
-          - 'Orange'
-        condition: and
-    on_match:
-      vulnerability: NOSQL_INJECTION
-      message: NoSQL injection in product search - || operator returns all products
-      remediation: Use proper parameterized queries and validate input

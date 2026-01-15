@@ -80,7 +80,7 @@
       <span class="badge {{ finding.evidence_strength.value }}">{{ finding.evidence_strength.value|replace('_', ' ')|title }}</span>
       {% if finding.endpoint_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.endpoint_count }} endpoints</span>{% endif %}
       {% if finding.payload_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.payload_count }} payloads</span>{% endif %}
-      <span style="font-size: 10px; color: #858585; margin-left: auto;">{{ finding.template_id }}</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">{% if finding.template_file %}{{ finding.template_file.split('/')[-1] }}{% else %}{{ finding.template_id }}{% endif %}</span>
     </div>
     <div class="finding-body">
       <div class="finding-title">{{ finding.vulnerability_type }}</div>

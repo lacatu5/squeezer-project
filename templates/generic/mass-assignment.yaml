@@ -1,0 +1,89 @@
+id: generic-mass-assignment
+info:
+  name: Mass Assignment - Privilege Escalation
+  description: Tests if registration endpoints accept privilege escalation fields via auto-discovery
+  owasp_category: A01:2025
+  severity: critical
+  tags:
+    - input-validation
+    - privilege-escalation
+    - access-control
+    - generic
+    - auth
+
+variables:
+  test_email: "mass{{rand_int()}}@test.local"
+
+requests:
+  - name: Privilege escalation via autodiscover
+    method: POST
+    path: "@api@/users@"
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{test_email}}", "password": "Test1234!", "{{autodiscover:privilege}}": "admin"}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+    on_match:
+      vulnerability: MASS_ASSIGNMENT_PRIVILEGE
+      message: Registration accepts privilege field - role escalation possible
+      remediation: Use allow-list for accepted fields; never bind user input directly to internal fields
+
+  - name: Status override via autodiscover
+    method: POST
+    path: "@api@/users@"
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{test_email}}", "password": "Test1234!", "{{autodiscover:status}}": false}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+    on_match:
+      vulnerability: MASS_ASSIGNMENT_STATUS
+      message: Registration accepts status field - account status manipulation possible
+      remediation: Never bind request body directly to model; use DTO pattern with explicit field mapping
+
+  - name: Token field via autodiscover
+    method: POST
+    path: "@api@/users@"
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{test_email}}", "password": "Test1234!", "{{autodiscover:token}}": "privilegedToken123"}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - privilegedToken123
+          - '"data":{'
+        condition: or
+    on_match:
+      vulnerability: MASS_ASSIGNMENT_TOKEN
+      message: Registration accepts token field - privilege escalation possible
+      remediation: Implement strict input validation; only allow explicitly whitelisted fields
+
+  - name: Register endpoint privilege test
+    method: POST
+    path: "@api@/register@"
+    headers:
+      Content-Type: application/json
+    body: '{"email": "{{test_email}}", "password": "Test1234!", "{{autodiscover:privilege}}": "admin"}'
+    matchers:
+      - type: status
+        condition: in
+        status:
+          - 200
+          - 201
+    on_match:
+      vulnerability: MASS_ASSIGNMENT_PRIVILEGE
+      message: Register endpoint accepts privilege field - admin escalation possible
+      remediation: Implement strict input validation with allow-lists

@@ -3,8 +3,22 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urlparse
 
+import json
 import yaml
 from pydantic import BaseModel, Field
+
+
+def load_autodiscovery_patterns() -> Dict[str, List[str]]:
+    config_path = Path(__file__).parent / "config" / "autodiscovery.json"
+    with open(config_path) as f:
+        return json.load(f)
+
+
+def load_endpoint_synonyms() -> Dict[str, List[str]]:
+    config_path = Path(__file__).parent / "config" / "endpoints.json"
+    with open(config_path) as f:
+        data = json.load(f)
+        return data.get("synonyms", {})
 
 
 class OWASPCategory(str, Enum):
@@ -160,6 +174,7 @@ class Template(BaseModel):
     variables: Dict[str, Any] = Field(default_factory=dict)
     requests: List[RequestConfig] = Field(default_factory=list)
     generic: Optional["GenericTemplate"] = None
+    file_path: Optional[str] = None
 
     @classmethod
     def from_yaml(cls, path: Union[str, Path]) -> "Template":
@@ -168,6 +183,7 @@ class Template(BaseModel):
             data = yaml.safe_load(f)
         if not data:
             raise ValueError(f"Empty template: {path}")
+        data["file_path"] = str(path)
         return cls(**data)
 
 
@@ -204,6 +220,7 @@ class GenericTemplate(BaseModel):
 
 class Finding(BaseModel):
     template_id: str
+    template_file: Optional[str] = None
     vulnerability_type: str
     severity: SeverityLevel
     owasp_category: OWASPCategory = OWASPCategory.A02_SECURITY_MISCONFIGURATION

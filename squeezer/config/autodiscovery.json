@@ -1,0 +1,6 @@
+{
+  "privilege": ["role", "userType", "type", "permissions", "isAdmin", "is_admin", "role_id", "userRole", "role_type"],
+  "status": ["isActive", "is_active", "status", "enabled", "verified", "active"],
+  "token": ["deluxeToken", "token", "authToken", "apiToken", "access_token", "session_token"],
+  "id": ["id", "userId", "user_id", "Id", "ID"]
+}

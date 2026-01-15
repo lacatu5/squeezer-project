@@ -42,7 +42,7 @@ class Authenticator:
                 if "=" in pair:
                     k, v = pair.split("=", 1)
                     cookies[k.strip()] = v.strip()
-        return AuthContext(headers=headers, cookies=cookies)
+        return AuthContext(headers=headers, cookies=cookies, token=token)
 
     async def _auth_lab(self, config: AuthConfig, base_url: str) -> AuthContext:
         username = config.username or ""

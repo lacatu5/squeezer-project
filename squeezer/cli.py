@@ -165,16 +165,28 @@ def init_app(
         table.add_column("File", style="cyan")
         table.add_column("Type", style="green")
 
-        table.add_row("app.yaml", "Config + Cached Endpoints")
-        for template in result['templates_created']:
+        for config_name, _ in result.get('config_files', []):
+            if 'noauth' in config_name:
+                table.add_row(config_name, "Public endpoint scanning")
+            elif 'auth' in config_name:
+                table.add_row(config_name, "Authenticated scanning")
+            else:
+                table.add_row(config_name, "Config + Cached Endpoints")
+
+        for template in result.get('templates_created', []):
             table.add_row(template, "Template Stub")
 
         console.print(table)
 
         console.print(f"\n[dim]Endpoints cached: {result['endpoints_discovered']}[/dim]")
-        console.print(f"[dim]Templates created: {len(result['templates_created'])}[/dim]")
+        console.print(f"[dim]Templates created: {len(result.get('templates_created', []))}[/dim]")
 
-        if lab:
+        if result.get('has_bearer'):
+            console.print("\n[bold cyan]Two-Phase Scanning:[/bold cyan]")
+            console.print("  [yellow]1. Public endpoints:[/yellow]   squeezer scan {target} --app {app_name}-noauth")
+            console.print("  [yellow]2. Authenticated scan:[/yellow] squeezer scan {target} --app {app_name}-auth")
+            console.print("\n[dim]Compare results to identify IDOR vs public access issues[/dim]")
+        elif lab:
             console.print("\n[bold]Next steps:[/bold]")
             console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
             console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name} -lab {lab}[/green]")
@@ -249,6 +261,12 @@ def scan(
 
         if app and not crawl:
             cached_endpoints = get_cached_endpoints(app, project_root)
+            app_config = load_app_config(app, project_root)
+            if app_config and not effective_bearer:
+                auth_config = app_config.get('auth', {})
+                if auth_config.get('type') == 'bearer' and auth_config.get('token'):
+                    effective_bearer = auth_config['token']
+                    console.print(f"[dim]Using bearer token from app config[/dim]")
 
         if not cached_endpoints and not template:
             if not app:
@@ -361,7 +379,11 @@ def scan(
             if output:
                 _save_results(report, output)
 
-            html_path = "report.html"
+            if effective_app:
+                app_dir = project_root / "templates" / "apps" / effective_app
+                html_path = str(app_dir / "report.html")
+            else:
+                html_path = "report.html"
             generate_html_report(report, html_path)
             console.print(f"[green]HTML report: {html_path}[/green]")
         finally:
