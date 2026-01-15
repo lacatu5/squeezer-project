@@ -10,6 +10,27 @@ info:
     - generic
 
 requests:
+  - name: CORS wildcard
+    method: GET
+    path: "/"
+    headers:
+      Origin: https://evil.com
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "'access-control-allow-origin': '*'"
+        condition: and
+        case_sensitive: false
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_WILDCARD
+      message: "CORS allows any origin with wildcard (*)"
+      remediation: "Use specific origins instead of wildcard"
+
   - name: CORS wildcard with credentials
     method: GET
     path: "/"
@@ -19,10 +40,8 @@ requests:
       - type: word
         part: header
         words:
-          - "access-control-allow-origin"
-          - "*"
-          - "access-control-allow-credentials"
-          - "true"
+          - "'access-control-allow-origin': '*'"
+          - "'access-control-allow-credentials': 'true'"
         condition: and
         case_sensitive: false
       - type: status
@@ -31,7 +50,7 @@ requests:
     matchers_condition: and
     on_match:
       vulnerability: CORS_WILDCARD_WITH_CREDS
-      message: "CORS allows any origin with credentials"
+      message: "CORS allows any origin with credentials (critical risk)"
       remediation: "Use specific origins, not wildcard with credentials"
 
   - name: CORS reflects origin
@@ -43,8 +62,7 @@ requests:
       - type: word
         part: header
         words:
-          - "access-control-allow-origin"
-          - "https://evil.com"
+          - "'access-control-allow-origin': 'https://evil.com'"
         condition: and
         case_sensitive: false
       - type: status
@@ -60,15 +78,14 @@ requests:
     method: GET
     path: "/"
     headers:
-      Origin: null
+      Origin: "null"
     matchers:
-      - type:access-control-allow-origin"
-          - "null"
-        condition: and
-        case_sensitive: false
+      - type: word
         part: header
         words:
-          - "Access-Control-Allow-Origin: null"
+          - "'access-control-allow-origin': 'null'"
+        condition: and
+        case_sensitive: false
       - type: status
         status:
           - 200
