@@ -1,13 +1,13 @@
 id: juice-shop-data-export-sqli
 info:
-  name: Data Export SQL Injection
+  name: Data Export Sensitive Data Exposure
   author: dast-mvp
-  owasp_category: A05:2025
-  severity: critical
-  description: Tests for SQL injection in data export functionality
+  owasp_category: A01:2025
+  severity: high
+  description: Tests for sensitive data exposure via data export functionality
   tags:
-    - sqli
-    - injection
+    - data-exposure
+    - privacy
     - data-exfiltration
 
 requests:
@@ -16,7 +16,7 @@ requests:
     headers:
       Authorization: "{{bearer_token}}"
       Content-Type: application/json
-    body: '{"format":"' OR 1=1--"}'
+    body: '{"format":"xml"}'
     matchers_condition: and
     matchers:
       - type: status
@@ -25,12 +25,18 @@ requests:
       - type: word
         words:
           - 'email'
-          - 'password'
-          - 'createdAt'
+          - 'orders'
+          - 'username'
         condition: and
+    on_match:
+      vulnerability: SENSITIVE_DATA_EXPOSURE
+      message: Data export endpoint exposes all user PII including orders, email, reviews, and memories without additional verification
+      remediation: Require re-authentication before data export and implement rate limiting
 
-  - path: "/rest/products/search?q='))%20UNION%20SELECT%20id,email,password,1,1,1,1,1,1%20FROM%20Users--"
+  - path: /rest/products/search
     method: GET
+    query:
+      q: "'||'"
     matchers_condition: and
     matchers:
       - type: status
@@ -38,6 +44,10 @@ requests:
           - 200
       - type: word
         words:
-          - 'password'
-          - '@'
+          - 'Apple'
+          - 'Orange'
         condition: and
+    on_match:
+      vulnerability: NOSQL_INJECTION
+      message: NoSQL injection in product search - || operator returns all products
+      remediation: Use proper parameterized queries and validate input

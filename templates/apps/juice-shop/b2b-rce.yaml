@@ -27,6 +27,10 @@ requests:
           - orderNo
           - B2B
         condition: or
+    on_match:
+      vulnerability: RCE_VIA_JS_INJECTION
+      message: B2B endpoint executes JavaScript code in orderLinesData parameter - remote code execution possible
+      remediation: Never execute user-supplied JavaScript; use safe JSON parsing instead of eval
 
   - path: /b2b/v2/orders
     method: POST
@@ -43,6 +47,10 @@ requests:
           - orderNo
           - orderLines
         condition: or
+    on_match:
+      vulnerability: RCE_VIA_JS_INJECTION
+      message: B2B endpoint accepts complex JavaScript code in orderLinesData - confirms code execution capability
+      remediation: Implement strict input validation; use JSON.parse() instead of eval() or Function()
 
   - path: /b2b/v2/orders
     method: POST
@@ -58,3 +66,7 @@ requests:
         regex:
           - 'v[0-9]+\.[0-9]+\.[0-9]+'
           - 'orderNo'
+    on_match:
+      vulnerability: RCE_VIA_JS_INJECTION
+      message: Successfully leaked Node.js version via process.version - confirms remote code execution
+      remediation: Disable code execution entirely; implement proper order processing without eval

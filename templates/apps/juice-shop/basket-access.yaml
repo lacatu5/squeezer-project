@@ -23,6 +23,10 @@ requests:
           - '"status":"success"'
           - Products
         condition: and
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Basket ID 1 accessible without authentication - IDOR vulnerability
+      remediation: Require authentication; verify basket ownership before allowing access
 
   - path: /rest/basket/2
     method: GET
@@ -36,6 +40,10 @@ requests:
           - '"status":"success"'
           - Products
         condition: and
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Basket ID 2 accessible without authentication - sequential ID enumeration works
+      remediation: Implement authorization check; use non-sequential basket IDs
 
   - path: /rest/basket/3
     method: GET
@@ -49,6 +57,10 @@ requests:
           - '"status":"success"'
           - Products
         condition: and
+    on_match:
+      vulnerability: INSECURE_DIRECT_OBJECT_REFERENCE
+      message: Basket ID 3 accessible without authentication - confirms IDOR pattern
+      remediation: Enforce ownership validation; users should only access their own baskets
 
   - path: /api/BasketItems
     method: GET
@@ -56,3 +68,7 @@ requests:
       - type: status
         status:
           - 200
+    on_match:
+      vulnerability: UNAUTHORIZED_ACCESS
+      message: Basket items endpoint accessible without authentication
+      remediation: Require valid authentication token to access basket data

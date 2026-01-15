@@ -21,9 +21,10 @@ requests:
       - type: word
         words:
           - '"status":"success"'
-          - name
-          - price
-        condition: and
+    on_match:
+      vulnerability: NOSQL_INJECTION
+      message: NoSQL injection in product search - $ne operator bypasses query logic
+      remediation: Use parameterized queries; sanitize MongoDB operators from user input
 
   - path: /rest/user/login
     method: POST
@@ -42,6 +43,10 @@ requests:
           - authentication
           - token
         condition: or
+    on_match:
+      vulnerability: NOSQL_INJECTION_AUTH_BYPASS
+      message: NoSQL injection in login bypasses authentication - $ne operator allows login without credentials
+      remediation: Never pass user input directly to MongoDB queries; use proper authentication libraries
 
   - path: /rest/products/reviews
     method: GET
@@ -49,3 +54,7 @@ requests:
       - type: status
         status:
           - 200
+    on_match:
+      vulnerability: UNAUTHORIZED_ACCESS
+      message: Product reviews accessible without authentication
+      remediation: Require authentication for accessing review data

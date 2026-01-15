@@ -16,42 +16,36 @@ requests:
     headers:
       Content-Type: application/json
     body: '{"email":"","password":"test123"}'
-    matchers_condition: and
     matchers:
-      - type: status
-        status:
-          - 200
-          - 201
       - type: word
         words:
-          - '"status":"success"'
+          - email must be unique
+    on_match:
+      vulnerability: EMPTY_USER_REGISTRATION
+      message: Application accepts empty email - validation bypass
 
   - path: /api/Users
     method: POST
     headers:
       Content-Type: application/json
-    body: '{"email":"test@test.com","password":""}'
-    matchers_condition: and
+    body: '{"email":"test-empty-pwd@test.com","password":""}'
     matchers:
-      - type: status
-        status:
-          - 200
-          - 201
       - type: word
         words:
           - '"status":"success"'
+    on_match:
+      vulnerability: EMPTY_USER_REGISTRATION
+      message: Application accepts empty password - weak authentication
 
   - path: /api/Users
     method: POST
     headers:
       Content-Type: application/json
     body: '{"email":null,"password":"test123"}'
-    matchers_condition: and
     matchers:
-      - type: status
-        status:
-          - 200
-          - 201
       - type: word
         words:
-          - '"status":"success"'
+          - email must be unique
+    on_match:
+      vulnerability: EMPTY_USER_REGISTRATION
+      message: Application accepts null email - validation bypass

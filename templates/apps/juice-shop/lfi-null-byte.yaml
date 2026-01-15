@@ -22,6 +22,10 @@ requests:
         words:
           - juice-shop
           - dependencies
+    on_match:
+      vulnerability: LOCAL_FILE_INCLUSION
+      message: Null byte bypass exposes package.json - sensitive dependency information disclosed
+      remediation: Sanitize file paths; reject paths containing null bytes and directory traversal sequences
 
   - path: /ftp/coupons_2013.md.bak%2500.md
     method: GET
@@ -29,6 +33,10 @@ requests:
       - type: status
         status:
           - 200
+    on_match:
+      vulnerability: LOCAL_FILE_INCLUSION
+      message: Null byte bypass exposes backup files - sensitive business data accessible
+      remediation: Block access to backup files; use secure file storage outside webroot
 
   - path: /ftp/..%252f..%252f..%252fetc%252fpasswd
     method: GET
@@ -41,6 +49,10 @@ requests:
         words:
           - root
           - bin
+    on_match:
+      vulnerability: PATH_TRAVERSAL
+      message: Double-encoded path traversal accesses /etc/passwd - critical system file exposed
+      remediation: Normalize all file paths; validate against allowed directory whitelist
 
   - path: /ftp/acquisitions.md%00.pdf
     method: GET
@@ -48,6 +60,10 @@ requests:
       - type: status
         status:
           - 200
+    on_match:
+      vulnerability: LOCAL_FILE_INCLUSION
+      message: Null byte injection bypasses extension check - internal documents exposed
+      remediation: Validate file extensions server-side; reject null bytes in filenames
 
   - path: /ftp/package.json.bak
     method: GET
@@ -55,3 +71,7 @@ requests:
       - type: status
         status:
           - 200
+    on_match:
+      vulnerability: UNRESTRICTED_FILE_ACCESS
+      message: Backup files directly accessible without authentication
+      remediation: Disable directory listing; restrict access to configuration and backup files
