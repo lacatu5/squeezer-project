@@ -3,7 +3,7 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from squeezer.models import EvidenceStrength, ScanReport
+from squeezer.models import ScanReport
 
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
@@ -30,11 +30,6 @@ def generate_html_report(report: ScanReport, output_path: str) -> None:
                 "code": category.split(":")[0],
                 "count": vuln_count,
             })
-    evidence = {
-        "direct": sum(1 for f in grouped if f.evidence_strength == EvidenceStrength.DIRECT),
-        "inference": sum(1 for f in grouped if f.evidence_strength == EvidenceStrength.INFERENCE),
-        "heuristic": sum(1 for f in grouped if f.evidence_strength == EvidenceStrength.HEURISTIC),
-    }
     all_tags = set()
     app_count = 0
     generic_count = 0
@@ -55,7 +50,6 @@ def generate_html_report(report: ScanReport, output_path: str) -> None:
         unique_findings=len(grouped),
         severity=severity,
         owasp=owasp,
-        evidence=evidence,
         findings=grouped,
         errors=report.errors,
         timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),

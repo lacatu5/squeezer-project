@@ -1,6 +1,6 @@
-name: test-auth
+name: juice-shop-auth
 target_url: http://localhost:3000
-created_at: '2026-01-15T23:22:12.502951'
+created_at: '2026-01-16T13:54:30.352385'
 endpoints:
 - url: http://localhost:3000
   path: ''
@@ -44,13 +44,6 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/redirect?to=http
-  path: /redirect
-  method: GET
-  query: to=http
-  tags:
-  - general
-  type: page
 - url: http://localhost:3000/application/vnd.ms-word.do
   path: /application/vnd.ms-word.do
   method: GET
@@ -58,8 +51,22 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/Highlight.js
-  path: /Highlight.js
+- url: http://localhost:3000/redirect?to=http
+  path: /redirect
+  method: GET
+  query: to=http
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/@ng/component?c=
+  path: /@ng/component
+  method: GET
+  query: c=
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/snippets/verdict
+  path: /snippets/verdict
   method: GET
   query: ''
   tags:
@@ -72,8 +79,8 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/snippets/verdict
-  path: /snippets/verdict
+- url: http://localhost:3000/Highlight.js
+  path: /Highlight.js
   method: GET
   query: ''
   tags:
@@ -86,22 +93,15 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/@ng/component?c=
-  path: /@ng/component
-  method: GET
-  query: c=
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/node_modules/morgan/index.js
-  path: /juice-shop/node_modules/morgan/index.js
+- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/layer.js
+  path: /juice-shop/node_modules/express/lib/router/layer.js
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/index.js
-  path: /juice-shop/node_modules/express/lib/router/index.js
+- url: http://localhost:3000/juice-shop/node_modules/morgan/index.js
+  path: /juice-shop/node_modules/morgan/index.js
   method: GET
   query: ''
   tags:
@@ -114,29 +114,8 @@ endpoints:
   tags:
   - general
   type: page
-- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/route.js
-  path: /juice-shop/node_modules/express/lib/router/route.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/layer.js
-  path: /juice-shop/node_modules/express/lib/router/layer.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/build/routes/angular.js
-  path: /juice-shop/build/routes/angular.js
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
-- url: http://localhost:3000/juice-shop/build/routes/redirect.js
-  path: /juice-shop/build/routes/redirect.js
+- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/index.js
+  path: /juice-shop/node_modules/express/lib/router/index.js
   method: GET
   query: ''
   tags:
@@ -149,19 +128,40 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/rest/wallet/balance
-  path: /rest/wallet/balance
+- url: http://localhost:3000/juice-shop/node_modules/express/lib/router/route.js
+  path: /juice-shop/node_modules/express/lib/router/route.js
   method: GET
   query: ''
   tags:
-  - api
-  type: api
+  - general
+  type: page
+- url: http://localhost:3000/juice-shop/build/routes/redirect.js
+  path: /juice-shop/build/routes/redirect.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/juice-shop/build/routes/angular.js
+  path: /juice-shop/build/routes/angular.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
 - url: http://localhost:3000/rest/order-history
   path: /rest/order-history
   method: GET
   query: ''
   tags:
   - commerce
+  - api
+  type: api
+- url: http://localhost:3000/rest/wallet/balance
+  path: /rest/wallet/balance
+  method: GET
+  query: ''
+  tags:
   - api
   type: api
 - url: http://localhost:3000/rest/image-captcha/
@@ -172,13 +172,6 @@ endpoints:
   - file-handling
   - api
   type: api
-- url: http://localhost:3000/track-result/new
-  path: /track-result/new
-  method: GET
-  query: ''
-  tags:
-  - general
-  type: page
 - url: http://localhost:3000/api/Addresss
   path: /api/Addresss
   method: GET
@@ -201,15 +194,22 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/api/Complaints
-  path: /api/Complaints
+- url: http://localhost:3000/track-result/new
+  path: /track-result/new
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: http://localhost:3000/rest/chatbot
+  path: /rest/chatbot
   method: GET
   query: ''
   tags:
   - api
   type: api
-- url: http://localhost:3000/rest/chatbot
-  path: /rest/chatbot
+- url: http://localhost:3000/api/Complaints
+  path: /api/Complaints
   method: GET
   query: ''
   tags:
@@ -243,13 +243,6 @@ endpoints:
   tags:
   - commerce
   type: page
-- url: http://localhost:3000/api/SecurityAnswers
-  path: /api/SecurityAnswers
-  method: GET
-  query: ''
-  tags:
-  - api
-  type: api
 - url: http://localhost:3000/2fa/enter
   path: /2fa/enter
   method: GET
@@ -257,6 +250,13 @@ endpoints:
   tags:
   - general
   type: page
+- url: http://localhost:3000/api/SecurityAnswers
+  path: /api/SecurityAnswers
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
 - url: http://localhost:3000/rest/track-order
   path: /rest/track-order
   method: GET
@@ -464,15 +464,15 @@ endpoints:
   tags:
   - api
   type: api
-- url: http://localhost:3000/Zone.js
-  path: /Zone.js
+- url: http://localhost:3000/zone.js
+  path: /zone.js
   method: GET
   query: ''
   tags:
   - general
   type: page
-- url: http://localhost:3000/zone.js
-  path: /zone.js
+- url: http://localhost:3000/Zone.js
+  path: /Zone.js
   method: GET
   query: ''
   tags:
@@ -515,4 +515,4 @@ endpoints:
   type: api
 auth:
   type: bearer
-  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6NTMsInVzZXJuYW1lIjoiIiwiZW1haWwiOiJvbGx0ZW9kQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiNjZjNWNjYjkyNjExMzY1MjFlZTc4Mzk1MzQ1N2FkN2UiLCJyb2xlIjoiY3VzdG9tZXIiLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiMC4wLjAuMCIsInByb2ZpbGVJbWFnZSI6Ii9hc3NldHMvcHVibGljL2ltYWdlcy91cGxvYWRzL2RlZmF1bHQuc3ZnIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI2LTAxLTE1IDE4OjAwOjI1LjA4NCArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI2LTAxLTE1IDE4OjAwOjI1LjA4NCArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3Njg1MDAwMjV9.kaRVwfQJkyYHu3BBpaZnOkUYMP9xjIknV3cZEjMfDrs3NIdXnejGzgx-bGbyDipxRS0HieCubNzocJIYpemMnzWHjYakGrT4yij6OH1Wub3rt_R2bSjJiRKkqVjh1GEbEWtGI79-CUuzF41d-VFBcJ0rKqzSjOJJjZXp5sNr2ek
+  token: eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6MjMsInVzZXJuYW1lIjoiIiwiZW1haWwiOiJvbGx0ZW9kQGdtYWlsLmNvbSIsInBhc3N3b3JkIjoiOTM4OTIxZDVhNGQ3MzUwYWQ5MDhkYTU2N2NjMDI1MjMiLCJyb2xlIjoiY3VzdG9tZXIiLCJkZWx1eGVUb2tlbiI6IiIsImxhc3RMb2dpbklwIjoiMC4wLjAuMCIsInByb2ZpbGVJbWFnZSI6Ii9hc3NldHMvcHVibGljL2ltYWdlcy91cGxvYWRzL2RlZmF1bHQuc3ZnIiwidG90cFNlY3JldCI6IiIsImlzQWN0aXZlIjp0cnVlLCJjcmVhdGVkQXQiOiIyMDI2LTAxLTE2IDEyOjUzOjA2LjExNCArMDA6MDAiLCJ1cGRhdGVkQXQiOiIyMDI2LTAxLTE2IDEyOjUzOjA2LjExNCArMDA6MDAiLCJkZWxldGVkQXQiOm51bGx9LCJpYXQiOjE3Njg1Njc5OTJ9.GHKrLPaHeBLIfsWiRlulswnvDMh3-BFrckh278YOSCBDN89jFapXgSTJmLvQZmytovQ5qjeUO-t-QHsBfXwxhVTBBRu2TyqtAeaYuuDKu830RDm7vHO3xb-xJ4OZqniBaCP1GAIU7ZLe2wB80pqiRx32FiDJpenG5H7rYCflNus

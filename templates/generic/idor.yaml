@@ -11,7 +11,7 @@ info:
     - api
 
 requests:
-  - name: IDOR enumerate ID 1
+  - name: IDOR enumerate ID 1 (API)
     method: GET
     path: "@api@/1"
     matchers_condition: and
@@ -24,20 +24,28 @@ requests:
       - type: word
         part: body
         words:
-          - '"id":'
           - '"email"'
-          - '"name"'
-          - '"data":{'
-          - "products"
-          - "items"
+          - '"password"'
+          - '"role"'
+          - '"username"'
+          - '"address"'
+          - '"phone"'
         condition: or
         case_sensitive: false
+      - type: word
+        part: body
+        words:
+          - '"price"'
+          - '"description"'
+        condition: or
+        case_sensitive: false
+        negative: true
     on_match:
       vulnerability: IDOR_ACCESSIBLE
-      message: Sequential ID 1 returns data - IDOR vulnerability possible
+      message: Sequential ID 1 returns sensitive user data - IDOR vulnerability possible
       remediation: Implement authentication and ownership verification; use non-sequential IDs
 
-  - name: IDOR enumerate ID 2
+  - name: IDOR enumerate ID 2 (API)
     method: GET
     path: "@api@/2"
     matchers_condition: and
@@ -49,15 +57,25 @@ requests:
       - type: word
         part: body
         words:
-          - '"id":'
-          - '"data":{'
-          - "products"
-          - "items"
+          - '"email"'
+          - '"password"'
+          - '"role"'
+          - '"username"'
+          - '"address"'
+          - '"phone"'
         condition: or
         case_sensitive: false
+      - type: word
+        part: body
+        words:
+          - '"price"'
+          - '"description"'
+        condition: or
+        case_sensitive: false
+        negative: true
     on_match:
       vulnerability: IDOR_SEQUENTIAL
-      message: Sequential ID 2 also accessible - enumeration confirmed
+      message: Sequential ID 2 also returns sensitive data - enumeration confirmed
       remediation: Use UUIDs or random identifiers; verify resource ownership
 
   - name: IDOR enumerate ID 0
@@ -73,13 +91,22 @@ requests:
       - type: word
         part: body
         words:
-          - '"id":'
-          - '"data":{'
+          - '"email"'
+          - '"password"'
+          - '"role"'
+          - '"username"'
         condition: or
         case_sensitive: false
+      - type: word
+        part: body
+        words:
+          - '"price"'
+        condition: or
+        case_sensitive: false
+        negative: true
     on_match:
       vulnerability: IDOR_ZERO_ID
-      message: ID 0 accessible - zero-based ID enumeration works
+      message: ID 0 returns sensitive data - zero-based ID enumeration works
       remediation: Validate ID ranges; use UUIDs
 
   - name: IDOR cart/basket test

@@ -10,7 +10,7 @@ info:
     - generic
 
 requests:
-  - name: CORS wildcard
+  - name: CORS wildcard on root
     method: GET
     path: "/"
     headers:
@@ -29,6 +29,26 @@ requests:
     on_match:
       vulnerability: CORS_WILDCARD
       message: "CORS allows any origin with wildcard (*)"
+      remediation: "Use specific origins instead of wildcard"
+
+  - name: CORS wildcard on API
+    method: GET
+    path: "/api/config"
+    headers:
+      Origin: https://evil.com
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "'access-control-allow-origin': '*'"
+        case_sensitive: false
+      - type: status
+        status:
+          - 200
+    matchers_condition: and
+    on_match:
+      vulnerability: CORS_WILDCARD_API
+      message: "CORS allows any origin on API endpoints"
       remediation: "Use specific origins instead of wildcard"
 
   - name: CORS wildcard with credentials

@@ -168,10 +168,8 @@ def init_app(
         for config_name, _ in result.get('config_files', []):
             if 'noauth' in config_name:
                 table.add_row(config_name, "Public endpoint scanning")
-            elif 'auth' in config_name:
-                table.add_row(config_name, "Authenticated scanning")
             else:
-                table.add_row(config_name, "Config + Cached Endpoints")
+                table.add_row(config_name, "Authenticated scanning")
 
         for template in result.get('templates_created', []):
             table.add_row(template, "Template Stub")
@@ -181,20 +179,26 @@ def init_app(
         console.print(f"\n[dim]Endpoints cached: {result['endpoints_discovered']}[/dim]")
         console.print(f"[dim]Templates created: {len(result.get('templates_created', []))}[/dim]")
 
-        if result.get('has_bearer'):
+        if lab and not bearer:
+            console.print("\n[bold]Next steps:[/bold]")
+            console.print("  1. Edit [cyan]app-auth.yaml[/cyan] to add your token")
+            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}-noauth[/green]")
+            console.print(f"  3. Run: [green]squeezer scan {effective_target} --app {app_name}-auth[/green]")
+        elif lab:
+            console.print("\n[bold]Next steps:[/bold]")
+            console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
+            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}-noauth -lab {lab}[/green]")
+            console.print(f"  3. Run: [green]squeezer scan {effective_target} --app {app_name}-auth -lab {lab}[/green]")
+        elif bearer:
             console.print("\n[bold cyan]Two-Phase Scanning:[/bold cyan]")
             console.print("  [yellow]1. Public endpoints:[/yellow]   squeezer scan {target} --app {app_name}-noauth")
             console.print("  [yellow]2. Authenticated scan:[/yellow] squeezer scan {target} --app {app_name}-auth")
             console.print("\n[dim]Compare results to identify IDOR vs public access issues[/dim]")
-        elif lab:
-            console.print("\n[bold]Next steps:[/bold]")
-            console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
-            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name} -lab {lab}[/green]")
-            console.print(f"  Or with manual token: [green]squeezer scan {effective_target} --app {app_name} --bearer <token>[/green]")
         else:
             console.print("\n[bold]Next steps:[/bold]")
-            console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
-            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}[/green]")
+            console.print("  1. Edit [cyan]app-auth.yaml[/cyan] to add your token")
+            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}-noauth[/green]")
+            console.print(f"  3. Run: [green]squeezer scan {effective_target} --app {app_name}-auth[/green]")
 
     asyncio.run(_init())
 
@@ -257,16 +261,22 @@ def scan(
             target_config.authentication.password = lab_password
 
         cached_endpoints = None
-        effective_app = app
+        effective_app = sanitize_name(app) if app else None
 
         if app and not crawl:
-            cached_endpoints = get_cached_endpoints(app, project_root)
-            app_config = load_app_config(app, project_root)
+            cached_endpoints = get_cached_endpoints(effective_app, project_root)
+            app_config = load_app_config(effective_app, project_root)
             if app_config and not effective_bearer:
                 auth_config = app_config.get('auth', {})
                 if auth_config.get('type') == 'bearer' and auth_config.get('token'):
                     effective_bearer = auth_config['token']
-                    console.print(f"[dim]Using bearer token from app config[/dim]")
+                    console.print("[dim]Using bearer token from app config[/dim]")
+
+        app_dir_exists = (project_root / "templates" / "apps" / effective_app).exists() if effective_app else False
+        needs_init = effective_app and not app_dir_exists and not template
+
+        if needs_init:
+            console.print(f"[cyan]App '{effective_app}' not found. Initializing...[/cyan]")
 
         if not cached_endpoints and not template:
             if not app:
@@ -311,7 +321,12 @@ def scan(
                 output_dir=project_root,
                 bearer_token=effective_bearer,
             )
-            console.print(f"[dim]Cached to '{effective_app}'[/dim]")
+
+            if needs_init:
+                console.print(f"[green]App '{effective_app}' created![/green]")
+                console.print("[dim]Configs: app-noauth.yaml, app-auth.yaml[/dim]")
+            else:
+                console.print(f"[dim]Cached to '{effective_app}'[/dim]")
 
             cached_endpoints = get_cached_endpoints(effective_app, project_root)
 

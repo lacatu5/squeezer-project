@@ -1,0 +1,87 @@
+id: generic-sensitive-data
+info:
+  name: Sensitive Data Exposure
+  description: Tests for exposed sensitive information in API responses
+  owasp_category: A02:2025
+  severity: high
+  tags:
+    - data-exposure
+    - information-disclosure
+    - generic
+    - api
+
+requests:
+  - name: Config endpoint exposure
+    method: GET
+    path: /api/config
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'bucket'
+          - 'aws'
+          - 'sql'
+          - 'postgres'
+          - 'mysql'
+          - 'password'
+          - 'secret'
+          - 'api'
+          - 'key'
+          - 'token'
+        condition: or
+        case_sensitive: false
+    on_match:
+      vulnerability: SENSITIVE_CONFIG_EXPOSURE
+      message: Configuration endpoint exposes sensitive data (credentials, API keys, or infrastructure details)
+      remediation: Remove sensitive configuration from public endpoints; use environment variables
+
+  - name: Environment exposure
+    method: GET
+    path: /api/env
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'password'
+          - 'secret'
+          - 'key'
+          - 'token'
+          - 'api'
+        condition: or
+        case_sensitive: false
+    on_match:
+      vulnerability: ENV_EXPOSURE
+      message: Environment endpoint exposes sensitive configuration
+      remediation: Disable environment disclosure endpoints in production
+
+  - name: Secrets endpoint
+    method: GET
+    path: /api/secrets
+    matchers:
+      - type: status
+        status:
+          - 200
+    on_match:
+      vulnerability: SECRETS_ENDPOINT
+      message: Secrets endpoint is accessible
+      remediation: Remove or protect secrets endpoints
+
+  - name: Debug endpoint
+    method: GET
+    path: /api/debug
+    matchers:
+      - type: status
+        status:
+          - 200
+    on_match:
+      vulnerability: DEBUG_ENDPOINT
+      message: Debug endpoint is publicly accessible
+      remediation: Disable debug endpoints in production

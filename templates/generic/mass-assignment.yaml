@@ -27,6 +27,15 @@ requests:
         status:
           - 200
           - 201
+      - type: word
+        part: body
+        words:
+          - '"status":'
+          - '"data":'
+          - '"id":'
+          - 'success'
+        condition: or
+    matchers_condition: and
     on_match:
       vulnerability: MASS_ASSIGNMENT_PRIVILEGE
       message: Registration accepts privilege field - role escalation possible
@@ -44,6 +53,15 @@ requests:
         status:
           - 200
           - 201
+      - type: word
+        part: body
+        words:
+          - '"status":'
+          - '"data":'
+          - '"id":'
+          - 'success'
+        condition: or
+    matchers_condition: and
     on_match:
       vulnerability: MASS_ASSIGNMENT_STATUS
       message: Registration accepts status field - account status manipulation possible

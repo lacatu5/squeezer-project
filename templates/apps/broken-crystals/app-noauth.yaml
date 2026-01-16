@@ -1,0 +1,223 @@
+name: broken-crystals-noauth
+target_url: https://brokencrystals.com/
+created_at: '2026-01-16T13:44:44.625479'
+endpoints:
+- url: https://brokencrystals.com/
+  path: /
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://brokencrystals.com/vendor/counter-up/jquery.waypoints.min.js
+  path: /vendor/counter-up/jquery.waypoints.min.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://brokencrystals.com/vendor/counter-up/jquery.counterup.min.js
+  path: /vendor/counter-up/jquery.counterup.min.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://brokencrystals.com/vendor/slick/slick.min.js
+  path: /vendor/slick/slick.min.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://brokencrystals.com/vendor/wow/wow.min.js
+  path: /vendor/wow/wow.min.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://brokencrystals.com/api/config
+  path: /api/config
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/vendor/wow/WOW.js
+  path: /vendor/wow/WOW.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://brokencrystals.com/manifest.json
+  path: /manifest.json
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: page
+- url: https://brokencrystals.com/api/file/aws?path=aws
+  path: /api/file/aws
+  method: GET
+  query: path=aws
+  tags:
+  - file-handling
+  - api
+  type: api
+- url: https://brokencrystals.com/api/file/digital_ocean?path=digital_ocean
+  path: /api/file/digital_ocean
+  method: GET
+  query: path=digital_ocean
+  tags:
+  - file-handling
+  - api
+  type: api
+- url: https://brokencrystals.com/api/file/azure?path=azure
+  path: /api/file/azure
+  method: GET
+  query: path=azure
+  tags:
+  - file-handling
+  - api
+  type: api
+- url: https://brokencrystals.com/api/file/google?path=google
+  path: /api/file/google
+  method: GET
+  query: path=google
+  tags:
+  - file-handling
+  - api
+  type: api
+- url: https://brokencrystals.com/api/secrets
+  path: /api/secrets
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/hidden-upload
+  path: /api/hidden-upload
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/chat
+  path: /api/chat
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/nestedJson
+  path: /api/nestedJson
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/email
+  path: /api/email
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/partners
+  path: /api/partners
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/render
+  path: /api/render
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/goto
+  path: /api/goto
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/file
+  path: /api/file
+  method: GET
+  query: ''
+  tags:
+  - file-handling
+  - api
+  type: api
+- url: https://brokencrystals.com/api/spawn
+  path: /api/spawn
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/metadata
+  path: /api/metadata
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/auth
+  path: /api/auth
+  method: GET
+  query: ''
+  tags:
+  - authentication
+  - api
+  type: api
+- url: https://brokencrystals.com/api/users
+  path: /api/users
+  method: GET
+  query: ''
+  tags:
+  - user-data
+  - api
+  type: api
+- url: https://brokencrystals.com/api/products
+  path: /api/products
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/products/latest
+  path: /api/products/latest
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/subscriptions
+  path: /api/subscriptions
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/api/testimonials
+  path: /api/testimonials
+  method: GET
+  query: ''
+  tags:
+  - api
+  type: api
+- url: https://brokencrystals.com/usr/src/app/dist/app.controller.js
+  path: /usr/src/app/dist/app.controller.js
+  method: GET
+  query: ''
+  tags:
+  - general
+  type: admin
+auth:
+  type: none

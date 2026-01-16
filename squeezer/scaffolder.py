@@ -116,21 +116,21 @@ def scaffold_app(
 
     config_files = []
 
-    if bearer_token:
-        noauth_config = {
-            'name': f'{app_name}-noauth',
-            'target_url': target_url,
-            'created_at': datetime.now().isoformat(),
-            'endpoints': api_endpoints,
-            'auth': {
-                'type': 'none',
-            },
-        }
-        noauth_path = app_dir / "app-noauth.yaml"
-        with open(noauth_path, 'w') as f:
-            yaml.dump(noauth_config, f, default_flow_style=False, sort_keys=False)
-        config_files.append(('app-noauth.yaml', noauth_path))
+    noauth_config = {
+        'name': f'{app_name}-noauth',
+        'target_url': target_url,
+        'created_at': datetime.now().isoformat(),
+        'endpoints': api_endpoints,
+        'auth': {
+            'type': 'none',
+        },
+    }
+    noauth_path = app_dir / "app-noauth.yaml"
+    with open(noauth_path, 'w') as f:
+        yaml.dump(noauth_config, f, default_flow_style=False, sort_keys=False)
+    config_files.append(('app-noauth.yaml', noauth_path))
 
+    if bearer_token:
         auth_config = {
             'name': f'{app_name}-auth',
             'target_url': target_url,
@@ -141,24 +141,22 @@ def scaffold_app(
                 'token': bearer_token,
             },
         }
-        auth_path = app_dir / "app-auth.yaml"
-        with open(auth_path, 'w') as f:
-            yaml.dump(auth_config, f, default_flow_style=False, sort_keys=False)
-        config_files.append(('app-auth.yaml', auth_path))
     else:
-        app_config = {
-            'name': app_name,
+        auth_config = {
+            'name': f'{app_name}-auth',
             'target_url': target_url,
             'created_at': datetime.now().isoformat(),
             'endpoints': api_endpoints,
             'auth': {
-                'type': 'none',
+                'type': 'bearer',
+                'token': 'YOUR_TOKEN_HERE',
             },
         }
-        config_path = app_dir / "app.yaml"
-        with open(config_path, 'w') as f:
-            yaml.dump(app_config, f, default_flow_style=False, sort_keys=False)
-        config_files.append(('app.yaml', config_path))
+
+    auth_path = app_dir / "app-auth.yaml"
+    with open(auth_path, 'w') as f:
+        yaml.dump(auth_config, f, default_flow_style=False, sort_keys=False)
+    config_files.append(('app-auth.yaml', auth_path))
 
     templates_created = []
     seen_paths = set()
@@ -184,7 +182,7 @@ def scaffold_app(
         'config_files': [(name, str(path)) for name, path in config_files],
         'endpoints_discovered': len(api_endpoints),
         'templates_created': templates_created,
-        'has_bearer': bearer_token is not None,
+        'has_bearer': True,
     }
 
 

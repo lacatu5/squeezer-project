@@ -1,0 +1,105 @@
+id: generic-path-traversal
+info:
+  name: Path Traversal / Local File Inclusion
+  description: Tests for path traversal vulnerabilities in file handling endpoints
+  owasp_category: A01:2025
+  severity: critical
+  tags:
+    - path-traversal
+    - lfi
+    - file-handling
+    - generic
+
+requests:
+  - name: LFI via file parameter
+    method: GET
+    path: /api/file?path=../../../etc/passwd
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - '/bin/bash'
+          - '/bin/sh'
+        condition: or
+    on_match:
+      vulnerability: PATH_TRAVERSAL_FILE
+      message: Path traversal vulnerability allows reading system files
+      remediation: Validate and sanitize file paths; use whitelist of allowed files
+
+  - name: LFI error disclosure
+    method: GET
+    path: /api/file?path=../../../etc/passwd
+    matchers_condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 400
+          - 500
+      - type: word
+        part: body
+        words:
+          - 'ENOENT'
+          - 'no such file'
+          - 'access'
+          - '/etc/passwd'
+          - 'permission denied'
+        condition: or
+    on_match:
+      vulnerability: PATH_TRAVERSAL_ERROR_DISCLOSURE
+      message: Path traversal attempt reveals file system structure in error messages
+      remediation: Sanitize error messages; implement proper path validation
+
+  - name: LFI AWS file endpoint
+    method: GET
+    path: /api/file/aws?path=../../etc/passwd
+    matchers:
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - 'ENOENT'
+          - '/etc/passwd'
+        condition: or
+    on_match:
+      vulnerability: PATH_TRAVERSAL_AWS
+      message: AWS file endpoint vulnerable to path traversal
+      remediation: Validate file paths against whitelist
+
+  - name: LFI via filename parameter
+    method: GET
+    path: /api/download?filename=../../../etc/passwd
+    matchers:
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - 'ENOENT'
+        condition: or
+    on_match:
+      vulnerability: PATH_TRAVERSAL_DOWNLOAD
+      message: Download endpoint vulnerable to path traversal
+      remediation: Use file IDs instead of names; validate paths
+
+  - name: LFI hidden upload endpoint
+    method: GET
+    path: /api/hidden-upload?file=../../../etc/passwd
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - 'ENOENT'
+        condition: or
+    on_match:
+      vulnerability: PATH_TRAVERSAL_UPLOAD
+      message: Hidden upload endpoint vulnerable to path traversal
+      remediation: Properly validate and sanitize file paths

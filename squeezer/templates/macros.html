@@ -47,22 +47,6 @@
   {% endif %}
 {%- endmacro %}
 
-{% macro evidence_chart(evidence_data) -%}
-  {% set total = [evidence_data.direct, evidence_data.inference, evidence_data.heuristic]|sum|default(1) %}
-  {% set colors = {'direct': '#00cc66', 'inference': '#ff8800', 'heuristic': '#00aaff'} %}
-  {% set bars = [] %}
-  {% for key, label in [('direct', 'Direct'), ('inference', 'Inf'), ('heuristic', 'Heur')] %}
-    {% set value = evidence_data[key] %}
-    {% if value > 0 %}
-      {% set height = (16, (value / total * 140)|round|int)|max %}
-    {% else %}
-      {% set height = 4 %}
-    {% endif %}
-    {% set _ = bars.append((label, value, height, colors[key])) %}
-  {% endfor %}
-  {{ bar_chart(bars) }}
-{%- endmacro %}
-
 {% macro finding_card(finding) -%}
   {% set sev = finding.severity.value|lower %}
   {% set owasp_parts = finding.owasp_category.value|split(':') %}
@@ -71,13 +55,11 @@
   <div class="finding-card {{ sev }}"
        data-severity="{{ sev }}"
        data-owasp="{{ owasp_code }}"
-       data-evidence="{{ finding.evidence_strength.value }}"
        data-scope="{{ "generic" if is_generic else "app" }}"
        data-tags="{{ finding.tags|join(",") }}">
     <div class="finding-header">
       <span class="owasp-badge owasp-{{ owasp_code|lower }}">{{ owasp_code }}</span>
       <span class="badge {{ sev }}">{{ sev }}</span>
-      <span class="badge {{ finding.evidence_strength.value }}">{{ finding.evidence_strength.value|replace('_', ' ')|title }}</span>
       {% if finding.endpoint_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.endpoint_count }} endpoints</span>{% endif %}
       {% if finding.payload_count > 1 %}<span class="badge" style="background: #3c3c3c; color: #cccccc;">{{ finding.payload_count }} payloads</span>{% endif %}
       <span style="font-size: 10px; color: #858585; margin-left: auto;">{% if finding.template_file %}{{ finding.template_file.split('/')[-1] }}{% else %}{{ finding.template_id }}{% endif %}</span>
@@ -103,20 +85,6 @@
         </div>
         <div class="raw-data-content collapsed"><span class="response-line">{{ finding.response_details }}</span></div>
         {% endif %}
-      </div>
-      {% endif %}
-
-      {% if finding.evidence %}
-      <h3 class="section-title">Evidence</h3>
-      <div class="evidence-grid">
-        {% for key, value in finding.evidence.items() %}
-        {% if value %}
-        <div class="evidence-item">
-          <div class="evidence-key">{{ key }}</div>
-          <div class="evidence-value">{{ value }}</div>
-        </div>
-        {% endif %}
-        {% endfor %}
       </div>
       {% endif %}
 

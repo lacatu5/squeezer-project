@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Squeezer Scan Report - https://juice-shop.herokuapp.com</title>
+    <title>Squeezer Scan Report - https://brokencrystals.com</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace; background: #1e1e1e; color: #cccccc; line-height: 1.5; font-size: 13px; }
@@ -67,6 +67,8 @@
         .raw-data-toggle { font-size: 16px; color: #858585; }
         .raw-data-content { padding: 15px; font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace; font-size: 11px; color: #cccccc; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow: auto; }
         .raw-data-content.collapsed { display: none; }
+        .request-line { color: #00aaff; }
+        .response-line { color: #00cc66; }
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; }
             .finding-header { flex-direction: column; align-items: flex-start; }
@@ -78,17 +80,17 @@
         
 <header>
     <h1>Squeezer Scan Report</h1>
-    <div class="subtitle">https://juice-shop.herokuapp.com • Scanned at 2026-01-16 01:02:48</div>
+    <div class="subtitle">https://brokencrystals.com • Scanned at 2026-01-16 18:23:18</div>
 </header>
 
         
 <div class="grid">
     <div class="card">
-        <div class="card-value critical">0</div>
+        <div class="card-value critical">2</div>
         <div class="card-title">Critical</div>
     </div>
     <div class="card">
-        <div class="card-value high">0</div>
+        <div class="card-value high">2</div>
         <div class="card-title">High</div>
     </div>
     <div class="card">
@@ -100,11 +102,11 @@
         <div class="card-title">Low</div>
     </div>
     <div class="card">
-        <div class="card-value">1</div>
+        <div class="card-value">6</div>
         <div class="card-title">Templates</div>
     </div>
     <div class="card">
-        <div class="card-value">0.7s</div>
+        <div class="card-value">39.6s</div>
         <div class="card-title">Duration</div>
     </div>
 </div>
@@ -143,14 +145,14 @@
   <div class="chart-container ">
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff4444">0</div>
-    <div class="bar-fill" style="height: 4px; background: #ff4444;"></div>
+    <div class="bar-value" style="color: #ff4444">2</div>
+    <div class="bar-fill" style="height: 140px; background: #ff4444;"></div>
     <div class="bar-label">Crit</div>
   </div>
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff8800">0</div>
-    <div class="bar-fill" style="height: 4px; background: #ff8800;"></div>
+    <div class="bar-value" style="color: #ff8800">2</div>
+    <div class="bar-fill" style="height: 140px; background: #ff8800;"></div>
     <div class="bar-label">High</div>
   </div>
   
@@ -171,11 +173,37 @@
     <div class="card">
         <div class="card-title">OWASP Top 10 2025</div>
         
-    <div style="color: #858585; text-align: center; padding: 40px;">No OWASP findings</div>
+    
+    
+    
+      
+      
+        
+      
+      
+    
+      
+      
+        
+      
+      
+    
+    <div class="chart-container ">
   
-    </div>
+  <div class="bar">
+    <div class="bar-value" style="color: #ff4444">2</div>
+    <div class="bar-fill" style="height: 140px; background: #ff4444;"></div>
+    <div class="bar-label">A01</div>
+  </div>
+  
+  <div class="bar">
+    <div class="bar-value" style="color: #ff8800">2</div>
+    <div class="bar-fill" style="height: 140px; background: #ff8800;"></div>
+    <div class="bar-label">A02</div>
+  </div>
+  
 </div>
-</div>
+  
     </div>
 </div>
 
@@ -185,8 +213,8 @@
         <span class="filter-label">Severity</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
-            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (0)</button>
-            <button class="filter-btn" data-filter-type="severity" data-filter="high">High (0)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (2)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="high">High (2)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med (0)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="low">Low (0)</button>
         </div>
@@ -197,17 +225,213 @@
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
             <button class="filter-btn" data-filter-type="scope" data-filter="app">App (0)</button>
-            <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic (0)</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic (4)</button>
         </div>
-    </div></div>
+    </div>
+
+    
+    <div class="filter-group">
+        <span class="filter-label">OWASP</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="owasp" data-filter="all">All</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A01">A01</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A02">A02</button>
+            
+        </div>
+    </div>
+    
+
+    
+    <div class="filter-group">
+        <span class="filter-label">Tags</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="tag" data-filter="all">All</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="api">api</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="data-exposure">data-exposure</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="file-handling">file-handling</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="generic">generic</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="information-disclosure">information-disclosure</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="lfi">lfi</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="path-traversal">path-traversal</button>
+            
+        </div>
+    </div>
+    
+</div>
 
 <h2>Vulnerabilities</h2>
 <div id="findings-container">
     
-        <div class="empty-state">
-            <div class="empty-title">No vulnerabilities found</div>
-            <div class="empty-text">The scan completed successfully without detecting any security issues.</div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A02"
+       data-scope="generic"
+       data-tags="data-exposure,information-disclosure,generic,api">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a02">A02</span>
+      <span class="badge high">high</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">sensitive-data-exposure.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">SENSITIVE_CONFIG_EXPOSURE</div>
+      <div class="finding-url">https://brokencrystals.com/api/config</div>
+      <div class="finding-message">Configuration endpoint exposes sensitive data (credentials, API keys, or infrastructure details)</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
         </div>
+        <div class="raw-data-content collapsed"><span class="request-line">GET /api/config</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Remove sensitive configuration from public endpoints; use environment variables</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A02"
+       data-scope="generic"
+       data-tags="data-exposure,information-disclosure,generic,api">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a02">A02</span>
+      <span class="badge high">high</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">sensitive-data-exposure.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">SECRETS_ENDPOINT</div>
+      <div class="finding-url">https://brokencrystals.com/api/secrets</div>
+      <div class="finding-message">Secrets endpoint is accessible</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">GET /api/secrets</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Remove or protect secrets endpoints</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card critical"
+       data-severity="critical"
+       data-owasp="A01"
+       data-scope="generic"
+       data-tags="path-traversal,lfi,file-handling,generic">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge critical">critical</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">path-traversal.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">PATH_TRAVERSAL_ERROR_DISCLOSURE</div>
+      <div class="finding-url">https://brokencrystals.com/api/file?path=../../../etc/passwd</div>
+      <div class="finding-message">Path traversal attempt reveals file system structure in error messages</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">GET /api/file?path=../../../etc/passwd</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Sanitize error messages; implement proper path validation</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card critical"
+       data-severity="critical"
+       data-owasp="A01"
+       data-scope="generic"
+       data-tags="path-traversal,lfi,file-handling,generic">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge critical">critical</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">path-traversal.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">PATH_TRAVERSAL_AWS</div>
+      <div class="finding-url">https://brokencrystals.com/api/file/aws?path=../../etc/passwd</div>
+      <div class="finding-message">AWS file endpoint vulnerable to path traversal</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">GET /api/file/aws?path=../../etc/passwd</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Validate file paths against whitelist</div>
+      
+    </div>
+  </div>
+        
     
 </div>
 
@@ -215,7 +439,7 @@
 
         
 <footer>
-    Generated by Squeezer • 2026-01-16 01:02:48 • 0 total findings (0 unique)
+    Generated by Squeezer • 2026-01-16 18:23:18 • 4 total findings (4 unique)
 </footer>
 
     </div>

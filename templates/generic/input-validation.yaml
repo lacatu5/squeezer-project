@@ -23,6 +23,14 @@ requests:
         status:
           - 200
           - 201
+      - type: word
+        part: body
+        words:
+          - '"status":'
+          - '"data":'
+          - '"id":'
+        condition: or
+    matchers_condition: and
     on_match:
       vulnerability: EMPTY_FIELD_ACCEPTED
       message: Endpoint accepts empty required field value
@@ -41,10 +49,14 @@ requests:
           - 200
           - 201
       - type: word
+        part: body
         words:
           - '"data":{'
-          - success
+          - '"status":'
+          - '"id":'
+          - 'success'
         condition: or
+    matchers_condition: and
     on_match:
       vulnerability: NULL_FIELD_ACCEPTED
       message: Endpoint accepts null required field value
