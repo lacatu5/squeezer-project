@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Squeezer Scan Report - https://juice-shop.herokuapp.com</title>
+    <title>Squeezer Scan Report - http://localhost:3000</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace; background: #1e1e1e; color: #cccccc; line-height: 1.5; font-size: 13px; }
@@ -67,6 +67,8 @@
         .raw-data-toggle { font-size: 16px; color: #858585; }
         .raw-data-content { padding: 15px; font-family: 'SF Mono', 'Monaco', 'Inconsolata', monospace; font-size: 11px; color: #cccccc; white-space: pre-wrap; word-break: break-all; max-height: 400px; overflow: auto; }
         .raw-data-content.collapsed { display: none; }
+        .request-line { color: #00aaff; }
+        .response-line { color: #00cc66; }
         @media (max-width: 768px) {
             .grid { grid-template-columns: 1fr; }
             .finding-header { flex-direction: column; align-items: flex-start; }
@@ -78,13 +80,13 @@
         
 <header>
     <h1>Squeezer Scan Report</h1>
-    <div class="subtitle">https://juice-shop.herokuapp.com • Scanned at 2026-01-16 01:02:48</div>
+    <div class="subtitle">http://localhost:3000 • Scanned at 2026-01-17 22:59:23</div>
 </header>
 
         
 <div class="grid">
     <div class="card">
-        <div class="card-value critical">0</div>
+        <div class="card-value critical">2</div>
         <div class="card-title">Critical</div>
     </div>
     <div class="card">
@@ -104,7 +106,7 @@
         <div class="card-title">Templates</div>
     </div>
     <div class="card">
-        <div class="card-value">0.7s</div>
+        <div class="card-value">0.1s</div>
         <div class="card-title">Duration</div>
     </div>
 </div>
@@ -143,8 +145,8 @@
   <div class="chart-container ">
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff4444">0</div>
-    <div class="bar-fill" style="height: 4px; background: #ff4444;"></div>
+    <div class="bar-value" style="color: #ff4444">2</div>
+    <div class="bar-fill" style="height: 140px; background: #ff4444;"></div>
     <div class="bar-label">Crit</div>
   </div>
   
@@ -171,11 +173,25 @@
     <div class="card">
         <div class="card-title">OWASP Top 10 2025</div>
         
-    <div style="color: #858585; text-align: center; padding: 40px;">No OWASP findings</div>
+    
+    
+    
+      
+      
+        
+      
+      
+    
+    <div class="chart-container ">
   
-    </div>
+  <div class="bar">
+    <div class="bar-value" style="color: #ff8800">2</div>
+    <div class="bar-fill" style="height: 140px; background: #ff8800;"></div>
+    <div class="bar-label">A02</div>
+  </div>
+  
 </div>
-</div>
+  
     </div>
 </div>
 
@@ -185,7 +201,7 @@
         <span class="filter-label">Severity</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
-            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (0)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (2)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="high">High (0)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med (0)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="low">Low (0)</button>
@@ -196,18 +212,126 @@
         <span class="filter-label">Type</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
-            <button class="filter-btn" data-filter-type="scope" data-filter="app">App (0)</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="app">App (2)</button>
             <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic (0)</button>
         </div>
-    </div></div>
+    </div>
+
+    
+    <div class="filter-group">
+        <span class="filter-label">OWASP</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="owasp" data-filter="all">All</button>
+            
+            <button class="filter-btn" data-filter-type="owasp" data-filter="A02">A02</button>
+            
+        </div>
+    </div>
+    
+
+    
+    <div class="filter-group">
+        <span class="filter-label">Tags</span>
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter-type="tag" data-filter="all">All</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="algorithm-confusion">algorithm-confusion</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="authentication">authentication</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="cryptographic-failure">cryptographic-failure</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="jwt">jwt</button>
+            
+        </div>
+    </div>
+    
+</div>
 
 <h2>Vulnerabilities</h2>
 <div id="findings-container">
     
-        <div class="empty-state">
-            <div class="empty-title">No vulnerabilities found</div>
-            <div class="empty-text">The scan completed successfully without detecting any security issues.</div>
+        
+            
+  
+  
+  
+  <div class="finding-card critical"
+       data-severity="critical"
+       data-owasp="A02"
+       data-scope="app"
+       data-tags="jwt,authentication,cryptographic-failure,algorithm-confusion">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a02">A02</span>
+      <span class="badge critical">critical</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">jwt-none-algorithm.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">JWT_NONE_ALGORITHM</div>
+      <div class="finding-url">http://localhost:3000/api/Users/1</div>
+      <div class="finding-message">Application accepts JWT tokens with &#39;none&#39; algorithm - signature validation bypassed</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
         </div>
+        <div class="raw-data-content collapsed"><span class="request-line">GET /api/Users/1</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Configure JWT library to reject &#39;none&#39; algorithm; use explicit algorithm whitelist</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card critical"
+       data-severity="critical"
+       data-owasp="A02"
+       data-scope="app"
+       data-tags="jwt,authentication,cryptographic-failure,algorithm-confusion">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a02">A02</span>
+      <span class="badge critical">critical</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">jwt-none-algorithm.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">JWT_NONE_PRIVILEGE_ESCALATION</div>
+      <div class="finding-url">http://localhost:3000/rest/admin/application-configuration</div>
+      <div class="finding-message">JWT &#39;none&#39; algorithm with privilege escalation succeeded - full admin access obtained</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">GET /rest/admin/application-configuration</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Never trust client-supplied algorithm; validate signature on every request</div>
+      
+    </div>
+  </div>
+        
     
 </div>
 
@@ -215,7 +339,7 @@
 
         
 <footer>
-    Generated by Squeezer • 2026-01-16 01:02:48 • 0 total findings (0 unique)
+    Generated by Squeezer • 2026-01-17 22:59:23 • 2 total findings (2 unique)
 </footer>
 
     </div>

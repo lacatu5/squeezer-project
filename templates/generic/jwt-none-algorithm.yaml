@@ -1,0 +1,34 @@
+id: jwt-none-algorithm
+info:
+  name: JWT Algorithm Confusion (None Algorithm)
+  description: Tests if the application accepts JWT tokens with 'none' algorithm and no signature
+  owasp_category: A02:2025
+  severity: critical
+  tags:
+    - jwt
+    - authentication
+    - cryptographic-failure
+    - algorithm-confusion
+
+requests:
+  - name: Test with forged 'none' algorithm JWT
+    method: GET
+    path: /api/Users/1
+    headers:
+      Authorization: "Bearer jwt_none({{bearer_token}})"
+    matchers_condition: and
+    matchers:
+      - type: status
+        values: [200]
+      - type: word
+        part: body
+        words:
+          - '"email"'
+          - '"role"'
+          - '"password"'
+        condition: or
+    on_match:
+      vulnerability: JWT_NONE_ALGORITHM
+      message: Application accepts JWT tokens with 'none' algorithm - signature validation bypassed
+      remediation: Configure JWT library to reject 'none' algorithm; use explicit algorithm whitelist
+

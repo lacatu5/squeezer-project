@@ -1,7 +1,6 @@
 id: juice-shop-b2b-rce
 info:
   name: B2B Order RCE via JavaScript Injection
-  author: dast-mvp
   owasp_category: A05:2025
   severity: critical
   description: Tests for Remote Code Execution in B2B order processing

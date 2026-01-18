@@ -4,6 +4,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import typer
+import yaml
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
@@ -111,14 +112,16 @@ def init_app(
             console.print(f"[dim]Target: {effective_target}[/dim]\n")
 
         crawl_cookies = {}
+        crawl_headers = {}
         if effective_bearer:
-            crawl_cookies['token'] = effective_bearer
+            crawl_headers["Authorization"] = f"Bearer {effective_bearer}"
 
         crawler = KatanaCrawler(
             base_url=effective_target,
             max_depth=3,
             js_crawl=True,
             cookies=crawl_cookies,
+            headers=crawl_headers,
             filter_static=True,
         )
 
@@ -179,26 +182,30 @@ def init_app(
         console.print(f"\n[dim]Endpoints cached: {result['endpoints_discovered']}[/dim]")
         console.print(f"[dim]Templates created: {len(result.get('templates_created', []))}[/dim]")
 
+        if lab:
+            console.print("\n[dim]Stopping lab container...[/dim]")
+            await docker_manager.stop_lab()
+
         if lab and not bearer:
             console.print("\n[bold]Next steps:[/bold]")
-            console.print("  1. Edit [cyan]app-auth.yaml[/cyan] to add your token")
-            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}-noauth[/green]")
-            console.print(f"  3. Run: [green]squeezer scan {effective_target} --app {app_name}-auth[/green]")
+            console.print("  1. Keep [cyan]app-auth.yaml[/cyan] token as placeholder for unauth scans")
+            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name} -lab {lab}[/green]")
+            console.print("  3. Add your token to [cyan]app-auth.yaml[/cyan] (or use -b) and re-run")
         elif lab:
             console.print("\n[bold]Next steps:[/bold]")
             console.print(f"  1. Edit templates in [cyan]{result['app_dir']}[/cyan]")
-            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}-noauth -lab {lab}[/green]")
-            console.print(f"  3. Run: [green]squeezer scan {effective_target} --app {app_name}-auth -lab {lab}[/green]")
+            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name} -lab {lab}[/green]")
+            console.print("  3. For authenticated scans, pass -b or set app-auth.yaml token")
         elif bearer:
             console.print("\n[bold cyan]Two-Phase Scanning:[/bold cyan]")
-            console.print("  [yellow]1. Public endpoints:[/yellow]   squeezer scan {target} --app {app_name}-noauth")
-            console.print("  [yellow]2. Authenticated scan:[/yellow] squeezer scan {target} --app {app_name}-auth")
+            console.print("  [yellow]1. Public endpoints:[/yellow]   squeezer scan {target} --app {app_name}")
+            console.print("  [yellow]2. Authenticated scan:[/yellow] squeezer scan {target} --app {app_name} -b TOKEN")
             console.print("\n[dim]Compare results to identify IDOR vs public access issues[/dim]")
         else:
             console.print("\n[bold]Next steps:[/bold]")
-            console.print("  1. Edit [cyan]app-auth.yaml[/cyan] to add your token")
-            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}-noauth[/green]")
-            console.print(f"  3. Run: [green]squeezer scan {effective_target} --app {app_name}-auth[/green]")
+            console.print("  1. Keep [cyan]app-auth.yaml[/cyan] token as placeholder for unauth scans")
+            console.print(f"  2. Run: [green]squeezer scan {effective_target} --app {app_name}[/green]")
+            console.print("  3. Add your token to [cyan]app-auth.yaml[/cyan] (or use -b) and re-run")
 
     asyncio.run(_init())
 
@@ -263,14 +270,47 @@ def scan(
         cached_endpoints = None
         effective_app = sanitize_name(app) if app else None
 
+        def _is_valid_bearer_token(value: str | None) -> bool:
+            return bool(value and value.strip() and value.strip() != "YOUR_TOKEN_HERE")
+
+        async def _load_bearer_from_app_auth_profile(app_name: str | None) -> str | None:
+            if not app_name:
+                return None
+            app_dir = project_root / "templates" / "apps" / app_name
+            auth_path = app_dir / "app-auth.yaml"
+            if not auth_path.exists():
+                return None
+            try:
+                raw = await asyncio.to_thread(auth_path.read_text, encoding="utf-8")
+                cfg = yaml.safe_load(raw) or {}
+                auth_cfg = cfg.get("auth", {}) or {}
+                token = auth_cfg.get("token")
+                if _is_valid_bearer_token(token) and auth_cfg.get("type") == "bearer":
+                    return str(token)
+            except Exception:
+                return None
+            return None
+
         if app and not crawl:
             cached_endpoints = get_cached_endpoints(effective_app, project_root)
             app_config = load_app_config(effective_app, project_root)
             if app_config and not effective_bearer:
                 auth_config = app_config.get('auth', {})
-                if auth_config.get('type') == 'bearer' and auth_config.get('token'):
-                    effective_bearer = auth_config['token']
+                token = auth_config.get('token')
+                if auth_config.get('type') == 'bearer' and _is_valid_bearer_token(token):
+                    effective_bearer = str(token)
                     console.print("[dim]Using bearer token from app config[/dim]")
+                    if not lab:
+                        target_config.authentication.type = AuthType.BEARER
+                        target_config.authentication.token = effective_bearer
+
+            if app_config and not effective_bearer and not lab:
+                token = await _load_bearer_from_app_auth_profile(effective_app)
+                if token:
+                    effective_bearer = token
+                    console.print("[dim]Using bearer token from app-auth.yaml[/dim]")
+                    target_config.authentication.type = AuthType.BEARER
+                    target_config.authentication.token = effective_bearer
 
         app_dir_exists = (project_root / "templates" / "apps" / effective_app).exists() if effective_app else False
         needs_init = effective_app and not app_dir_exists and not template
@@ -284,14 +324,16 @@ def scan(
                 effective_app = sanitize_name(parsed.netloc.replace(":", "-"))
 
             crawl_cookies = {}
+            crawl_headers = {}
             if effective_bearer:
-                crawl_cookies['token'] = effective_bearer
+                crawl_headers["Authorization"] = f"Bearer {effective_bearer}"
 
             crawler = KatanaCrawler(
                 base_url=effective_target,
                 max_depth=3,
                 js_crawl=True,
                 cookies=crawl_cookies,
+                headers=crawl_headers,
                 filter_static=True,
             )
 

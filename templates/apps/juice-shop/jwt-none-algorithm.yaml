@@ -1,0 +1,25 @@
+id: juice-shop-jwt-none
+info:
+  name: JWT None Algorithm Attack (Juice Shop)
+  description: OWASP Juice Shop specific JWT algorithm confusion test
+  owasp_category: A02:2025
+  severity: critical
+  tags:
+    - jwt
+    - juice-shop
+    - authentication-bypass
+
+requests:
+  - name: Forged JWT with none algorithm
+    method: GET
+    path: /api/Users/1
+    headers:
+      Authorization: "Bearer jwt_none({{bearer_token}})"
+    matchers:
+      - type: status
+        values: [200]
+    on_match:
+      vulnerability: JWT_NONE_ALGORITHM
+      message: Juice Shop accepts JWT with 'none' algorithm - signature bypass works
+      remediation: Update jwt-simple library or configure explicit algorithm verification
+

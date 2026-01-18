@@ -149,6 +149,9 @@ class KatanaCrawler:
         cmd.extend(["-xhr"])
         cmd.extend(["-fx"])
         cmd.extend(["-aff"])
+        if self.headers:
+            for k, v in self.headers.items():
+                cmd.extend(["-H", f"{k}: {v}"])
         if self.cookies:
             cookie_str = "; ".join(f"{k}={v}" for k, v in self.cookies.items())
             cmd.extend(["-H", f"Cookie: {cookie_str}"])

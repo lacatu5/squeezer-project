@@ -14,7 +14,7 @@ requests:
     method: POST
     path: /rest/basket/1/checkout
     headers:
-      Authorization: "{{bearer_token}}"
+      Authorization: "Bearer {{bearer_token}}"
       Content-Type: application/json
     body: '{"couponData": "bnVsbA==", "orderDetails": {"totalPrice": 0.01}}'
     matchers_condition: and

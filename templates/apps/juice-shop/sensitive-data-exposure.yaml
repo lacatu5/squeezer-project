@@ -1,7 +1,6 @@
 id: juice-shop-data-export-sqli
 info:
   name: Data Export Sensitive Data Exposure
-  author: dast-mvp
   owasp_category: A01:2025
   severity: high
   description: Tests for sensitive data exposure via data export functionality
@@ -14,7 +13,7 @@ requests:
   - path: /rest/user/data-export
     method: POST
     headers:
-      Authorization: "{{bearer_token}}"
+      Authorization: "Bearer {{bearer_token}}"
       Content-Type: application/json
     body: '{"format":"xml"}'
     matchers_condition: and

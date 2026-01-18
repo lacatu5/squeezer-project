@@ -13,6 +13,7 @@ import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
 from squeezer.auth import AuthContext, Authenticator
+from squeezer.jwt_utils import decode_jwt, forge_none_algorithm
 from squeezer.matchers import MatchResult, create_matcher, evaluate_matchers, ConsistencyChecker, ConfidenceCalculator
 from squeezer.models import (
     EvidenceStrength,
@@ -35,6 +36,7 @@ class ExecutionContext:
     endpoints: Dict[str, str] = field(default_factory=dict)
     responses: List[httpx.Response] = field(default_factory=list)
     _named_responses: Dict[str, httpx.Response] = field(default_factory=dict)
+    _jwt_cache: Dict[str, str] = field(default_factory=dict)
 
     def interpolate(self, text: str, max_iterations: int = 10) -> str:
         result = text
@@ -46,12 +48,20 @@ class ExecutionContext:
                 break
         return result
 
+    def _jwt_none_forge(self, token: str) -> str:
+        if token in self._jwt_cache:
+            return self._jwt_cache[token]
+        try:
+            token_data = decode_jwt(token)
+            forged = forge_none_algorithm(token_data)
+            self._jwt_cache[token] = forged
+            return forged
+        except Exception as e:
+            logger.debug(f"JWT forging failed: {e}")
+            return token
+
     def _interpolate_once(self, text: str) -> str:
         result = text
-        result = re.sub(r"rand_base\((\d+)\)", lambda m: self._rand_base(m.group(1)), result)
-        result = re.sub(r"rand_int\((\d+)\,(\d+)\)", lambda m: str(random.randint(int(m.group(1)), int(m.group(2)))), result)
-        result = re.sub(r"rand_int\(\)", lambda m: str(random.randint(10000, 99999)), result)
-        result = re.sub(r"uuid\(\)", lambda m: str(uuid.uuid4()), result)
         for name, value in self.endpoints.items():
             result = result.replace(f"{{{{endpoints.{name}}}}}", value)
 
@@ -65,6 +75,12 @@ class ExecutionContext:
             value = self.variables[name]
             result = result.replace(f"{{{{{name}}}}}", str(value))
             result = result.replace(f"{{{{ {name} }}}}", str(value))
+
+        result = re.sub(r"rand_base\((\d+)\)", lambda m: self._rand_base(m.group(1)), result)
+        result = re.sub(r"rand_int\((\d+)\,(\d+)\)", lambda m: str(random.randint(int(m.group(1)), int(m.group(2)))), result)
+        result = re.sub(r"rand_int\(\)", lambda m: str(random.randint(10000, 99999)), result)
+        result = re.sub(r"uuid\(\)", lambda m: str(uuid.uuid4()), result)
+        result = re.sub(r"jwt_none\(([^)]+)\)", lambda m: self._jwt_none_forge(m.group(1)), result)
         return result
 
     def _rand_base(self, length: str) -> str:
@@ -188,7 +204,10 @@ async def execute_request(
 ) -> Optional[Finding]:
     method = config.method
     path = context.interpolate(config.path)
-    headers = prepare_headers(config, context)
+    headers = {}
+    if auth_context:
+        headers.update(auth_context.headers)
+    headers.update(prepare_headers(config, context))
     body = prepare_body(config, context)
     kwargs: Dict[str, Any] = {"headers": headers}
     if body:
@@ -196,10 +215,8 @@ async def execute_request(
             kwargs["json"] = body
         else:
             kwargs["content"] = body
-    if auth_context:
-        kwargs["headers"].update(auth_context.headers)
-        if auth_context.cookies:
-            kwargs["cookies"] = auth_context.cookies.copy()
+    if auth_context and auth_context.cookies:
+        kwargs["cookies"] = auth_context.cookies.copy()
     if config.cookies:
         if "cookies" not in kwargs:
             kwargs["cookies"] = {}
@@ -349,7 +366,6 @@ class TemplateEngine:
                 report.add_error(f"Template {template.id}: {request_name} - {str(e)}")
 
     def _expand_template(self, template: Template) -> List[RequestConfig]:
-        """Expand template requests against discovered endpoints."""
         all_requests = []
         discovered_endpoints = self.target.endpoints.custom or {}
         autodiscovery_patterns = load_autodiscovery_patterns()

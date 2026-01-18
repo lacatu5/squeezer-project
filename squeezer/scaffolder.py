@@ -72,7 +72,6 @@ def generate_idor_template(endpoint: dict, app_name: str) -> dict | None:
             {
                 'path': f"{path}/1",
                 'method': 'GET',
-                'headers': {'Authorization': '{{bearer_token}}'},
                 'matchers': [
                     {'type': 'status', 'status': [200]},
                 ],

@@ -28,7 +28,7 @@ requests:
     method: POST
     path: /api/BasketItems/
     headers:
-      Authorization: "{{bearer_token}}"
+      Authorization: "Bearer {{bearer_token}}"
       Content-Type: application/json
     body: '{"ProductId": 1, "quantity": -1}'
     matchers:
