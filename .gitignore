@@ -89,3 +89,7 @@ baseline/
 traffic/
 *.traffic.log
 *.har
+
+nuclei-templates/
+nuclei.json
+katana.txt
