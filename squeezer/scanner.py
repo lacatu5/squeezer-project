@@ -14,9 +14,8 @@ from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_excep
 
 from squeezer.auth import AuthContext, Authenticator
 from squeezer.jwt_utils import decode_jwt, forge_none_algorithm
-from squeezer.matchers import MatchResult, create_matcher, evaluate_matchers, ConsistencyChecker, ConfidenceCalculator
+from squeezer.matchers import MatchResult, create_matcher, evaluate_matchers, ConsistencyChecker
 from squeezer.models import (
-    EvidenceStrength,
     Finding,
     RequestConfig,
     ScanReport,
@@ -153,13 +152,6 @@ def create_finding(
     confidence: str = "medium",
 ) -> Finding:
     on_match = config.on_match or {}
-    evidence_strength = match_result.evidence_strength
-    if on_match.get("evidence_strength"):
-        strength_str = on_match["evidence_strength"]
-        try:
-            evidence_strength = EvidenceStrength(strength_str)
-        except ValueError:
-            evidence_strength = EvidenceStrength.HEURISTIC
     owasp_category = template.info.get_owasp_category()
     sev = template.info.severity
     if isinstance(sev, str):
@@ -178,7 +170,6 @@ def create_finding(
         vulnerability_type=on_match.get("vulnerability") or template.id.replace("-", "_"),
         severity=sev,
         owasp_category=owasp_category,
-        evidence_strength=evidence_strength,
         url=str(response.url),
         evidence={
             "status_code": response.status_code,
@@ -251,11 +242,8 @@ async def execute_request(
             condition = config.matchers_condition if hasattr(config, 'matchers_condition') else (config.matchers[0].condition if config.matchers else "and")
             result = evaluate_matchers(matchers, response, condition)
             if result.matched:
-                confidence = ConfidenceCalculator.calculate(
-                    result.evidence_strength,
-                    sum(1 for m in matchers if m.matches(response).matched),
-                    is_consistent=is_consistent,
-                )
+                passed_matchers = sum(1 for m in matchers if m.matches(response).matched)
+                confidence = "high" if passed_matchers >= 2 and is_consistent else "medium"
                 return create_finding(config, template, response, result, confidence)
     except httpx.HTTPError as e:
         logger.debug(f"HTTP error during request: {e}")

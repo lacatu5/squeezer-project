@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from httpx import Response
 
-from squeezer.models import EvidenceStrength, MatcherConfig
+from squeezer.models import MatcherConfig
 
 
 @dataclass
@@ -13,7 +13,6 @@ class MatchResult:
     matched: bool
     evidence: Dict[str, Any]
     message: str
-    evidence_strength: EvidenceStrength = EvidenceStrength.HEURISTIC
     response_details: Optional[str] = None
 
 
@@ -63,12 +62,10 @@ class StatusMatcher(Matcher):
             matched = any(status <= s for s in self.statuses)
         else:
             matched = status in self.statuses
-        strength = EvidenceStrength.DIRECT if matched else EvidenceStrength.HEURISTIC
         return self._apply_negative(MatchResult(
             matched=matched,
             evidence={"status": status, "expected": self.statuses},
             message=f"Status {status} {'matches' if matched else 'does not match'} {self.statuses}",
-            evidence_strength=strength,
         ))
 
 
@@ -105,7 +102,6 @@ class WordMatcher(Matcher):
             matched=matched,
             evidence={"found": found_words, "content_length": len(content)},
             message=f"Words {found_words} found in {self.part}",
-            evidence_strength=EvidenceStrength.HEURISTIC,
         ))
 
 
@@ -128,7 +124,6 @@ class RegexMatcher(Matcher):
             matched=matched,
             evidence={"matches": matches},
             message=f"Regex patterns matched: {matches}",
-            evidence_strength=EvidenceStrength.HEURISTIC,
         ))
 
 
@@ -201,7 +196,6 @@ class JsonMatcher(Matcher):
             matched=matched,
             evidence={"selector": self.selector, "extracted": extracted, "expected": self.value},
             message=f"JSON {self.selector} = {extracted} (expected {self.value})",
-            evidence_strength=EvidenceStrength.INFERENCE,
         ))
 
 
@@ -247,20 +241,11 @@ def evaluate_matchers(matchers: List[Matcher], response: Response, condition: st
     evidence["positive_matchers"] = f"{sum(r.matched for r in positive_results)}/{len(positive_results)}" if positive_results else "0/0"
     evidence["negative_matchers"] = f"{sum(r.matched for r in negative_results)}/{len(negative_results)}" if negative_results else "0/0"
     evidence["condition"] = condition
-    strength = EvidenceStrength.HEURISTIC
-    for r in positive_results:
-        if r.matched:
-            if r.evidence_strength == EvidenceStrength.DIRECT:
-                strength = EvidenceStrength.DIRECT
-                break
-            elif r.evidence_strength == EvidenceStrength.INFERENCE:
-                strength = EvidenceStrength.INFERENCE
     return MatchResult(
         matched=matched,
         evidence=evidence,
         message=f"Combined {condition.upper()}: {sum(r.matched for r in positive_results)}/{len(positive_results)} positive, "
                 f"{sum(r.matched for r in negative_results)}/{len(negative_results)} negative passed",
-        evidence_strength=strength,
     )
 
 
@@ -281,23 +266,3 @@ class ConsistencyChecker:
             if variance > threshold:
                 return False
         return True
-
-
-class ConfidenceCalculator:
-    @staticmethod
-    def calculate(evidence_strength: EvidenceStrength, passed_matchers: int, is_consistent: bool = True) -> str:
-        if not is_consistent:
-            return "low"
-        if evidence_strength == EvidenceStrength.DIRECT:
-            if passed_matchers >= 2:
-                return "high"
-            return "medium"
-        if evidence_strength == EvidenceStrength.INFERENCE:
-            if passed_matchers >= 2 and is_consistent:
-                return "medium"
-            return "low"
-        if evidence_strength == EvidenceStrength.HEURISTIC:
-            if passed_matchers >= 3 and is_consistent:
-                return "medium"
-            return "low"
-        return "low"

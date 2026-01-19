@@ -100,9 +100,6 @@ This log captures *prompts* (i.e., the inputs given to AI assistants) used to de
 ### Prompt 15
 > Add regex extractors that capture values from responses and store them into variables for later requests.
 
-### Prompt 16
-> Add confidence calculation based on the number of passing matchers and response consistency.
-
 ### Prompt 17
 > Integrate Katana as a subprocess, parse JSON output, and store discovered endpoints. Enable JavaScript crawling by default.
 

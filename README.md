@@ -77,7 +77,44 @@ To scan a real application, you typically want to "initialize" it first to crawl
     squeezer scan https://example.com --app my-target
     ```
 
-## 🛠️ Project Structure
+## � Command Reference
+
+Squeezer works in two phases: **Initialization** (Discovery) and **Scanning** (Attack).
+
+### 1. `squeezer init`
+Initializes a new application profile. This phase performs the crawling and scaffolding.
+
+**Usage:**
+```bash
+squeezer init [OPTIONS] APP_NAME [TARGET]
+```
+
+**Arguments:**
+*   `APP_NAME` (Required): A unique name for your target application (e.g., `my-shop`). This creates a folder in `templates/apps/`.
+*   `TARGET`: The target URL (e.g., `https://example.com`). Required unless using `--lab`.
+
+**Options:**
+*   `-b, --bearer`: Bearer token for authenticated crawling. Useful if parts of the site are behind a login.
+*   `-lab, --lab`:  Starts a fresh Docker lab (e.g., `juice-shop`) instead of scanning a real URL.
+*   `-v, --verbose`: Enable detailed logging.
+
+### 2. `squeezer scan`
+Executes the security testing templates against the target.
+
+**Usage:**
+```bash
+squeezer scan [OPTIONS] [TARGET]
+```
+
+**Options:**
+*   `--app`: The name of the app profile (from `init`) to use. Loads cached endpoints and custom templates.
+*   `--generic / --no-generic`: Whether to run the general vulnerability templates (Default: enabled).
+*   `-T, --template`: Run **only** a specific template file (useful for developing new checks).
+*   `-b, --bearer`: Override authentication token for this scan run.
+*   `-o, --output`: Save results to a JSON file (e.g., `results.json`).
+*   `--crawl`: Force a re-crawl of the target, ignoring the cached endpoints from `init`.
+
+# Project Structure
 
 - **`squeezer/`**: Core logic (crawler, scanner, cli).
 - **`templates/generic/`**: General vulnerability payloads (CORS, IDOR, etc.).

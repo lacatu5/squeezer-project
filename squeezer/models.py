@@ -48,12 +48,6 @@ class DetectionTier(str, Enum):
     AGGRESSIVE = "aggressive"
 
 
-class EvidenceStrength(str, Enum):
-    DIRECT = "direct_observation"
-    INFERENCE = "inference"
-    HEURISTIC = "heuristic"
-
-
 class AuthType(str, Enum):
     NONE = "none"
     BEARER = "bearer"
@@ -224,7 +218,6 @@ class Finding(BaseModel):
     vulnerability_type: str
     severity: SeverityLevel
     owasp_category: OWASPCategory = OWASPCategory.A02_SECURITY_MISCONFIGURATION
-    evidence_strength: EvidenceStrength
     url: str
     evidence: Dict[str, Any] = Field(default_factory=dict)
     message: str = ""
@@ -458,7 +451,7 @@ class ScanReport(BaseModel):
         for finding in self.findings:
             parsed = urlparse(finding.url)
             base_path = parsed.path.split('?')[0]
-            key = (finding.vulnerability_type, finding.template_id, base_path, finding.evidence_strength)
+            key = (finding.vulnerability_type, finding.template_id, base_path)
             if key not in grouped:
                 grouped[key] = finding
             else:
@@ -477,7 +470,7 @@ class ScanReport(BaseModel):
                     group_key = 'GENERIC_SSRF'
                 else:
                     group_key = 'INSECURE_DIRECT_OBJECT_REFERENCE'
-                key = (group_key, finding.template_id, finding.evidence_strength)
+                key = (group_key, finding.template_id)
                 if key not in consolidated:
                     consolidated[key] = finding
                     if group_key == 'DEBUG_ENDPOINTS':
@@ -491,7 +484,7 @@ class ScanReport(BaseModel):
                     endpoint_data[key]['paths'].append(urlparse(finding.url).path)
                     endpoint_data[key]['payloads'] += finding.payload_count
             else:
-                unique_key = (finding.vulnerability_type, finding.template_id, urlparse(finding.url).path, finding.evidence_strength)
+                unique_key = (finding.vulnerability_type, finding.template_id, urlparse(finding.url).path)
                 consolidated[unique_key] = finding
         for key in endpoint_data:
             if key in consolidated:
