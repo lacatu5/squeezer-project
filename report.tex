@@ -40,10 +40,9 @@
 \maketitle
 
 \begin{abstract}
-The transition from Multi-Page Applications (MPAs) to Single Page Applications (SPAs) has rendered traditional crawling methodologies insufficient, creating a phenomenon known as "scanner blindness." Conventional Dynamic Application Security Testing (DAST) tools often fail to discover attack surfaces generated dynamically via client-side execution or background requests. This study proposes a template-driven DAST framework that combines Katana-based endpoint discovery (JavaScript crawling and XMLHttpRequest (XHR) endpoint extraction) with YAML-defined active checks. Templates support endpoint placeholders (e.g., expanding across discovered API routes) and data-driven field-name auto-discovery patterns for common concepts such as privilege/role-like fields, tokens, and identifiers.
+The transition from Multi-Page Applications (MPAs) to Single Page Applications (SPAs) has rendered traditional crawling methodologies insufficient, creating a phenomenon known as "scanner blindness." Conventional Dynamic Application Security Testing (DAST) tools struggle to discover attack surfaces generated dynamically via client-side execution because they historically rely on static HTML parsing rather than DOM evaluation. This study proposes a template-driven DAST framework that combines Katana-based endpoint discovery (JavaScript crawling and XMLHttpRequest (XHR) endpoint extraction) with YAML-defined active checks. Templates support endpoint placeholders (e.g., expanding across discovered API routes) and data-driven field-name auto-discovery patterns for common concepts such as privilege/role-like fields, tokens, and identifiers.
 
 
-The system integrates an optional "lab mode" that provisions a fresh Docker container per scan run for reproducible, clean-slate experiments and to mitigate state pollution (e.g., database contamination) in targets designed to be resettable; lab profiles are defined via a lightweight YAML descriptor stored alongside the app templates. The solution is evaluated against OWASP Juice Shop as a representative SPA-backed application, focusing on business logic flaws and broken access control vectors commonly missed by signature-only engines. The results suggest that combining automated endpoint discovery, explicit authentication context, and specialized request templates improves practical coverage on modern JavaScript-heavy targets.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -59,7 +58,9 @@ Consequently, Dynamic Application Security Testing (DAST) tools, originally arch
 To quantify the impact of these architectural shifts, the research community relies on empirical evaluations of tool effectiveness. Recent studies, such as those by Qadir et al. (2025), assess scanner performance by measuring the count and severity of detected vulnerabilities and mapping them to standardized industry benchmarks like the OWASP Top 10~\cite{Qadir2025}. These comparative frameworks are essential for identifying gaps in scanner coverage against real-world applications.
 
 \subsection{Justification of Test Environment}
-This project utilizes OWASP Juice Shop as the primary testing environment. While modern alternatives like "Broken Crystals" offer valuable benchmarks, they are often structured as collections of isolated, unrelated vulnerability test cases. In contrast, Juice Shop simulates a monolithic, interdependent e-commerce workflow where vulnerabilities are gated behind complex state transitions. In such environments, security testing frequently depends on preserving an authentication context (e.g., a bearer token) and executing request sequences in the correct order to satisfy preconditions (e.g., login before accessing protected APIs). This architectural cohesion makes Juice Shop a strong candidate for stress-testing a scanner’s ability to overcome "blindness" in deep navigational structures, while also highlighting the limits of purely stateless request fuzzing.
+This project utilizes OWASP Juice Shop \cite{JuiceShop} as the primary testing environment. Juice Shop is an intentionally vulnerable web application originally developed by Bjoern Kimminich and first released in 2014 as part of the OWASP (Open Web Application Security Project) community. As of 2025, it is the most-starred OWASP project on GitHub with over 50,000 stars, reflecting widespread adoption for security training, capture-the-flag competitions, and tool evaluation. The application is actively maintained and serves as a modern benchmark for testing DAST scanners against contemporary JavaScript-based architectures.
+
+While modern alternatives like "Broken Crystals" offer valuable benchmarks, they are often structured as collections of isolated, unrelated vulnerability test cases. In contrast, Juice Shop simulates a monolithic, interdependent e-commerce workflow where vulnerabilities are gated behind complex state transitions. In such environments, security testing frequently depends on preserving an authentication context (e.g., a bearer token) and executing request sequences in the correct order to satisfy preconditions (e.g., login before accessing protected APIs). This architectural cohesion makes Juice Shop a strong candidate for stress-testing a scanner’s ability to overcome "blindness" in deep navigational structures, while also highlighting the limits of purely stateless request fuzzing.
 
 \subsection{Methodological Approach}
 Unlike general-purpose tools such as OWASP ZAP or Burp Suite, which often operate against long-lived targets and can suffer from "state pollution" (where previous actions contaminate the database for subsequent tests), this solution supports an optional "Clean-Slate" methodology when the target can be provisioned as an ephemeral lab. Research by Arcuri on automated API testing emphasizes Resetting the System Under Test (SUT), specifically the database state, before test execution to ensure scientific validity~\cite{Arcuri2019}. The concrete lab-mode workflow and Docker integration are detailed in Section~IV-A.
@@ -71,7 +72,7 @@ This work makes the following practical contributions toward mitigating scanner 
     \item \textbf{Scaffolded app profiling:} an initialization workflow that discovers endpoints and generates an application profile to reduce the cost of onboarding new targets and authoring templates.
     \item \textbf{Template-driven, multi-step active checks:} YAML-defined request sequences with variable extraction/interpolation to express stateful workflows (e.g., authentication, token propagation) beyond single-request signatures.
     \item \textbf{Reproducible and extensible methodology:} a tiered template approach (generic baseline + app-specific overlays) intended to be easily reproduced and expanded to additional applications with minimal rework.
-    \item \textbf{Standards-aligned reporting:} automatic mapping of findings to OWASP Top 10 (2025) categories to support executive-facing communication and benchmarking.
+    \item \textbf{Standards-aligned reporting:} automatic mapping of findings to OWASP Top 10 (2025) \cite{OWASPTop10} categories to support executive-facing communication and benchmarking.
 \end{itemize}
 
 \subsection{Ethical Considerations and Safety}
@@ -139,22 +140,21 @@ The global market for application security is expanding, driven by the increasin
 
 \subsection{Open-Source Ecosystem}
 
-Open-source tools remain the backbone of the security research community, offering high customizability. However, they often face challenges regarding maintenance continuity and out-of-the-box efficacy against modern SPAs~\cite{Somi2024}.
+Open-source tools remain the backbone of the security research community. However, without enterprise-grade funding, they frequently face maintenance gaps and reliance on heavy external dependencies for DOM rendering~\cite{Somi2024}.
 
 \subsubsection{OWASP Zed Attack Proxy (ZAP)}
-OWASP ZAP stands as the de-facto standard for open-source DAST. It is heavily favored for its seamless integration into CI/CD pipelines and ability to perform both active and passive scans~\cite{Somi2024}. Recent benchmarks indicate that ZAP performs consistently well against traditional vulnerabilities, achieving respectable recall rates (0.75–0.77) in controlled environments~\cite{Yarphel2025}. However, performance gaps exist. While ZAP can discover significantly more URLs in AJAX-heavy applications via its AJAX Spider compared to traditional crawlers~\cite{Somi2024}, independent benchmarks note it can produce higher false positive rates in specific categories compared to commercial tools~\cite{Yarphel2025, Somi2024}. Despite this, ZAP remains a viable open-source candidate due to its scriptability and wide adoption.
+OWASP ZAP stands as the de-facto standard for open-source DAST. It is favored for its seamless integration into CI/CD pipelines and ability to perform both active and passive scans~\cite{Somi2024}. Recent benchmarks indicate that ZAP performs consistently well against traditional vulnerabilities, achieving respectable recall rates (0.75–0.77) in controlled environments~\cite{Yarphel2025}. However, performance gaps exist; while ZAP can discover URLs in AJAX-heavy applications via its AJAX Spider, independent benchmarks note it often produces higher false positive rates compared to commercial engines~\cite{Yarphel2025}.
 
 \subsubsection{ProjectDiscovery Nuclei}
-A rapidly emerging tool is Nuclei, which shifts from heuristic scanning to template-based matching. Unlike ZAP, Nuclei often relies on external inputs (e.g., from tools like Katana) to map the attack surface rather than performing native crawling~\cite{Somi2024}. Its architecture is built around YAML-based templates that define specific requests, allowing it to identify known vulnerabilities (CVEs) and misconfigurations.
-
-In comparative studies, Nuclei demonstrated a \textbf{zero false-positive rate} on standard benchmarks like the OWASP Benchmark~\cite{Somi2024}. However, this precision comes with a trade-off: the tool may fail to identify "unknown unknowns" if specific templates do not exist, effectively limiting its recall in scenarios requiring deep business logic interaction~\cite{Somi2024}. Updated benchmarks conducted for this study against OWASP Juice Shop reveal that when equipped with custom application-specific templates and authentication context (Bearer token), Nuclei successfully detects critical business logic flaws including JWT 'none' algorithm confusion, negative basket quantities, and price manipulation vulnerabilities. This confirms that Nuclei's detection capability is primarily dependent on template quality rather than engine limitations.
+A rapidly emerging tool is Nuclei, which shifts from heuristic scanning to template-based matching. Unlike ZAP, Nuclei relies on external inputs (e.g., from tools like Katana) to map the attack surface rather than performing native crawling. Its architecture is built around YAML-based templates that define specific requests, allowing it to identify known vulnerabilities (CVEs) and misconfigurations.
+In comparative studies, Nuclei demonstrated a \textbf{zero false-positive rate} on standard benchmarks~\cite{Somi2024}. Updated benchmarks conducted for this study confirm that when equipped with custom application-specific templates and authentication context, Nuclei successfully detects critical business logic flaws.
 
 \subsubsection{Legacy and Niche Tools}
-The open-source ecosystem also includes tools that have struggled to adapt to the SPA era.
+The open-source ecosystem also includes tools that have struggled to adapt to the SPA era or have been deprecated.
 
 \begin{itemize}
-    \item \textbf{Wapiti:} A command-line based scanner that functions as a "black-box" fuzzer. While it boasts fast scan times, evaluations show it lacks a JavaScript engine capable of rendering AJAX-heavy applications~\cite{Somi2024}. In tests against modern targets, Wapiti failed to discover input vectors hidden behind client-side dynamic rendering~\cite{Somi2024}.
-    \item \textbf{Arachni:} Once a high-performance framework, Arachni is now considered on the verge of obsolescence. Development has largely stalled, and commercial support has migrated to its successor, Codename SCNR~\cite{Somi2024}.
+    \item \textbf{Wapiti:} A command-line based scanner that functions as a "black-box" fuzzer. While recent versions have introduced a "headless" mode to parse JavaScript, this relies on external browser automation (GeckoDriver), introducing significant performance overhead compared to integrated crawling engines.
+    \item \textbf{Arachni:} Once a high-performance framework, Arachni is now considered discontinued. The official repository was archived in 2021, rendering it incompatible with modern ECMAScript standards and actively unmaintained.
 \end{itemize}
 
 \subsection{Commercial Landscape}
@@ -165,7 +165,7 @@ Commercial scanners distinguish themselves through "Smart Crawling" capabilities
 Widely regarded as the industry gold standard, Burp Suite Professional combines automated scanning with a powerful manual testing toolkit~\cite{Somi2024}. Recent empirical comparisons rank it as the most effective overall scanner, achieving the highest precision (0.73) and recall (0.90) rates in controlled experiments~\cite{Yarphel2025}. Its primary strength lies in its advanced crawling engine, which can navigate complex client-side states and authentication sequences that often baffle open-source alternatives.
 
 \subsubsection{Acunetix}
-Acunetix focuses heavily on enterprise automation. It employs technology specifically engineered to crawl HTML5 and JavaScript-heavy applications. In comparative benchmarks, Acunetix (AWVS) demonstrated a more \textbf{conservative scanning strategy} compared to ZAP, generating fewer total HTTP requests while still maintaining competitive vulnerability detection rates~\cite{Yin2023}. This efficiency makes it a preferred choice for organizations prioritizing low network overhead.
+Acunetix focuses heavily on enterprise automation. It employs technology specifically engineered to crawl HTML5 and JavaScript-heavy applications. In comparative benchmarks, Acunetix demonstrated a more \textbf{conservative scanning strategy} compared to ZAP, generating fewer total HTTP requests while still maintaining competitive vulnerability detection rates~\cite{Yin2023}. This efficiency makes it a preferred choice for organizations prioritizing low network overhead.
 
 \subsection{Comparative Summary}
 
@@ -245,7 +245,7 @@ Standard scanners rely heavily on HTTP status codes to determine pass/fail condi
 \textbf{The Solution:} This check is implemented as an active template that injects anomalous numeric values (e.g., negative quantities) and flags cases where the server responds successfully to inputs that should be rejected by the business tier. The approach mirrors invariant-based testing and intent synchronization proposed by Yin et al. for enhancing vulnerability detection in modern web applications~\cite{Yin2023}.
 
 \subsubsection{IDOR: Resource Deviation Strategy}
-Insecure Direct Object References (IDOR) remain a "Blind Spot" for scanners because strong verification often benefits from comparing access patterns across different authorization contexts. The current implementation supports comparing unauthenticated execution against a single authenticated context (bearer token), but it does not implement multi-user differential testing (e.g., User A vs. User B sessions) as a first-class feature.
+Insecure Direct Object References (IDOR) remain a "Blind Spot" for scanners. As noted by Rennhard et al., automated detection of these flaws is notoriously difficult because scanners lack the semantic understanding of the application's authorization model to distinguish between legitimate and illegitimate access to data objects~\cite{DBLP:journals/sncs/RennhardKFEZ22}. While strong verification often benefits from comparing access patterns across different authorization contexts (e.g., User A vs. User B), the current implementation focuses on detecting deviations within a single authenticated context.
 
 \textbf{The Solution:} The scanner implements a \textit{Template-Driven Resource Enumeration} strategy across discovered API endpoints, expressed as templates that expand over API paths and append candidate identifiers (e.g., \texttt{/1}). Verification remains matcher-driven: templates may use status checks as a lightweight triage signal, and can be strengthened with content matchers (e.g., patterns for PII fields) when target semantics are known. In practice, the framework supports running scans in both unauthenticated and authenticated modes to compare behaviors and highlight broken access control.
 
@@ -258,7 +258,9 @@ Insecure Direct Object References (IDOR) remain a "Blind Spot" for scanners beca
 
 \subsubsection{JSON Web Token (JWT) Algorithm Confusion}
 
-This targets JWT algorithm confusion (also known as the ``none'' algorithm attack). A template helper can forge a JWT with \texttt{alg=none} by rewriting the header and stripping the signature (e.g., \texttt{jwt\_none(\{\{bearer\_token\}\})}). The forged token is replayed against endpoints requiring authentication to test for signature-verification bypass. While conceptually simple, this specific misconfiguration is frequently missed by generic fuzzers that do not parse the internal structure of JWTs. It represents a "Logic Bypass" where the server trusts the client-supplied directive to disable cryptographic verification, a class of vulnerability that contributes to the high-risk nature of open-source component dependencies~\cite{BlackDuck2025}.
+This targets JWT algorithm confusion (also known as the ``none'' algorithm attack)~\cite{JangLee2025JWT}. A template helper can forge a JWT with \texttt{alg=none} by rewriting the header and stripping the signature (e.g., \texttt{jwt\_none(\{\{bearer\_token\}\})}).
+
+The forged token is replayed against endpoints requiring authentication to test for signature-verification bypass. This specific misconfiguration is frequently missed by generic fuzzers because they typically treat tokens as opaque strings. To successfully execute this attack, the scanner must decode the Base64 structure, parse the JSON header, modify the \texttt{"alg"} directive specifically, and re-encode the payload without the signature---a structured manipulation that random payload injection cannot achieve.
 
 \subsection{Operational Interface}
 The framework is implemented as a command-line interface application developed in Python. The operational workflow consists of two primary stages designed to enforce the separation between discovery and active exploitation.
@@ -273,7 +275,7 @@ The framework is implemented as a command-line interface application developed i
 
 \section{Experimental Evaluation}
 
-To validate the efficacy of the proposed solution, a comparative benchmark was conducted against ProjectDiscovery's \textbf{Nuclei} (v3.6.2), representing the state-of-the-art in template-based open-source DAST scanners.
+To validate the efficacy of the proposed solution, a comparative benchmark was conducted against ProjectDiscovery's  \textbf{Nuclei} \cite{Nuclei}, representing the state-of-the-art in template-based open-source DAST scanners.
 
 \subsection{Benchmark Setup}
 
@@ -339,3 +341,4 @@ Benchmarks revealed a distinct trade-off: Nuclei is 5.4× faster (0.24s vs. 1.29
 \bibliography{sample}
 
 \end{document}
+
