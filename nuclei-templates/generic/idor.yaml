@@ -1,0 +1,52 @@
+id: generic-idor
+info:
+  name: Insecure Direct Object Reference (IDOR)
+  author: dast-mvp
+  description: Tests for IDOR vulnerabilities on API endpoints via sequential ID enumeration
+  severity: high
+  tags:
+    - idor
+    - access-control
+    - generic
+    - api
+
+http:
+  - raw:
+      - |
+        GET /api/Feedbacks/1 HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 403
+      - type: word
+        part: body
+        words:
+          - '"email"'
+          - '"password"'
+          - '"role"'
+          - '"username"'
+          - '"comment"'
+        condition: or
+        case-insensitive: true
+      - type: word
+        part: body
+        words:
+          - '"price"'
+          - '"description"'
+        condition: or
+        case-insensitive: true
+        negative: true
+
+  - raw:
+      - |
+        GET /api/BasketItems/1 HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers:
+      - type: status
+        status:
+          - 200

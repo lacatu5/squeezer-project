@@ -1,0 +1,79 @@
+id: generic-sensitive-data-exposure
+info:
+  name: Sensitive Data Exposure
+  author: dast-mvp
+  description: Tests for exposed sensitive information in API responses
+  severity: high
+  tags:
+    - data-exposure
+    - information-disclosure
+    - generic
+    - api
+
+http:
+  - raw:
+      - |
+        GET /api/config HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'bucket'
+          - 'aws'
+          - 'sql'
+          - 'postgres'
+          - 'mysql'
+          - 'password'
+          - 'secret'
+          - 'api'
+          - 'key'
+          - 'token'
+        condition: or
+        case-insensitive: true
+
+  - raw:
+      - |
+        GET /api/env HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'password'
+          - 'secret'
+          - 'key'
+          - 'token'
+          - 'api'
+        condition: or
+        case-insensitive: true
+
+  - raw:
+      - |
+        GET /api/secrets HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers:
+      - type: status
+        status:
+          - 200
+
+  - raw:
+      - |
+        GET /api/debug HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers:
+      - type: status
+        status:
+          - 200

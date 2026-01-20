@@ -1,0 +1,21 @@
+id: juice-shop-jwt-none
+info:
+  name: JWT None Algorithm Attack (Juice Shop)
+  author: generated
+  severity: critical
+  tags: juice-shop,jwt
+http:
+  - raw:
+      - |
+        GET /api/Users/1 HTTP/1.1
+        Host: {{Hostname}}
+        Authorization: Bearer {{none_jwt}}
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - "email"
+          - "username"

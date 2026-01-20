@@ -1,0 +1,81 @@
+id: generic-cors-misconfig
+info:
+  name: CORS Misconfiguration
+  author: dast-mvp
+  description: Detects overly permissive CORS policies
+  severity: medium
+  tags:
+    - cors
+    - misconfig
+    - generic
+
+http:
+  - raw:
+      - |
+        GET / HTTP/1.1
+        Host: {{Hostname}}
+        Origin: https://evil.com
+
+    matchers-condition: or
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: *"
+        case-insensitive: true
+
+  - raw:
+      - |
+        GET /api/config HTTP/1.1
+        Host: {{Hostname}}
+        Origin: https://evil.com
+
+    matchers-condition: or
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: *"
+        case-insensitive: true
+
+  - raw:
+      - |
+        GET / HTTP/1.1
+        Host: {{Hostname}}
+        Origin: https://evil.com
+
+    matchers-condition: and
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: *"
+          - "access-control-allow-credentials: true"
+        condition: and
+        case-insensitive: true
+
+  - raw:
+      - |
+        GET / HTTP/1.1
+        Host: {{Hostname}}
+        Origin: https://evil.com
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: https://evil.com"
+        case-insensitive: true
+
+  - raw:
+      - |
+        GET / HTTP/1.1
+        Host: {{Hostname}}
+        Origin: null
+
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "access-control-allow-origin: null"
+        case-insensitive: true

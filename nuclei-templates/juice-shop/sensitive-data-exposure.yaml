@@ -1,0 +1,36 @@
+id: juice-shop-sensitive-data-exposure
+info:
+  name: Juice Shop Sensitive Data Export
+  author: dast-mvp
+  description: User data export endpoint exposes sensitive PII without proper rate limiting
+  severity: high
+  tags:
+    - sensitive-data
+    - pii
+    - juice-shop
+    - owasp
+
+http:
+  - raw:
+      - |
+        POST /rest/user/data-export HTTP/1.1
+        Host: {{Hostname}}
+        Authorization: Bearer {{bearer_token}}
+        Content-Type: application/json
+
+        {}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+      - type: word
+        words:
+          - "email"
+          - "password"
+          - "role"
+          - "username"
+        condition: or
+        part: body
+        case-insensitive: true

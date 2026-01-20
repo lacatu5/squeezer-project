@@ -1,0 +1,31 @@
+id: juice-shop-b2b-rce
+info:
+  name: Juice Shop B2B Order RCE
+  author: dast-mvp
+  description: Server-side template injection via B2B order module allowing code execution
+  severity: critical
+  tags:
+    - rce
+    - ssti
+    - juice-shop
+    - owasp
+
+http:
+  - raw:
+      - |
+        POST /b2b/v2/order HTTP/1.1
+        Host: {{Hostname}}
+        Content-Type: application/json
+
+        {"cm": "{{7*7}}", "products": [{"id": 1, "qty": 1}]}
+
+    matchers-condition: and
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 201
+      - type: word
+        words:
+          - "49"
+        part: body

