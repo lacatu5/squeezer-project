@@ -64,7 +64,6 @@ venv.bak/
 
 # Project specific
 *.log
-report.tex
 reports/
 *.db
 *.sqlite
