@@ -2,7 +2,7 @@
 
 Squeezer is a minimal, template-based DAST (Dynamic Application Security Testing) framework. It uses **Katana** for crawling and custom YAML templates for scanning vulnerabilities.
 
-## 🚀 Getting Started
+##  Getting Started
 
 Follow these steps to set up the environment and run your first scan.
 
