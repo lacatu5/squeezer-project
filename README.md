@@ -120,9 +120,8 @@ squeezer scan [OPTIONS] [TARGET]
 - **`templates/generic/`**: General vulnerability payloads (CORS, IDOR, etc.).
 - **`templates/apps/`**: App-specific configuration and templates.
 - **`docs/`**: Project documentation and design decisions.
-- **`report.tex`**: LaTeX template for generating reports.
 
-## 📝 Development
+## Development
 
 To run tests or contribute, ensure you have the environment set up:
 
