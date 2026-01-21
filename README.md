@@ -24,19 +24,13 @@ Before installing Squeezer, ensure you have the following tools installed on you
 
 ### 2. Installation
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/yourusername/dast-mvp.git
-    cd dast-mvp
-    ```
-
-2.  **Create a Virtual Environment (Recommended):**
+1.  **Create a Virtual Environment (Recommended):**
     ```bash
     python3 -m venv .venv
     source .venv/bin/activate  # On Windows: .venv\Scripts\activate
     ```
 
-3.  **Install Dependencies:**
+2.  **Install Dependencies:**
     This command installs the project in editable mode along with all required libraries.
     ```bash
     pip install -e .
@@ -77,7 +71,7 @@ To scan a real application, you typically want to "initialize" it first to crawl
     squeezer scan https://example.com --app my-target
     ```
 
-## � Command Reference
+## Command Reference
 
 Squeezer works in two phases: **Initialization** (Discovery) and **Scanning** (Attack).
 
