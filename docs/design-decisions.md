@@ -155,38 +155,3 @@ The scaffolder (`squeezer/scaffolder.py`) automates creation of baseline `app.ya
 | Templates | `yaml` | Human-readable, widely supported, declarative |
 | Reporting | `jinja2` | Flexible HTML generation, Python ecosystem standard |
 | Containerization | `docker` | Industry standard, cross-platform |
-
----
-
-## 10. Project Evolution
-
-```mermaid
-timeline
-    title Squeezer Project Evolution
-    section Prototype Phase
-        Initial exploration : MCP integration
-                         : Complex profiles
-                         : Experimental features
-    section Refactoring Phase
-        Simplification : Removed abstractions
-                       : Standardized templates
-                       : Improved code quality
-    section Enhancement Phase
-        Depth & Reliability : JWT, NoSQL, IDOR checks
-                            : Improved lab stability
-                            : Better crawler integration
-    section Stabilization Phase
-        Production Ready : Documentation
-                         : Testing & bug fixes
-                         : Performance tuning
-```
-
-### Phase Summary
-
-| Phase | Focus | Outcome |
-|-------|-------|---------|
-| **Prototype** | Exploration | Experimental features, rapid iteration |
-| **Refactoring** | Simplification | Cleaner codebase, standardization |
-| **Enhancement** | Depth | Specific vulnerability classes, reliability |
-| **Stabilization** | Production | Documentation, testing, polish |
-
