@@ -11,12 +11,12 @@ This document describes the **system architecture** of **Squeezer**, a minimal t
 ```mermaid
 flowchart TB
     CLI[CLI Entry Point<br/>typer + rich]
-    Orch[Orchestrator<br/>src/dast/cli.py]
+    Orch[Orchestrator<br/>squeezer/cli.py]
 
-    Crawler[Crawler Engine<br/>src/dast/crawler.py]
-    Scanner[Scanner Engine<br/>src/dast/scanner.py]
-    Reporter[Reporting Module<br/>src/dast/report.py]
-    Docker[Docker Manager<br/>src/dast/lab.py]
+    Crawler[Crawler Engine<br/>squeezer/crawler.py]
+    Scanner[Scanner Engine<br/>squeezer/scanner.py]
+    Reporter[Reporting Module<br/>squeezer/report.py]
+    Docker[Docker Manager<br/>squeezer/docker.py]
 
     Katana[Katana Executor]
     Templates[Templates<br/>YAML]
@@ -49,8 +49,8 @@ flowchart TB
 | Aspect | Description |
 |--------|-------------|
 | **Technology** | `typer` + `rich` |
-| **Location** | `src/dast/cli.py` |
-| **Commands** | `init`, `scan`, `doctor` |
+| **Location** | `squeezer/cli.py` |
+| **Commands** | `init`, `scan`, `apps` |
 
 **Responsibilities:**
 - Command parsing and validation
@@ -63,7 +63,7 @@ flowchart TB
 | Aspect | Description |
 |--------|-------------|
 | **Technology** | ProjectDiscovery `katana` |
-| **Location** | `src/dast/crawler.py` |
+| **Location** | `squeezer/crawler.py` |
 | **Class** | `KatanaCrawler` |
 
 **Responsibilities:**
@@ -76,7 +76,7 @@ flowchart TB
 
 | Aspect | Description |
 |--------|-------------|
-| **Location** | `src/dast/scanner.py` |
+| **Location** | `squeezer/scanner.py` |
 | **Input** | Discovered endpoints + YAML templates |
 | **Output** | Vulnerability findings |
 
@@ -91,7 +91,7 @@ flowchart TB
 | Aspect | Description |
 |--------|-------------|
 | **Technology** | `jinja2` |
-| **Location** | `src/dast/report.py` |
+| **Location** | `squeezer/report.py` |
 
 **Responsibilities:**
 - HTML report generation
@@ -104,7 +104,7 @@ flowchart TB
 | Aspect | Description |
 |--------|-------------|
 | **Technology** | Docker SDK |
-| **Location** | `src/dast/lab.py` |
+| **Location** | `squeezer/docker.py` |
 
 **Responsibilities:**
 - Container lifecycle (start, stop, rm)
@@ -156,22 +156,10 @@ graph TD
     Generic[generic/]
     Apps[apps/]
 
-    Inj[injection/]
-    Auth[authentication/]
-    Info[information-disclosure/]
-    Red[redirect/]
-    Other[other/]
-
     Juice[juice-shop/]
 
     Root --> Generic
     Root --> Apps
-
-    Generic --> Inj
-    Generic --> Auth
-    Generic --> Info
-    Generic --> Red
-    Generic --> Other
 
     Apps --> Juice
 
@@ -184,32 +172,51 @@ graph TD
 
 ```
 templates/
-├── generic/                    # Universal vulnerability checks
-│   ├── injection/             # SQLi, XSS, Command Injection
-│   ├── authentication/        # Auth bypass, weak login
-│   ├── information-disclosure/
-│   ├── redirect/              # Open redirects
-│   └── other/                 # Path traversal, SSRF, XXE
+├── generic/                    # Universal vulnerability checks (flat YAML files)
+│   ├── cors-misconfig.yaml
+│   ├── idor.yaml
+│   ├── input-validation.yaml
+│   ├── jwt-none-algorithm.yaml
+│   ├── mass-assignment.yaml
+│   ├── path-traversal.yaml
+│   └── sensitive-data-exposure.yaml
 └── apps/                      # Application-specific checks
     └── juice-shop/            # OWASP Juice Shop tests
+        ├── app-auth.yaml
+        ├── app-noauth.yaml
+        ├── b2b-rce.yaml
+        ├── file-upload-bypass.yaml
+        ├── jwt-none-algorithm.yaml
+        ├── lab.yaml
+        ├── lfi-null-byte.yaml
+        ├── negative-quantity.yaml
+        ├── price-manipulation.yaml
+        ├── report.html
+        └── sensitive-data-exposure.yaml
 ```
 
 ### Template Schema
 
 ```yaml
 id: unique-identifier
-name: Vulnerability Name
-severity: critical|high|medium|low|info
-category: owasp-category
+info:
+  name: Vulnerability Name
+  description: Brief description
+  owasp_category: OWASP category
+  severity: critical|high|medium|low|info
+  tags: [tag1, tag2]
 requests:
-  - method: GET|POST|PUT|DELETE|PATCH
+  - name: Request description
+    method: GET|POST|PUT|DELETE|PATCH
     path: /api/target
     headers: {...}
     body: {...}
-matches:
-  - status: 200
-    type: dsl|regex|word
-    expression: "..."
+    matchers:
+      - type: word|regex|status
+        part: header|body
+        words: [...]
+        condition: and|or
+    matchers_condition: and|or
 ```
 
 ---
@@ -255,18 +262,17 @@ flowchart TB
 
 ```
 dast-mvp/
-├── src/dast/
+├── squeezer/
 │   ├── __init__.py
 │   ├── cli.py              # Main CLI entry point
 │   ├── crawler.py          # KatanaCrawler implementation
 │   ├── scanner.py          # Template-based scanner
 │   ├── report.py           # HTML/JSON report generation
-│   ├── lab.py              # Docker/lifecycle management
+│   ├── docker.py           # Docker/lifecycle management
 │   └── scaffolder.py       # Config generation
 ├── templates/
 │   ├── generic/            # Universal vulnerability templates
 │   └── apps/               # Application-specific templates
-├── tests/                  # Test suite
 ├── docs/                   # Documentation
 └── pyproject.toml          # Project metadata
 ```
