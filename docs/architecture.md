@@ -103,7 +103,7 @@ flowchart TB
 
 | Aspect | Description |
 |--------|-------------|
-| **Technology** | Docker SDK |
+| **Technology** | `asyncio.subprocess` (Docker CLI) |
 | **Location** | `squeezer/docker.py` |
 
 **Responsibilities:**

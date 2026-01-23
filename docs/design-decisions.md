@@ -91,21 +91,7 @@ For system architecture and component details, see [architecture.md](./architect
 
 ---
 
-## 6. Dual-Format Reporting
-
-**Decision:** Rich console output + HTML/JSON artifacts.
-
-### Rationale
-
-| Format | Purpose |
-|--------|---------|
-| **Console** | Immediate feedback during scan (progress bars, tables) |
-| **HTML** | Detailed post-scan analysis with grouping and filtering |
-| **JSON** | CI/CD pipeline integration and ticketing systems |
-
----
-
-## 7. Configuration Scaffolding
+## 6. Configuration Scaffolding
 
 **Decision:** Implement `init` command for automated configuration generation.
 
@@ -120,24 +106,24 @@ The scaffolder (`squeezer/scaffolder.py`) automates creation of baseline `app.ya
 
 ---
 
-## 8. Architectural Principles
+## 7. Architectural Principles
 
-### 8.1 Separation of Concerns
+### 7.1 Separation of Concerns
 
 - Crawling, scanning, and reporting are isolated modules
 - Each component has a single, well-defined responsibility
 
-### 8.2 Configuration Over Code
+### 7.2 Configuration Over Code
 
 - Vulnerability definitions live in YAML, not Python
 - Behavior changes through config, not code modification
 
-### 8.3 Fail-Safe Defaults
+### 7.3 Fail-Safe Defaults
 
 - Safe defaults for scan depth, concurrency, and timeout
 - Explicit opt-in for aggressive scanning modes
 
-### 8.4 Observability First
+### 7.4 Observability First
 
 - Rich console output by default
 - Structured logging for debugging
@@ -145,7 +131,7 @@ The scaffolder (`squeezer/scaffolder.py`) automates creation of baseline `app.ya
 
 ---
 
-## 9. Technology Choices
+## 8. Technology Choices
 
 | Component | Technology | Justification |
 |-----------|------------|---------------|
