@@ -80,17 +80,17 @@
         
 <header>
     <h1>Squeezer Scan Report</h1>
-    <div class="subtitle">http://localhost:3000 • Scanned at 2026-01-21 14:16:24</div>
+    <div class="subtitle">http://localhost:3000 • Scanned at 2026-01-23 23:37:25</div>
 </header>
 
         
 <div class="grid">
     <div class="card">
-        <div class="card-value critical">28</div>
+        <div class="card-value critical">29</div>
         <div class="card-title">Critical</div>
     </div>
     <div class="card">
-        <div class="card-value high">5</div>
+        <div class="card-value high">8</div>
         <div class="card-title">High</div>
     </div>
     <div class="card">
@@ -106,7 +106,7 @@
         <div class="card-title">Templates</div>
     </div>
     <div class="card">
-        <div class="card-value">2.4s</div>
+        <div class="card-value">2.0s</div>
         <div class="card-title">Duration</div>
     </div>
 </div>
@@ -145,20 +145,20 @@
   <div class="chart-container ">
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff4444">28</div>
+    <div class="bar-value" style="color: #ff4444">29</div>
     <div class="bar-fill" style="height: 140px; background: #ff4444;"></div>
     <div class="bar-label">Crit</div>
   </div>
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff8800">5</div>
-    <div class="bar-fill" style="height: 25px; background: #ff8800;"></div>
+    <div class="bar-value" style="color: #ff8800">8</div>
+    <div class="bar-fill" style="height: 39px; background: #ff8800;"></div>
     <div class="bar-label">High</div>
   </div>
   
   <div class="bar">
     <div class="bar-value" style="color: #ffcc00">4</div>
-    <div class="bar-fill" style="height: 20px; background: #ffcc00;"></div>
+    <div class="bar-fill" style="height: 19px; background: #ffcc00;"></div>
     <div class="bar-label">Med</div>
   </div>
   
@@ -203,20 +203,20 @@
     <div class="chart-container ">
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff4444">26</div>
+    <div class="bar-value" style="color: #ff4444">27</div>
     <div class="bar-fill" style="height: 140px; background: #ff4444;"></div>
     <div class="bar-label">A01</div>
   </div>
   
   <div class="bar">
-    <div class="bar-value" style="color: #ff8800">2</div>
-    <div class="bar-fill" style="height: 16px; background: #ff8800;"></div>
+    <div class="bar-value" style="color: #ff8800">5</div>
+    <div class="bar-fill" style="height: 26px; background: #ff8800;"></div>
     <div class="bar-label">A02</div>
   </div>
   
   <div class="bar">
     <div class="bar-value" style="color: #ff4444">6</div>
-    <div class="bar-fill" style="height: 32px; background: #ff4444;"></div>
+    <div class="bar-fill" style="height: 31px; background: #ff4444;"></div>
     <div class="bar-label">A05</div>
   </div>
   
@@ -237,8 +237,8 @@
         <span class="filter-label">Severity</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="severity" data-filter="all">All</button>
-            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (28)</button>
-            <button class="filter-btn" data-filter-type="severity" data-filter="high">High (5)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="critical">Crit (29)</button>
+            <button class="filter-btn" data-filter-type="severity" data-filter="high">High (8)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="medium">Med (4)</button>
             <button class="filter-btn" data-filter-type="severity" data-filter="low">Low (0)</button>
         </div>
@@ -248,7 +248,7 @@
         <span class="filter-label">Type</span>
         <div class="filter-bar">
             <button class="filter-btn active" data-filter-type="scope" data-filter="all">All</button>
-            <button class="filter-btn" data-filter-type="scope" data-filter="app">App (6)</button>
+            <button class="filter-btn" data-filter-type="scope" data-filter="app">App (9)</button>
             <button class="filter-btn" data-filter-type="scope" data-filter="generic">Generic (11)</button>
         </div>
     </div>
@@ -289,11 +289,17 @@
             
             <button class="filter-btn" data-filter-type="tag" data-filter="authentication-bypass">authentication-bypass</button>
             
+            <button class="filter-btn" data-filter-type="tag" data-filter="business-logic">business-logic</button>
+            
             <button class="filter-btn" data-filter-type="tag" data-filter="code-injection">code-injection</button>
             
             <button class="filter-btn" data-filter-type="tag" data-filter="cors">cors</button>
             
             <button class="filter-btn" data-filter-type="tag" data-filter="cryptographic-failure">cryptographic-failure</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="data-exfiltration">data-exfiltration</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="data-exposure">data-exposure</button>
             
             <button class="filter-btn" data-filter-type="tag" data-filter="file-handling">file-handling</button>
             
@@ -321,9 +327,15 @@
             
             <button class="filter-btn" data-filter-type="tag" data-filter="path-traversal">path-traversal</button>
             
+            <button class="filter-btn" data-filter-type="tag" data-filter="payment-bypass">payment-bypass</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="privacy">privacy</button>
+            
             <button class="filter-btn" data-filter-type="tag" data-filter="privilege-escalation">privilege-escalation</button>
             
             <button class="filter-btn" data-filter-type="tag" data-filter="rce">rce</button>
+            
+            <button class="filter-btn" data-filter-type="tag" data-filter="refund-abuse">refund-abuse</button>
             
         </div>
     </div>
@@ -820,6 +832,46 @@
   
   <div class="finding-card critical"
        data-severity="critical"
+       data-owasp="A02"
+       data-scope="app"
+       data-tags="business-logic,payment-bypass,input-validation">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a02">A02</span>
+      <span class="badge critical">critical</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">price-manipulation.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">PRICE_MANIPULATION</div>
+      <div class="finding-url">http://localhost:3000/rest/basket/1/checkout</div>
+      <div class="finding-message">Checkout accepts modified total price - payment bypass possible</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">POST /rest/basket/1/checkout</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Always calculate total server-side; never trust client-provided totals</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card critical"
+       data-severity="critical"
        data-owasp="A05"
        data-scope="app"
        data-tags="rce,code-injection,injection">
@@ -940,6 +992,86 @@
   
   <div class="finding-card high"
        data-severity="high"
+       data-owasp="A02"
+       data-scope="app"
+       data-tags="business-logic,input-validation,refund-abuse">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a02">A02</span>
+      <span class="badge high">high</span>
+      
+      <span class="badge" style="background: #3c3c3c; color: #cccccc;">3 payloads</span>
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">negative-quantity.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">NEGATIVE_QUANTITY</div>
+      <div class="finding-url">http://localhost:3000/api/BasketItems/</div>
+      <div class="finding-message">Server accepts negative quantity without authentication - business logic flaw</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">POST /api/BasketItems/</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Validate quantity is a positive integer (&gt;= 1) and require authentication</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
+       data-owasp="A01"
+       data-scope="app"
+       data-tags="data-exposure,privacy,data-exfiltration">
+    <div class="finding-header">
+      <span class="owasp-badge owasp-a01">A01</span>
+      <span class="badge high">high</span>
+      
+      
+      <span style="font-size: 10px; color: #858585; margin-left: auto;">sensitive-data-exposure.yaml</span>
+    </div>
+    <div class="finding-body">
+      <div class="finding-title">SENSITIVE_DATA_EXPOSURE</div>
+      <div class="finding-url">http://localhost:3000/rest/user/data-export</div>
+      <div class="finding-message">Data export endpoint exposes all user PII including orders, email, reviews, and memories without additional verification</div>
+
+      
+      <div class="raw-data">
+        
+        <div class="raw-data-header" onclick="toggleRawData(this)">
+          <span class="raw-data-title">Request</span>
+          <span class="raw-data-toggle">+</span>
+        </div>
+        <div class="raw-data-content collapsed"><span class="request-line">POST /rest/user/data-export</span></div>
+        
+        
+      </div>
+      
+
+      
+      <div class="remediation"><strong>Remediation:</strong> Require re-authentication before data export and implement rate limiting</div>
+      
+    </div>
+  </div>
+        
+            
+  
+  
+  
+  <div class="finding-card high"
+       data-severity="high"
        data-owasp="A05"
        data-scope="app"
        data-tags="lfi,path-traversal,info-disclosure">
@@ -1021,7 +1153,7 @@
 
         
 <footer>
-    Generated by Squeezer • 2026-01-21 14:16:24 • 37 total findings (17 unique)
+    Generated by Squeezer • 2026-01-23 23:37:25 • 41 total findings (20 unique)
 </footer>
 
     </div>
